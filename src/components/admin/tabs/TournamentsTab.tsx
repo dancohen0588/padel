@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Tournament, TournamentStatus } from "@/lib/types";
 import { Card } from "@/components/ui/card";
@@ -24,6 +24,9 @@ const statusLabel: Record<TournamentStatus, string> = {
 export function TournamentsTab({ tournaments, adminToken }: TournamentsTabProps) {
   const [search, setSearch] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [playoffsEnabled, setPlayoffsEnabled] = useState(false);
+  const [hasThirdPlace, setHasThirdPlace] = useState(false);
+  const [status, setStatus] = useState<TournamentStatus>("draft");
   const router = useRouter();
 
   const selected = useMemo(
@@ -44,6 +47,12 @@ export function TournamentsTab({ tournaments, adminToken }: TournamentsTabProps)
       }),
     [tournaments, search]
   );
+
+  useEffect(() => {
+    setPlayoffsEnabled(selected?.config?.playoffs?.enabled ?? false);
+    setHasThirdPlace(selected?.config?.playoffs?.has_third_place ?? false);
+    setStatus(selected?.status ?? "draft");
+  }, [selected]);
 
   return (
     <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
@@ -131,71 +140,145 @@ export function TournamentsTab({ tournaments, adminToken }: TournamentsTabProps)
           <input type="hidden" name="adminToken" value={adminToken} />
           <input type="hidden" name="tournamentId" value={selected?.id ?? ""} />
 
-          <Input name="name" placeholder="Nom" defaultValue={selected?.name ?? ""} />
-          <Input name="slug" placeholder="Slug" defaultValue={selected?.slug ?? ""} />
-          <Input name="date" type="date" defaultValue={selected?.date ?? ""} />
-          <Input
-            name="location"
-            placeholder="Lieu"
-            defaultValue={selected?.location ?? ""}
-          />
-          <Input
-            name="maxPlayers"
-            type="number"
-            placeholder="Max joueurs"
-            defaultValue={selected?.max_players ?? ""}
-          />
-          <Input
-            name="imagePath"
-            placeholder="Image (URL ou path)"
-            defaultValue={selected?.image_path ?? ""}
-          />
-          <Input
-            name="description"
-            placeholder="Description"
-            defaultValue={selected?.description ?? ""}
-          />
+          <label className="flex flex-col gap-2 text-sm font-semibold text-brand-charcoal">
+            Nom du tournoi
+            <Input name="name" placeholder="Nom" defaultValue={selected?.name ?? ""} />
+          </label>
+          <label className="flex flex-col gap-2 text-sm font-semibold text-brand-charcoal">
+            Slug
+            <Input name="slug" placeholder="Slug" defaultValue={selected?.slug ?? ""} />
+          </label>
+          <label className="flex flex-col gap-2 text-sm font-semibold text-brand-charcoal">
+            Date
+            <Input name="date" type="date" defaultValue={selected?.date ?? ""} />
+          </label>
+          <label className="flex flex-col gap-2 text-sm font-semibold text-brand-charcoal">
+            Lieu
+            <Input
+              name="location"
+              placeholder="Lieu"
+              defaultValue={selected?.location ?? ""}
+            />
+          </label>
+          <label className="flex flex-col gap-2 text-sm font-semibold text-brand-charcoal">
+            Max joueurs
+            <Input
+              name="maxPlayers"
+              type="number"
+              placeholder="Max joueurs"
+              defaultValue={selected?.max_players ?? ""}
+            />
+          </label>
+          <label className="flex flex-col gap-2 text-sm font-semibold text-brand-charcoal">
+            Image (URL ou path)
+            <Input
+              name="imagePath"
+              placeholder="Image (URL ou path)"
+              defaultValue={selected?.image_path ?? ""}
+            />
+          </label>
+          <label className="flex flex-col gap-2 text-sm font-semibold text-brand-charcoal">
+            Description
+            <Input
+              name="description"
+              placeholder="Description"
+              defaultValue={selected?.description ?? ""}
+            />
+          </label>
 
           <div className="grid gap-3 md:grid-cols-2">
-            <Input
-              name="pairingMode"
-              placeholder="pairing_mode (manual/random/balanced)"
-              defaultValue={selected?.config?.pairing_mode ?? "balanced"}
-            />
-            <Input
-              name="poolsCount"
-              type="number"
-              placeholder="Nombre de poules"
-              defaultValue={selected?.config?.pools_count ?? 4}
-            />
-            <Input
-              name="teamsQualified"
-              type="number"
-              placeholder="Équipes qualifiées"
-              defaultValue={selected?.config?.playoffs?.teams_qualified ?? 8}
-            />
-            <Input
-              name="playoffsFormat"
-              placeholder="Format playoffs (single_elim/double_elim)"
-              defaultValue={selected?.config?.playoffs?.format ?? "single_elim"}
-            />
+            <label className="flex flex-col gap-2 text-sm font-semibold text-brand-charcoal">
+              Mode d'appariement
+              <Input
+                name="pairingMode"
+                placeholder="pairing_mode (manual/random/balanced)"
+                defaultValue={selected?.config?.pairing_mode ?? "balanced"}
+              />
+            </label>
+            <label className="flex flex-col gap-2 text-sm font-semibold text-brand-charcoal">
+              Nombre de poules
+              <Input
+                name="poolsCount"
+                type="number"
+                placeholder="Nombre de poules"
+                defaultValue={selected?.config?.pools_count ?? 4}
+              />
+            </label>
+            <label className="flex flex-col gap-2 text-sm font-semibold text-brand-charcoal">
+              Équipes qualifiées
+              <Input
+                name="teamsQualified"
+                type="number"
+                placeholder="Équipes qualifiées"
+                defaultValue={selected?.config?.playoffs?.teams_qualified ?? 8}
+              />
+            </label>
+            <label className="flex flex-col gap-2 text-sm font-semibold text-brand-charcoal">
+              Format playoffs
+              <Input
+                name="playoffsFormat"
+                placeholder="Format playoffs (single_elim/double_elim)"
+                defaultValue={selected?.config?.playoffs?.format ?? "single_elim"}
+              />
+            </label>
           </div>
-          <div className="grid gap-3 md:grid-cols-3">
-            <Input
-              name="playoffsEnabled"
-              placeholder="Playoffs activés (true/false)"
-              defaultValue={selected?.config?.playoffs?.enabled ? "true" : "false"}
-            />
-            <Input
-              name="hasThirdPlace"
-              placeholder="Petite finale (true/false)"
-              defaultValue={selected?.config?.playoffs?.has_third_place ? "true" : "false"}
-            />
-            <Input
-              name="status"
-              placeholder="Statut (draft/published/archived)"
-              defaultValue={selected?.status ?? "draft"}
-            />
+          <div className="grid gap-4 md:grid-cols-3">
+            <div className="flex flex-col gap-2 text-sm font-semibold text-brand-charcoal">
+              Playoffs activés
+              <input type="hidden" name="playoffsEnabled" value={playoffsEnabled ? "true" : "false"} />
+              <button
+                type="button"
+                aria-pressed={playoffsEnabled}
+                onClick={() => setPlayoffsEnabled((value) => !value)}
+                className={`flex h-10 items-center justify-between rounded-full border px-4 text-xs font-semibold transition ${
+                  playoffsEnabled
+                    ? "border-brand-violet bg-brand-violet text-white"
+                    : "border-border bg-white text-brand-charcoal"
+                }`}
+              >
+                <span>{playoffsEnabled ? "Activés" : "Désactivés"}</span>
+                <span className={`h-5 w-5 rounded-full ${playoffsEnabled ? "bg-white" : "bg-brand-gray"}`} />
+              </button>
+            </div>
+            <div className="flex flex-col gap-2 text-sm font-semibold text-brand-charcoal">
+              Petite finale
+              <input type="hidden" name="hasThirdPlace" value={hasThirdPlace ? "true" : "false"} />
+              <button
+                type="button"
+                aria-pressed={hasThirdPlace}
+                onClick={() => setHasThirdPlace((value) => !value)}
+                className={`flex h-10 items-center justify-between rounded-full border px-4 text-xs font-semibold transition ${
+                  hasThirdPlace
+                    ? "border-brand-violet bg-brand-violet text-white"
+                    : "border-border bg-white text-brand-charcoal"
+                }`}
+              >
+                <span>{hasThirdPlace ? "Activée" : "Désactivée"}</span>
+                <span className={`h-5 w-5 rounded-full ${hasThirdPlace ? "bg-white" : "bg-brand-gray"}`} />
+              </button>
+            </div>
+            <div className="flex flex-col gap-2 text-sm font-semibold text-brand-charcoal">
+              Statut
+              <input type="hidden" name="status" value={status} />
+              <div className="grid grid-cols-3 gap-2">
+                {(["draft", "published", "archived"] as TournamentStatus[]).map(
+                  (value) => (
+                    <button
+                      key={value}
+                      type="button"
+                      onClick={() => setStatus(value)}
+                      className={`rounded-full border px-3 py-2 text-xs font-semibold transition ${
+                        status === value
+                          ? "border-brand-violet bg-brand-violet text-white"
+                          : "border-border bg-white text-brand-charcoal"
+                      }`}
+                    >
+                      {statusLabel[value]}
+                    </button>
+                  )
+                )}
+              </div>
+            </div>
           </div>
 
           <div className="flex flex-wrap gap-3">
