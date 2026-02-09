@@ -20,6 +20,11 @@ export default async function AdminInscriptionsPage({
 }) {
   const adminToken = searchParams.token ?? "";
   const tournament = await getActiveTournament();
+  console.info("[admin-debug] active tournament", {
+    hasTournament: Boolean(tournament),
+    id: tournament?.id,
+    status: tournament?.status,
+  });
 
   try {
     assertAdminToken(adminToken);

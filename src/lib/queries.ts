@@ -29,6 +29,12 @@ export const getActiveTournament = async (): Promise<Tournament | null> => {
     limit 1
   `;
 
+  console.info("[db-debug] getActiveTournament result", {
+    count: tournaments.length,
+    ids: tournaments.map((t) => t.id),
+    statuses: tournaments.map((t) => t.status),
+  });
+
   return tournaments[0] ?? null;
 };
 
