@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   DndContext,
+  type DragEndEvent,
   PointerSensor,
   useDroppable,
   useDraggable,
@@ -20,7 +21,6 @@ import type {
 } from "@/lib/types";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Toast } from "@/components/ui/toast";
 import {
   assignPlayerToTeamAction,
@@ -48,9 +48,6 @@ type TournamentConfigAdminProps = {
 
 type PlayerItem = RegistrationWithPlayer["player"];
 
-type DndItem =
-  | { type: "player"; id: string }
-  | { type: "team"; id: string };
 
 type DroppableProps = {
   id: string;
@@ -94,7 +91,18 @@ const DraggableItem = ({ id, className, children }: DraggableProps) => {
   );
 };
 
-export function TournamentConfigAdmin({
+type TournamentConfigContentProps = {
+  adminToken: string;
+  tournament: Tournament;
+  registrations: RegistrationWithPlayer[];
+  teams: Team[];
+  teamPlayers: TeamPlayer[];
+  pools: Pool[];
+  poolTeams: PoolTeam[];
+  mode?: "teams" | "pools";
+};
+
+export function TournamentConfigContent({
   tournament,
   adminToken,
   registrations,
@@ -102,7 +110,8 @@ export function TournamentConfigAdmin({
   teamPlayers,
   pools,
   poolTeams,
-}: TournamentConfigAdminProps) {
+  mode = "teams",
+}: TournamentConfigContentProps) {
   const [toast, setToast] = useState<string | null>(null);
   const [localTeams, setLocalTeams] = useState<Team[]>(teams);
   const [localTeamPlayers, setLocalTeamPlayers] = useState<TeamPlayer[]>(teamPlayers);
@@ -168,7 +177,6 @@ export function TournamentConfigAdmin({
       4
   );
 
-  const poolsMismatch = localPools.length !== poolsCount;
 
   useEffect(() => {
     console.info("[tournament-admin] pools config", {
@@ -278,7 +286,8 @@ export function TournamentConfigAdmin({
     setLocalPools((prev) => prev.map((pool) => (pool.id === poolId ? { ...pool, name } : pool)));
   };
 
-  const handleDragEnd = async ({ active, over }: { active: { id: string }; over: { id: string } | null }) => {
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
     if (!over) return;
     const activeId = String(active.id);
     const overId = String(over.id);
@@ -308,202 +317,289 @@ export function TournamentConfigAdmin({
     }
   };
 
+  const getInitials = (player: PlayerItem) =>
+    `${player.first_name?.[0] ?? ""}${player.last_name?.[0] ?? ""}`.toUpperCase() || "??";
+
   return (
     <div className="space-y-6">
       {toast ? <Toast message={toast} /> : null}
-      <Tabs defaultValue="teams" className="w-full">
-        <TabsList className="rounded-full bg-white/10 p-1">
-          <TabsTrigger value="teams" className="rounded-full px-4 py-2">
-            Équipes
-          </TabsTrigger>
-          <TabsTrigger value="pools" className="rounded-full px-4 py-2">
-            Poules
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="teams" className="mt-6">
-          <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
-            <div className="grid gap-6 lg:grid-cols-[1fr_1.4fr]">
-              <Card className="rounded-2xl border border-white/10 bg-white/5 p-4 text-white shadow-card">
-                <p className="text-sm font-semibold text-white">Joueurs validés</p>
-                <div className="mt-4 max-h-[60vh] overflow-y-auto pr-1">
-                  <DroppableArea id="drop:unassignedPlayers" className="space-y-2">
-                    {unassignedPlayers.map((player) => (
-                      <DraggableItem
-                        key={player.id}
-                        id={`player:${player.id}`}
-                        className="flex items-center justify-between rounded-xl border border-white/10 bg-white/10 px-3 py-2 text-xs shadow-sm"
-                      >
-                        <span>
+      {mode === "teams" ? (
+        <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
+          <div className="grid gap-6 lg:grid-cols-[1fr_1.4fr]">
+            <Card className="rounded-2xl border border-violet-400/30 bg-violet-500/10 p-5 text-white shadow-card">
+              <div className="flex items-center gap-3 border-b border-white/10 pb-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-violet-400 to-violet-600 text-lg">
+                  🎯
+                </div>
+                <div>
+                  <p className="text-sm font-semibold">Joueurs disponibles</p>
+                  <p className="text-xs text-white/60">À glisser dans les équipes</p>
+                </div>
+                <span className="ml-auto text-xs font-semibold text-white/60">
+                  {unassignedPlayers.length}
+                </span>
+              </div>
+              <div className="mt-4 max-h-[60vh] overflow-y-auto pr-2">
+                <DroppableArea id="drop:unassignedPlayers" className="space-y-2">
+                  {unassignedPlayers.map((player) => (
+                    <DraggableItem
+                      key={player.id}
+                      id={`player:${player.id}`}
+                      className="flex items-center justify-between gap-3 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs transition hover:translate-x-1 hover:border-violet-300/60 hover:bg-violet-500/15"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-violet-400 to-violet-600 text-xs font-semibold">
+                          {getInitials(player)}
+                        </div>
+                        <span className="text-xs font-semibold">
                           {player.first_name} {player.last_name}
                         </span>
-                        <span className="text-white/50">Drag</span>
-                      </DraggableItem>
-                    ))}
-                    {!unassignedPlayers.length ? (
-                      <p className="text-xs text-white/60">Tous les joueurs sont assignés.</p>
-                    ) : null}
-                  </DroppableArea>
-                </div>
-              </Card>
-
-              <Card className="rounded-2xl border border-white/10 bg-white p-4 text-brand-charcoal shadow-card">
-                <div className="flex items-center justify-between">
-                  <p className="text-sm font-semibold">Équipes</p>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="bg-brand-violet text-white hover:bg-brand-violet/90 hover:text-white"
-                    onClick={handleCreateTeam}
-                  >
-                    Créer une équipe
-                  </Button>
-                </div>
-                <div className="mt-4 max-h-[60vh] overflow-y-auto pr-1">
-                  <div className="grid gap-4">
-                    {localTeams.map((team) => {
-                      const players = teamPlayerMap.get(team.id) ?? [];
-                      return (
-                        <div key={team.id} className="rounded-2xl border border-border p-3">
-                          <div className="flex items-center justify-between gap-2">
-                            <input
-                              className="w-full rounded-xl border border-border px-3 py-2 text-sm"
-                              placeholder="Nom d’équipe"
-                              defaultValue={team.name ?? ""}
-                              onBlur={(event) => handleUpdateTeamName(team.id, event.target.value)}
-                            />
-                            {players.length === 0 ? (
-                              <Button
-                                type="button"
-                                variant="outline"
-                                className="bg-brand-violet text-white hover:bg-brand-violet/90 hover:text-white"
-                                onClick={() => handleDeleteTeam(team.id)}
-                              >
-                                Supprimer
-                              </Button>
-                            ) : null}
-                          </div>
-                          <DroppableArea
-                            id={`drop:team:${team.id}`}
-                            className="mt-3 space-y-2 rounded-2xl border border-dashed border-border p-2"
-                          >
-                            {[0, 1].map((slot) => {
-                              const playerId = players[slot];
-                              const player = playerId ? playerById.get(playerId) : null;
-                              return (
-                                <div
-                                  key={`${team.id}-${slot}`}
-                                  className="flex items-center justify-between rounded-xl bg-white px-3 py-2 text-xs"
-                                >
-                                  {player ? (
-                                    <DraggableItem id={`player:${player.id}`} className="flex-1">
-                                      <span>
-                                        {player.first_name} {player.last_name}
-                                      </span>
-                                    </DraggableItem>
-                                  ) : (
-                                    <span className="text-muted-foreground">Slot libre</span>
-                                  )}
-                                </div>
-                              );
-                            })}
-                            <p className="text-xs text-muted-foreground">
-                              {players.length}/2 joueurs
-                            </p>
-                          </DroppableArea>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              </Card>
-            </div>
-          </DndContext>
-        </TabsContent>
-
-        <TabsContent value="pools" className="mt-6">
-          <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
-            <div className="flex items-center justify-between">
-              <p className="text-sm font-semibold text-white">Poules</p>
-              <Button
-                type="button"
-                variant="outline"
-                className="bg-brand-violet text-white hover:bg-brand-violet/90 hover:text-white"
-                onClick={ensurePools}
-                disabled={isEnsuringPools}
-              >
-                Générer les poules
-              </Button>
-            </div>
-            <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_2fr]">
-              <Card className="rounded-2xl border border-white/10 bg-white/5 p-4 text-white shadow-card">
-                <p className="text-sm font-semibold">Équipes complètes</p>
-                <DroppableArea id="drop:unassignedTeams" className="mt-4 space-y-2">
-                  {unassignedTeams.map((team) => (
-                    <DraggableItem
-                      key={team.id}
-                      id={`team:${team.id}`}
-                      className="rounded-xl border border-white/10 bg-white/10 px-3 py-2 text-xs"
-                    >
-                      <p className="font-semibold text-white">{team.name || "Équipe"}</p>
-                      <p className="text-white/70">
-                        {(teamPlayerMap.get(team.id) ?? [])
-                          .map((playerId) => {
-                            const player = playerById.get(playerId);
-                            return player ? `${player.first_name} ${player.last_name}` : "";
-                          })
-                          .filter(Boolean)
-                          .join(" / ")}
-                      </p>
+                      </div>
+                      <span className="text-base text-white/30">⋮⋮</span>
                     </DraggableItem>
                   ))}
+                  {!unassignedPlayers.length ? (
+                    <p className="text-xs text-white/60">Tous les joueurs sont assignés.</p>
+                  ) : null}
                 </DroppableArea>
-              </Card>
+              </div>
+            </Card>
 
-              <div className="grid gap-4 md:grid-cols-2">
-                {localPools.map((pool) => (
-                  <Card key={pool.id} className="rounded-2xl border border-border bg-white p-4 shadow-card">
-                    <input
-                      className="w-full rounded-xl border border-border px-3 py-2 text-sm"
-                      defaultValue={pool.name}
-                      onBlur={(event) => handleUpdatePoolName(pool.id, event.target.value)}
-                    />
+            <Card className="rounded-2xl border border-white/10 bg-white/5 p-5 text-white shadow-card">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <p className="bg-gradient-to-br from-orange-400 to-amber-200 bg-clip-text text-sm font-semibold text-transparent">
+                  Équipes du tournoi
+                </p>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="rounded-xl border-none bg-gradient-to-br from-orange-400 to-orange-500 px-4 py-2 text-xs font-semibold text-white shadow-md transition hover:translate-y-[-1px] hover:shadow-lg"
+                  onClick={handleCreateTeam}
+                >
+                  Créer une équipe
+                </Button>
+              </div>
+              <div className="mt-4 max-h-[60vh] overflow-y-auto pr-1">
+                <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                  {localTeams.map((team) => {
+                    const players = teamPlayerMap.get(team.id) ?? [];
+                    const isComplete = players.length >= 2;
+                    return (
+                      <div
+                        key={team.id}
+                        className={`rounded-2xl border p-4 transition ${
+                          isComplete
+                            ? "border-emerald-400/40 bg-emerald-500/5"
+                            : "border-white/10 bg-white/5"
+                        }`}
+                      >
+                        <div className="flex items-center gap-2">
+                          <input
+                            className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs font-semibold text-white placeholder:text-white/30 focus:border-orange-400 focus:outline-none"
+                            placeholder="Nom de l’équipe"
+                            defaultValue={team.name ?? ""}
+                            onBlur={(event) => handleUpdateTeamName(team.id, event.target.value)}
+                          />
+                          {players.length === 0 ? (
+                            <button
+                              type="button"
+                              className="rounded-xl border border-red-500/40 bg-red-500/10 px-3 py-2 text-xs font-semibold text-red-400 transition hover:bg-red-500/20"
+                              onClick={() => handleDeleteTeam(team.id)}
+                            >
+                              ✕
+                            </button>
+                          ) : null}
+                        </div>
+                        <DroppableArea
+                          id={`drop:team:${team.id}`}
+                          className="mt-3 space-y-2 rounded-xl border border-dashed border-white/15 bg-white/5 p-3"
+                        >
+                          {[0, 1].map((slot) => {
+                            const playerId = players[slot];
+                            const player = playerId ? playerById.get(playerId) : null;
+                            return (
+                              <div
+                                key={`${team.id}-${slot}`}
+                                className={`flex items-center gap-3 rounded-xl px-3 py-2 text-xs ${
+                                  player
+                                    ? "border border-emerald-400/30 bg-emerald-500/10"
+                                    : "border border-white/10 bg-white/5"
+                                }`}
+                              >
+                                {player ? (
+                                  <DraggableItem id={`player:${player.id}`} className="flex flex-1 items-center gap-3">
+                                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-violet-400 to-violet-600 text-[10px] font-semibold">
+                                      {getInitials(player)}
+                                    </div>
+                                    <span className="text-xs font-semibold">
+                                      {player.first_name} {player.last_name}
+                                    </span>
+                                  </DraggableItem>
+                                ) : (
+                                  <span className="text-xs text-white/40">Glissez un joueur ici...</span>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </DroppableArea>
+                        <div className="mt-3 flex items-center justify-between border-t border-white/10 pt-3">
+                          {isComplete ? (
+                            <span className="inline-flex items-center gap-2 rounded-full bg-emerald-500/20 px-3 py-1 text-[10px] font-semibold uppercase tracking-wide text-emerald-300">
+                              <span className="h-1.5 w-1.5 rounded-full bg-emerald-300" />
+                              Complète
+                            </span>
+                          ) : (
+                            <span className="text-xs text-white/50">{players.length}/2 joueurs</span>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </Card>
+          </div>
+        </DndContext>
+      ) : (
+        <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <p className="bg-gradient-to-br from-orange-400 to-amber-200 bg-clip-text text-lg font-semibold text-transparent">
+                Répartition des poules
+              </p>
+              <p className="text-xs text-white/60">
+                Glissez-déposez les équipes complètes dans les poules
+              </p>
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              className="rounded-xl border-none bg-gradient-to-br from-violet-400 to-violet-600 px-4 py-2 text-xs font-semibold text-white shadow-md transition hover:translate-y-[-1px] hover:shadow-lg"
+              onClick={ensurePools}
+              disabled={isEnsuringPools}
+            >
+              Générer les poules
+            </Button>
+          </div>
+          <div className="mt-6 grid gap-6 lg:grid-cols-[320px_1fr]">
+            <Card className="sticky top-6 h-fit rounded-2xl border border-orange-400/30 bg-orange-500/10 p-5 text-white shadow-card">
+              <div className="flex items-center gap-3 border-b border-white/10 pb-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-orange-400 to-orange-500 text-lg">
+                  👥
+                </div>
+                <div>
+                  <p className="text-sm font-semibold">Équipes complètes</p>
+                  <p className="text-xs text-white/60">À répartir</p>
+                </div>
+                <span className="ml-auto text-xs font-semibold text-white/60">
+                  {unassignedTeams.length}
+                </span>
+              </div>
+              <DroppableArea id="drop:unassignedTeams" className="mt-4 space-y-2">
+                {unassignedTeams.map((team) => (
+                  <DraggableItem
+                    key={team.id}
+                    id={`team:${team.id}`}
+                    className="rounded-xl border border-white/10 bg-white/5 px-3 py-3 text-xs transition hover:translate-x-1 hover:border-orange-300/50 hover:bg-orange-500/10"
+                  >
+                    <span className="float-right text-base text-white/30">⋮⋮</span>
+                    <p className="font-semibold text-white">{team.name || "Équipe"}</p>
+                    <p className="text-white/60">
+                      {(teamPlayerMap.get(team.id) ?? [])
+                        .map((playerId) => {
+                          const player = playerById.get(playerId);
+                          return player ? `${player.first_name} ${player.last_name}` : "";
+                        })
+                        .filter(Boolean)
+                        .join(" / ")}
+                    </p>
+                  </DraggableItem>
+                ))}
+              </DroppableArea>
+            </Card>
+
+            <div className="grid gap-5 md:grid-cols-2">
+              {localPools.map((pool, index) => {
+                const teamIds = teamIdsByPool.get(pool.id) ?? [];
+                const teamsCount = teamIds.length;
+                const isReady = teamsCount > 0;
+                const borderVariants = [
+                  "border-orange-400/40",
+                  "border-emerald-400/40",
+                  "border-violet-400/40",
+                  "border-amber-300/40",
+                ];
+                return (
+                  <Card
+                    key={pool.id}
+                    className={`rounded-2xl border bg-white/5 p-4 text-white shadow-card ${
+                      borderVariants[index % borderVariants.length]
+                    }`}
+                  >
+                    <div className="mb-3">
+                      <input
+                        className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm font-semibold text-white placeholder:text-white/30 focus:border-orange-400 focus:outline-none"
+                        defaultValue={pool.name}
+                        onBlur={(event) => handleUpdatePoolName(pool.id, event.target.value)}
+                        placeholder="Nom de la poule"
+                      />
+                    </div>
                     <DroppableArea
                       id={`drop:pool:${pool.id}`}
-                      className="mt-4 space-y-2 rounded-2xl border border-dashed border-border p-2"
+                      className={`min-h-[160px] space-y-2 rounded-xl border border-dashed border-white/15 bg-white/5 p-3 ${
+                        teamsCount === 0 ? "flex items-center justify-center" : ""
+                      }`}
                     >
-                      {(teamIdsByPool.get(pool.id) ?? []).map((teamId) => {
-                        const team = localTeams.find((item) => item.id === teamId);
-                        if (!team) return null;
-                        return (
-                          <DraggableItem
-                            key={team.id}
-                            id={`team:${team.id}`}
-                            className="rounded-xl border border-border bg-white px-3 py-2 text-xs"
-                          >
-                            <p className="font-semibold text-brand-charcoal">
-                              {team.name || "Équipe"}
-                            </p>
-                            <p className="text-muted-foreground">
-                              {(teamPlayerMap.get(team.id) ?? [])
-                                .map((playerId) => {
-                                  const player = playerById.get(playerId);
-                                  return player ? `${player.first_name} ${player.last_name}` : "";
-                                })
-                                .filter(Boolean)
-                                .join(" / ")}
-                            </p>
-                          </DraggableItem>
-                        );
-                      })}
+                      {teamIds.length === 0 ? (
+                        <p className="text-xs text-white/30">Glissez les équipes ici...</p>
+                      ) : (
+                        teamIds.map((teamId) => {
+                          const team = localTeams.find((item) => item.id === teamId);
+                          if (!team) return null;
+                          return (
+                            <DraggableItem
+                              key={team.id}
+                              id={`team:${team.id}`}
+                              className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs transition hover:border-white/30 hover:bg-white/10"
+                            >
+                              <p className="font-semibold text-white">{team.name || "Équipe"}</p>
+                              <p className="text-white/60">
+                                {(teamPlayerMap.get(team.id) ?? [])
+                                  .map((playerId) => {
+                                    const player = playerById.get(playerId);
+                                    return player ? `${player.first_name} ${player.last_name}` : "";
+                                  })
+                                  .filter(Boolean)
+                                  .join(" / ")}
+                              </p>
+                            </DraggableItem>
+                          );
+                        })
+                      )}
                     </DroppableArea>
+                    <div className="mt-3 flex items-center justify-between border-t border-white/10 pt-3">
+                      <span className="text-xs text-white/60">
+                        {teamsCount} équipe{teamsCount > 1 ? "s" : ""}
+                      </span>
+                      <span
+                        className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-[10px] font-semibold uppercase tracking-wide ${
+                          isReady ? "bg-emerald-500/20 text-emerald-300" : "bg-amber-400/20 text-amber-200"
+                        }`}
+                      >
+                        {isReady ? "Prête" : teamsCount === 0 ? "Vide" : "Incomplète"}
+                      </span>
+                    </div>
                   </Card>
-                ))}
-              </div>
+                );
+              })}
             </div>
-          </DndContext>
-        </TabsContent>
-      </Tabs>
+          </div>
+        </DndContext>
+      )}
     </div>
   );
+}
+
+export function TournamentConfigAdmin(props: TournamentConfigAdminProps) {
+  return <TournamentConfigContent {...props} />;
 }

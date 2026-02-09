@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proposition 2 - Design Minimaliste Flashscore</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #1E1E2E;
+            color: white;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            color: #ff6b35;
+        }
+
+        .subtitle {
+            color: rgba(255, 255, 255, 0.5);
+            margin-bottom: 30px;
+            font-size: 0.95rem;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 0;
+            margin-bottom: 20px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .tab {
+            padding: 14px 28px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.5);
+            transition: all 0.2s ease;
+            border-bottom: 3px solid transparent;
+            font-size: 0.95rem;
+        }
+
+        .tab.active {
+            color: #ff6b35;
+            border-bottom-color: #ff6b35;
+        }
+
+        .tab:hover {
+            color: #ff8c42;
+        }
+
+        /* Section Header */
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            margin-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .section-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        /* Table Simple */
+        .simple-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: rgba(255, 255, 255, 0.02);
+            margin-bottom: 30px;
+        }
+
+        .simple-table thead {
+            background: rgba(255, 107, 53, 0.1);
+        }
+
+        .simple-table th {
+            text-align: left;
+            padding: 14px 16px;
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.6);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+            border-bottom: 2px solid rgba(255, 107, 53, 0.3);
+        }
+
+        .simple-table th.center,
+        .simple-table td.center {
+            text-align: center;
+        }
+
+        .simple-table tbody tr {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            transition: background 0.15s ease;
+        }
+
+        .simple-table tbody tr:hover {
+            background: rgba(255, 107, 53, 0.05);
+        }
+
+        .simple-table td {
+            padding: 16px;
+            font-size: 0.95rem;
+        }
+
+        /* Position Badge */
+        .pos {
+            display: inline-block;
+            width: 28px;
+            height: 28px;
+            text-align: center;
+            line-height: 28px;
+            border-radius: 4px;
+            font-weight: 700;
+            font-size: 0.85rem;
+        }
+
+        .pos.top3 {
+            background: rgba(255, 107, 53, 0.2);
+            color: #ff6b35;
+        }
+
+        .pos.normal {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .team-name-cell {
+            font-weight: 600;
+            color: white;
+        }
+
+        /* Stats */
+        .stat {
+            font-weight: 600;
+        }
+
+        .stat.positive {
+            color: #4CAF50;
+        }
+
+        .stat.neutral {
+            color: #FFDA77;
+        }
+
+        .stat.negative {
+            color: #F44336;
+        }
+
+        .stat.default {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        /* Match Row */
+        .match-row {
+            background: rgba(255, 255, 255, 0.02);
+            border-left: 3px solid transparent;
+            margin-bottom: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .match-row:hover {
+            background: rgba(255, 107, 53, 0.05);
+            border-left-color: #ff6b35;
+        }
+
+        .match-row.live {
+            border-left-color: #4CAF50;
+            background: rgba(76, 175, 80, 0.05);
+        }
+
+        .match-content {
+            display: grid;
+            grid-template-columns: 100px 1fr auto 1fr auto;
+            align-items: center;
+            padding: 16px;
+            gap: 20px;
+        }
+
+        .match-time {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .match-time.live {
+            color: #4CAF50;
+        }
+
+        .team {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .team-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 4px;
+            background: rgba(157, 122, 250, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #9D7AFA;
+        }
+
+        .team-label {
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .score {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #ff6b35;
+            min-width: 40px;
+            text-align: center;
+        }
+
+        .score.winner {
+            color: #4CAF50;
+        }
+
+        .sets {
+            display: flex;
+            gap: 6px;
+        }
+
+        .set {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.6);
+            min-width: 50px;
+            text-align: center;
+        }
+
+        .set.won {
+            color: #4CAF50;
+            background: rgba(76, 175, 80, 0.1);
+        }
+
+        .set.lost {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.85rem;
+        }
+
+        .btn-primary {
+            background: #ff6b35;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #ff8c42;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.08);
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.12);
+        }
+
+        /* Live indicator */
+        .live-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(76, 175, 80, 0.15);
+            color: #4CAF50;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .live-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #4CAF50;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.3;
+            }
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: #2A2A3E;
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+        }
+
+        .modal-title {
+            font-size: 1.3rem;
+            margin-bottom: 25px;
+            font-weight: 700;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .score-inputs {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .score-input {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 12px;
+            color: white;
+            font-size: 1.2rem;
+            text-align: center;
+            font-weight: 700;
+        }
+
+        .score-input:focus {
+            outline: none;
+            border-color: #ff6b35;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Matchs & Classements</h1>
+        <p class="subtitle">Proposition 2 - Design Minimaliste inspiré Flashscore</p>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab active">Poule A</button>
+            <button class="tab">Poule B</button>
+            <button class="tab">Poule C</button>
+        </div>
+
+        <!-- Classement -->
+        <div class="section-header">
+            <div class="section-title">📊 Classement</div>
+        </div>
+
+        <table class="simple-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Équipe</th>
+                    <th class="center">J</th>
+                    <th class="center">G</th>
+                    <th class="center">N</th>
+                    <th class="center">P</th>
+                    <th class="center">+/-</th>
+                    <th class="center">Pts</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><span class="pos top3">1</span></td>
+                    <td class="team-name-cell">Les Smashers</td>
+                    <td class="center">6</td>
+                    <td class="center stat positive">5</td>
+                    <td class="center stat neutral">0</td>
+                    <td class="center stat negative">1</td>
+                    <td class="center stat positive">+12</td>
+                    <td class="center stat default">15</td>
+                </tr>
+                <tr>
+                    <td><span class="pos top3">2</span></td>
+                    <td class="team-name-cell">Padel Warriors</td>
+                    <td class="center">6</td>
+                    <td class="center stat positive">4</td>
+                    <td class="center stat neutral">1</td>
+                    <td class="center stat negative">1</td>
+                    <td class="center stat positive">+8</td>
+                    <td class="center stat default">13</td>
+                </tr>
+                <tr>
+                    <td><span class="pos top3">3</span></td>
+                    <td class="team-name-cell">Court Kings</td>
+                    <td class="center">6</td>
+                    <td class="center stat positive">3</td>
+                    <td class="center stat neutral">0</td>
+                    <td class="center stat negative">3</td>
+                    <td class="center stat positive">+2</td>
+                    <td class="center stat default">9</td>
+                </tr>
+                <tr>
+                    <td><span class="pos normal">4</span></td>
+                    <td class="team-name-cell">Net Ninjas</td>
+                    <td class="center">6</td>
+                    <td class="center stat positive">1</td>
+                    <td class="center stat neutral">1</td>
+                    <td class="center stat negative">4</td>
+                    <td class="center stat negative">-7</td>
+                    <td class="center stat default">4</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Matches -->
+        <div class="section-header">
+            <div class="section-title">⚔️ Matchs</div>
+            <button class="btn btn-primary">+ Nouveau match</button>
+        </div>
+
+        <!-- Match Terminé -->
+        <div class="match-row">
+            <div class="match-content">
+                <div class="match-time">8 Fév, 14:00</div>
+
+                <div class="team">
+                    <div class="team-icon">LS</div>
+                    <span class="team-label">Les Smashers</span>
+                </div>
+
+                <div class="score winner">3</div>
+
+                <div class="team">
+                    <div class="team-icon">NN</div>
+                    <span class="team-label">Net Ninjas</span>
+                </div>
+
+                <div class="score">1</div>
+            </div>
+
+            <div style="padding: 0 16px 16px; display: flex; justify-content: space-between; align-items: center;">
+                <div class="sets">
+                    <div class="set won">6-3</div>
+                    <div class="set won">7-5</div>
+                    <div class="set lost">5-7</div>
+                    <div class="set won">6-4</div>
+                </div>
+                <div class="actions">
+                    <button class="btn btn-secondary">Modifier</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Match En cours -->
+        <div class="match-row live">
+            <div class="match-content">
+                <div class="match-time live">
+                    <span class="live-badge">
+                        <span class="live-dot"></span>
+                        EN DIRECT
+                    </span>
+                </div>
+
+                <div class="team">
+                    <div class="team-icon">PW</div>
+                    <span class="team-label">Padel Warriors</span>
+                </div>
+
+                <div class="score">1</div>
+
+                <div class="team">
+                    <div class="team-icon">CK</div>
+                    <span class="team-label">Court Kings</span>
+                </div>
+
+                <div class="score">1</div>
+            </div>
+
+            <div style="padding: 0 16px 16px; display: flex; justify-content: space-between; align-items: center;">
+                <div class="sets">
+                    <div class="set won">6-4</div>
+                    <div class="set lost">3-6</div>
+                    <div class="set" style="color: #4CAF50; background: rgba(76, 175, 80, 0.15);">2-1</div>
+                </div>
+                <div class="actions">
+                    <button class="btn btn-primary" onclick="openModal()">Mettre à jour</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Match À venir -->
+        <div class="match-row">
+            <div class="match-content">
+                <div class="match-time">9 Fév, 16:30</div>
+
+                <div class="team">
+                    <div class="team-icon">LS</div>
+                    <span class="team-label">Les Smashers</span>
+                </div>
+
+                <div style="text-align: center; color: rgba(255, 255, 255, 0.3); font-weight: 600;">VS</div>
+
+                <div class="team">
+                    <div class="team-icon">PW</div>
+                    <span class="team-label">Padel Warriors</span>
+                </div>
+
+                <div></div>
+            </div>
+
+            <div style="padding: 0 16px 16px; display: flex; justify-content: flex-end;">
+                <div class="actions">
+                    <button class="btn btn-primary" onclick="openModal()">Saisir résultat</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal" id="scoreModal">
+        <div class="modal-content">
+            <h2 class="modal-title">Saisir le résultat</h2>
+
+            <div style="margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+                <div style="font-size: 0.9rem; color: rgba(255, 255, 255, 0.6); margin-bottom: 5px;">Match</div>
+                <div style="font-weight: 600;">Les Smashers vs Padel Warriors</div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Set 1</label>
+                <div class="score-inputs">
+                    <input type="number" class="score-input" placeholder="0" min="0" max="7">
+                    <span style="color: rgba(255, 255, 255, 0.3);">:</span>
+                    <input type="number" class="score-input" placeholder="0" min="0" max="7">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Set 2</label>
+                <div class="score-inputs">
+                    <input type="number" class="score-input" placeholder="0" min="0" max="7">
+                    <span style="color: rgba(255, 255, 255, 0.3);">:</span>
+                    <input type="number" class="score-input" placeholder="0" min="0" max="7">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Set 3</label>
+                <div class="score-inputs">
+                    <input type="number" class="score-input" placeholder="0" min="0" max="7">
+                    <span style="color: rgba(255, 255, 255, 0.3);">:</span>
+                    <input type="number" class="score-input" placeholder="0" min="0" max="7">
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 10px; margin-top: 25px;">
+                <button class="btn btn-primary" style="flex: 1; padding: 12px;">Enregistrer</button>
+                <button class="btn btn-secondary" style="flex: 1; padding: 12px;" onclick="closeModal()">Annuler</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function openModal() {
+            document.getElementById('scoreModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('scoreModal').classList.remove('active');
+        }
+    </script>
+</body>
+</html>

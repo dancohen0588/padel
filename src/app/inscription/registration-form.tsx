@@ -9,8 +9,12 @@ import { StatusBadge } from "@/components/ui/status-badge";
 
 const initialState = null;
 
-export function RegistrationForm() {
-  const [state, formAction] = useFormState(registerPlayer, initialState);
+type RegistrationFormProps = {
+  action?: typeof registerPlayer;
+};
+
+export function RegistrationForm({ action = registerPlayer }: RegistrationFormProps) {
+  const [state, formAction] = useFormState(action, initialState);
 
   if (state?.status === "ok") {
     return (

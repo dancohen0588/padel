@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Onglet "Équipes" - Refonte Hybride</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #1E1E2E;
+            color: white;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Grid Layout */
+        .teams-layout {
+            display: grid;
+            grid-template-columns: 380px 1fr;
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        @media (max-width: 1024px) {
+            .teams-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Players Pool Card */
+        .pool-card {
+            background: rgba(157, 122, 250, 0.08);
+            border-radius: 18px;
+            padding: 25px;
+            border: 1px solid rgba(157, 122, 250, 0.2);
+            height: fit-content;
+            position: sticky;
+            top: 20px;
+        }
+
+        .pool-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .pool-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #9D7AFA 0%, #7B5FD8 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+        }
+
+        .pool-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        .pool-count {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.85rem;
+            margin-left: auto;
+        }
+
+        .players-list {
+            max-height: 600px;
+            overflow-y: auto;
+            padding-right: 8px;
+        }
+
+        .player-item {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 12px 14px;
+            margin-bottom: 8px;
+            cursor: grab;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .player-item:hover {
+            background: rgba(157, 122, 250, 0.15);
+            border-color: rgba(157, 122, 250, 0.4);
+            transform: translateX(4px);
+        }
+
+        .player-item:active {
+            cursor: grabbing;
+        }
+
+        .player-initials {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, #9D7AFA 0%, #7B5FD8 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.9rem;
+            flex-shrink: 0;
+        }
+
+        .player-info {
+            flex: 1;
+        }
+
+        .player-name {
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .drag-handle {
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 1.2rem;
+        }
+
+        /* Teams Section */
+        .teams-section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .teams-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #ff6b35 0%, #FFDA77 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .btn-create {
+            background: linear-gradient(135deg, #ff6b35 0%, #ff8c42 100%);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 12px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(255, 107, 53, 0.25);
+        }
+
+        .btn-create:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(255, 107, 53, 0.35);
+        }
+
+        .teams-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 15px;
+        }
+
+        .team-card {
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.3s ease;
+        }
+
+        .team-card:hover {
+            border-color: rgba(255, 107, 53, 0.4);
+        }
+
+        .team-card.complete {
+            border-color: rgba(76, 175, 80, 0.4);
+            background: rgba(76, 175, 80, 0.05);
+        }
+
+        .team-header {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .team-name-input {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.06);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 10px 14px;
+            color: white;
+            font-size: 0.95rem;
+            font-weight: 600;
+        }
+
+        .team-name-input:focus {
+            outline: none;
+            border-color: #ff6b35;
+        }
+
+        .team-name-input::placeholder {
+            color: rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-delete {
+            background: rgba(244, 67, 54, 0.15);
+            color: #F44336;
+            padding: 10px 16px;
+            border-radius: 10px;
+            border: 1px solid rgba(244, 67, 54, 0.3);
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        .btn-delete:hover {
+            background: rgba(244, 67, 54, 0.25);
+        }
+
+        .drop-zone {
+            background: rgba(255, 255, 255, 0.02);
+            border: 2px dashed rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            padding: 15px;
+            min-height: 140px;
+        }
+
+        .drop-zone.dragover {
+            background: rgba(255, 107, 53, 0.1);
+            border-color: #ff6b35;
+        }
+
+        .slot {
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 8px;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .slot.filled {
+            background: rgba(76, 175, 80, 0.1);
+            border: 1px solid rgba(76, 175, 80, 0.3);
+        }
+
+        .slot.empty {
+            border: 1px dashed rgba(255, 255, 255, 0.2);
+        }
+
+        .slot-label {
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 0.85rem;
+        }
+
+        .team-footer {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .team-status {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .team-status.complete {
+            color: #4CAF50;
+            font-weight: 600;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(76, 175, 80, 0.15);
+            color: #4CAF50;
+            padding: 6px 12px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #4CAF50;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 style="font-size: 2.2rem; margin-bottom: 8px; background: linear-gradient(135deg, #ff6b35 0%, #FFDA77 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">👥 Formation des équipes</h1>
+        <p style="color: rgba(255, 255, 255, 0.5); margin-bottom: 10px;">Refonte graphique - Style Hybride</p>
+        <p style="color: rgba(255, 255, 255, 0.4); font-size: 0.9rem; margin-bottom: 30px;">Glissez-déposez les joueurs pour former les équipes (2 joueurs par équipe)</p>
+
+        <div class="teams-layout">
+            <!-- Players Pool -->
+            <div class="pool-card">
+                <div class="pool-header">
+                    <div class="pool-icon">🎯</div>
+                    <div class="pool-title">Joueurs disponibles</div>
+                    <div class="pool-count">8</div>
+                </div>
+                <div class="players-list">
+                    <div class="player-item">
+                        <div class="player-initials">JD</div>
+                        <div class="player-info">
+                            <div class="player-name">Jean Dupont</div>
+                        </div>
+                        <div class="drag-handle">⋮⋮</div>
+                    </div>
+                    <div class="player-item">
+                        <div class="player-initials">MM</div>
+                        <div class="player-info">
+                            <div class="player-name">Marie Martin</div>
+                        </div>
+                        <div class="drag-handle">⋮⋮</div>
+                    </div>
+                    <div class="player-item">
+                        <div class="player-initials">PL</div>
+                        <div class="player-info">
+                            <div class="player-name">Pierre Lefebvre</div>
+                        </div>
+                        <div class="drag-handle">⋮⋮</div>
+                    </div>
+                    <div class="player-item">
+                        <div class="player-initials">SB</div>
+                        <div class="player-info">
+                            <div class="player-name">Sophie Bernard</div>
+                        </div>
+                        <div class="drag-handle">⋮⋮</div>
+                    </div>
+                    <div class="player-item">
+                        <div class="player-initials">TR</div>
+                        <div class="player-info">
+                            <div class="player-name">Thomas Robert</div>
+                        </div>
+                        <div class="drag-handle">⋮⋮</div>
+                    </div>
+                    <div class="player-item">
+                        <div class="player-initials">CD</div>
+                        <div class="player-info">
+                            <div class="player-name">Claire Dubois</div>
+                        </div>
+                        <div class="drag-handle">⋮⋮</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Teams Section -->
+            <div>
+                <div class="teams-section-header">
+                    <div class="teams-title">Équipes du tournoi</div>
+                    <button class="btn-create">+ Créer une équipe</button>
+                </div>
+
+                <div class="teams-grid">
+                    <!-- Team Complete -->
+                    <div class="team-card complete">
+                        <div class="team-header">
+                            <input type="text" class="team-name-input" placeholder="Nom de l'équipe" value="Les Smashers">
+                        </div>
+                        <div class="drop-zone">
+                            <div class="slot filled">
+                                <div class="player-initials">AL</div>
+                                <div class="player-info">
+                                    <div class="player-name">Antoine Leroy</div>
+                                </div>
+                            </div>
+                            <div class="slot filled">
+                                <div class="player-initials">LG</div>
+                                <div class="player-info">
+                                    <div class="player-name">Lucas Garcia</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="team-footer">
+                            <div class="team-status complete">
+                                <span class="status-badge">
+                                    <span class="status-dot"></span>
+                                    <span>COMPLÈTE</span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Team Incomplete -->
+                    <div class="team-card">
+                        <div class="team-header">
+                            <input type="text" class="team-name-input" placeholder="Nom de l'équipe" value="Padel Warriors">
+                        </div>
+                        <div class="drop-zone">
+                            <div class="slot filled">
+                                <div class="player-initials">EM</div>
+                                <div class="player-info">
+                                    <div class="player-name">Emma Moreau</div>
+                                </div>
+                            </div>
+                            <div class="slot empty">
+                                <span class="slot-label">Glissez un joueur ici...</span>
+                            </div>
+                        </div>
+                        <div class="team-footer">
+                            <div class="team-status">1/2 joueurs</div>
+                        </div>
+                    </div>
+
+                    <!-- Team Empty -->
+                    <div class="team-card">
+                        <div class="team-header">
+                            <input type="text" class="team-name-input" placeholder="Nom de l'équipe">
+                            <button class="btn-delete">✕</button>
+                        </div>
+                        <div class="drop-zone">
+                            <div class="slot empty">
+                                <span class="slot-label">Glissez un joueur ici...</span>
+                            </div>
+                            <div class="slot empty">
+                                <span class="slot-label">Glissez un joueur ici...</span>
+                            </div>
+                        </div>
+                        <div class="team-footer">
+                            <div class="team-status">0/2 joueurs</div>
+                        </div>
+                    </div>
+
+                    <!-- Team Empty -->
+                    <div class="team-card">
+                        <div class="team-header">
+                            <input type="text" class="team-name-input" placeholder="Nom de l'équipe">
+                            <button class="btn-delete">✕</button>
+                        </div>
+                        <div class="drop-zone">
+                            <div class="slot empty">
+                                <span class="slot-label">Glissez un joueur ici...</span>
+                            </div>
+                            <div class="slot empty">
+                                <span class="slot-label">Glissez un joueur ici...</span>
+                            </div>
+                        </div>
+                        <div class="team-footer">
+                            <div class="team-status">0/2 joueurs</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

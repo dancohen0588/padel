@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Onglet "Validés" - Refonte Hybride</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #1E1E2E;
+            color: white;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Header Card */
+        .header-card {
+            background: rgba(76, 175, 80, 0.08);
+            border-radius: 18px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border: 1px solid rgba(76, 175, 80, 0.2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .header-info h2 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: #4CAF50;
+        }
+
+        .header-info p {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.95rem;
+        }
+
+        .search-box {
+            background: rgba(255, 255, 255, 0.06);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 12px 16px;
+            color: white;
+            font-size: 0.95rem;
+            min-width: 300px;
+        }
+
+        .search-box:focus {
+            outline: none;
+            border-color: #4CAF50;
+            background: rgba(76, 175, 80, 0.08);
+        }
+
+        .search-box::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        /* Player Grid */
+        .players-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 15px;
+        }
+
+        .player-card {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            transition: all 0.3s ease;
+        }
+
+        .player-card:hover {
+            border-color: rgba(76, 175, 80, 0.4);
+            background: rgba(76, 175, 80, 0.05);
+            transform: translateY(-2px);
+        }
+
+        .player-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        .player-avatar {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #4CAF50 0%, #66BB6A 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+        }
+
+        .player-name-block {
+            flex: 1;
+        }
+
+        .player-name {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .player-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(76, 175, 80, 0.15);
+            color: #4CAF50;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #4CAF50;
+        }
+
+        .player-details {
+            margin-bottom: 15px;
+        }
+
+        .player-contact {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.9rem;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .icon {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .player-actions {
+            display: flex;
+            gap: 8px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .btn {
+            flex: 1;
+            padding: 10px 16px;
+            border-radius: 10px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.85rem;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.08);
+            color: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Stats Summary */
+        .stats-card {
+            background: linear-gradient(135deg, rgba(76, 175, 80, 0.1) 0%, rgba(102, 187, 106, 0.05) 100%);
+            border-radius: 18px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(76, 175, 80, 0.2);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #4CAF50;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 style="font-size: 2.2rem; margin-bottom: 8px; background: linear-gradient(135deg, #4CAF50 0%, #66BB6A 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">✓ Joueurs validés</h1>
+        <p style="color: rgba(255, 255, 255, 0.5); margin-bottom: 30px;">Refonte graphique - Style Hybride</p>
+
+        <!-- Stats Card -->
+        <div class="stats-card">
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-value">12</div>
+                    <div class="stat-label">Joueurs validés</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">6</div>
+                    <div class="stat-label">Équipes formées</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">100%</div>
+                    <div class="stat-label">Taux de validation</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Header Card -->
+        <div class="header-card">
+            <div class="header-info">
+                <h2>Liste des participants</h2>
+                <p>12 joueurs confirmés pour le tournoi</p>
+            </div>
+            <input type="text" class="search-box" placeholder="🔍 Rechercher un joueur...">
+        </div>
+
+        <!-- Players Grid -->
+        <div class="players-grid">
+            <div class="player-card">
+                <div class="player-header">
+                    <div class="player-avatar">JD</div>
+                    <div class="player-name-block">
+                        <div class="player-name">Jean Dupont</div>
+                        <div class="player-status">
+                            <span class="status-dot"></span>
+                            <span>VALIDÉ</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="player-details">
+                    <div class="player-contact">
+                        <span class="icon">✉️</span>
+                        <span>jean.dupont@email.com</span>
+                    </div>
+                    <div class="player-contact">
+                        <span class="icon">📱</span>
+                        <span>06 12 34 56 78</span>
+                    </div>
+                </div>
+                <div class="player-actions">
+                    <button class="btn btn-secondary">↶ Repasser en attente</button>
+                </div>
+            </div>
+
+            <div class="player-card">
+                <div class="player-header">
+                    <div class="player-avatar">MM</div>
+                    <div class="player-name-block">
+                        <div class="player-name">Marie Martin</div>
+                        <div class="player-status">
+                            <span class="status-dot"></span>
+                            <span>VALIDÉ</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="player-details">
+                    <div class="player-contact">
+                        <span class="icon">✉️</span>
+                        <span>marie.martin@email.com</span>
+                    </div>
+                    <div class="player-contact">
+                        <span class="icon">📱</span>
+                        <span>06 98 76 54 32</span>
+                    </div>
+                </div>
+                <div class="player-actions">
+                    <button class="btn btn-secondary">↶ Repasser en attente</button>
+                </div>
+            </div>
+
+            <div class="player-card">
+                <div class="player-header">
+                    <div class="player-avatar">PL</div>
+                    <div class="player-name-block">
+                        <div class="player-name">Pierre Lefebvre</div>
+                        <div class="player-status">
+                            <span class="status-dot"></span>
+                            <span>VALIDÉ</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="player-details">
+                    <div class="player-contact">
+                        <span class="icon">✉️</span>
+                        <span>pierre.lefebvre@email.com</span>
+                    </div>
+                </div>
+                <div class="player-actions">
+                    <button class="btn btn-secondary">↶ Repasser en attente</button>
+                </div>
+            </div>
+
+            <div class="player-card">
+                <div class="player-header">
+                    <div class="player-avatar">SB</div>
+                    <div class="player-name-block">
+                        <div class="player-name">Sophie Bernard</div>
+                        <div class="player-status">
+                            <span class="status-dot"></span>
+                            <span>VALIDÉ</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="player-details">
+                    <div class="player-contact">
+                        <span class="icon">✉️</span>
+                        <span>sophie.bernard@email.com</span>
+                    </div>
+                    <div class="player-contact">
+                        <span class="icon">📱</span>
+                        <span>06 45 67 89 01</span>
+                    </div>
+                </div>
+                <div class="player-actions">
+                    <button class="btn btn-secondary">↶ Repasser en attente</button>
+                </div>
+            </div>
+
+            <div class="player-card">
+                <div class="player-header">
+                    <div class="player-avatar">TR</div>
+                    <div class="player-name-block">
+                        <div class="player-name">Thomas Robert</div>
+                        <div class="player-status">
+                            <span class="status-dot"></span>
+                            <span>VALIDÉ</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="player-details">
+                    <div class="player-contact">
+                        <span class="icon">✉️</span>
+                        <span>thomas.robert@email.com</span>
+                    </div>
+                    <div class="player-contact">
+                        <span class="icon">📱</span>
+                        <span>06 23 45 67 89</span>
+                    </div>
+                </div>
+                <div class="player-actions">
+                    <button class="btn btn-secondary">↶ Repasser en attente</button>
+                </div>
+            </div>
+
+            <div class="player-card">
+                <div class="player-header">
+                    <div class="player-avatar">CD</div>
+                    <div class="player-name-block">
+                        <div class="player-name">Claire Dubois</div>
+                        <div class="player-status">
+                            <span class="status-dot"></span>
+                            <span>VALIDÉ</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="player-details">
+                    <div class="player-contact">
+                        <span class="icon">✉️</span>
+                        <span>claire.dubois@email.com</span>
+                    </div>
+                </div>
+                <div class="player-actions">
+                    <button class="btn btn-secondary">↶ Repasser en attente</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

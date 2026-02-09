@@ -1,6 +1,11 @@
 import { getDatabaseClient } from "@/lib/database";
 import type {
+  Match,
+  MatchSet,
+  MatchStatus,
+  MatchWithTeams,
   Pool,
+  PoolStanding,
   PoolTeam,
   RegistrationStatus,
   RegistrationWithPlayer,
@@ -283,4 +288,241 @@ export const getPoolTeamsByTournament = async (
   `;
 
   return rows;
+};
+
+export const getMatchesByTournament = async (
+  tournamentId: string
+): Promise<Match[]> => {
+  const database = getDatabaseClient();
+  const rows = await database<Match[]>`
+    select
+      id,
+      tournament_id,
+      pool_id,
+      team_a_id,
+      team_b_id,
+      status,
+      scheduled_at::text as scheduled_at,
+      winner_team_id,
+      sets_won_a,
+      sets_won_b,
+      games_won_a,
+      games_won_b,
+      created_at::text as created_at
+    from matches
+    where tournament_id = ${tournamentId}
+    order by created_at asc
+  `;
+
+  return rows;
+};
+
+export const getMatchSetsByTournament = async (
+  tournamentId: string
+): Promise<MatchSet[]> => {
+  const database = getDatabaseClient();
+  const rows = await database<MatchSet[]>`
+    select
+      ms.id,
+      ms.match_id,
+      ms.set_order,
+      ms.team_a_games,
+      ms.team_b_games,
+      ms.created_at::text as created_at
+    from match_sets ms
+    join matches m on m.id = ms.match_id
+    where m.tournament_id = ${tournamentId}
+    order by ms.match_id asc, ms.set_order asc
+  `;
+
+  return rows;
+};
+
+export const getMatchesWithTeamsByPool = async (
+  tournamentId: string,
+  poolId: string | null
+): Promise<MatchWithTeams[]> => {
+  const database = getDatabaseClient();
+  type MatchRow = Match & {
+    team_a_name: string | null;
+    team_b_name: string | null;
+    team_a_created_at: string;
+    team_b_created_at: string;
+  };
+
+  const poolClause = poolId
+    ? database`and m.pool_id = ${poolId}`
+    : database`and m.pool_id is null`;
+
+  const rows = await database<MatchRow[]>`
+    select
+      m.id,
+      m.tournament_id,
+      m.pool_id,
+      m.team_a_id,
+      m.team_b_id,
+      m.status,
+      m.scheduled_at::text as scheduled_at,
+      m.winner_team_id,
+      m.sets_won_a,
+      m.sets_won_b,
+      m.games_won_a,
+      m.games_won_b,
+      m.created_at::text as created_at,
+      ta.name as team_a_name,
+      ta.created_at::text as team_a_created_at,
+      tb.name as team_b_name,
+      tb.created_at::text as team_b_created_at
+    from matches m
+    join teams ta on ta.id = m.team_a_id
+    join teams tb on tb.id = m.team_b_id
+    where m.tournament_id = ${tournamentId}
+    ${poolClause}
+    order by m.created_at asc
+  `;
+
+  const matchIds = rows.map((row) => row.id);
+  const sets = matchIds.length
+    ? await database<MatchSet[]>`
+        select
+          id,
+          match_id,
+          set_order,
+          team_a_games,
+          team_b_games,
+          created_at::text as created_at
+        from match_sets
+        where match_id in ${database(matchIds)}
+        order by match_id asc, set_order asc
+      `
+    : [];
+
+  const setsByMatch = new Map<string, MatchSet[]>();
+  sets.forEach((set) => {
+    const list = setsByMatch.get(set.match_id) ?? [];
+    list.push(set);
+    setsByMatch.set(set.match_id, list);
+  });
+
+  return rows.map((row) => ({
+    id: row.id,
+    tournament_id: row.tournament_id,
+    pool_id: row.pool_id,
+    team_a_id: row.team_a_id,
+    team_b_id: row.team_b_id,
+    status: row.status as MatchStatus,
+    scheduled_at: row.scheduled_at,
+    winner_team_id: row.winner_team_id,
+    sets_won_a: row.sets_won_a,
+    sets_won_b: row.sets_won_b,
+    games_won_a: row.games_won_a,
+    games_won_b: row.games_won_b,
+    created_at: row.created_at,
+    team_a: {
+      id: row.team_a_id,
+      tournament_id: tournamentId,
+      name: row.team_a_name,
+      created_at: row.team_a_created_at,
+    },
+    team_b: {
+      id: row.team_b_id,
+      tournament_id: tournamentId,
+      name: row.team_b_name,
+      created_at: row.team_b_created_at,
+    },
+    sets: setsByMatch.get(row.id) ?? [],
+  }));
+};
+
+export const getPoolStandings = async (
+  tournamentId: string,
+  poolId: string | null
+): Promise<PoolStanding[]> => {
+  const database = getDatabaseClient();
+  type TeamRow = {
+    id: string;
+    name: string | null;
+  };
+
+  const poolClause = poolId
+    ? database`and pt.pool_id = ${poolId}`
+    : database``;
+
+  const teams = await database<TeamRow[]>`
+    select t.id, t.name
+    from teams t
+    join pool_teams pt on pt.team_id = t.id
+    join pools p on p.id = pt.pool_id
+    where p.tournament_id = ${tournamentId}
+    ${poolClause}
+    order by t.created_at asc
+  `;
+
+  const matches = await getMatchesByTournament(tournamentId);
+  const poolMatches = matches.filter((match) =>
+    poolId ? match.pool_id === poolId : match.pool_id === null
+  );
+
+  const standings = new Map<string, PoolStanding>();
+  teams.forEach((team) => {
+    standings.set(team.id, {
+      team_id: team.id,
+      team_name: team.name,
+      played: 0,
+      wins: 0,
+      draws: 0,
+      losses: 0,
+      sets_for: 0,
+      sets_against: 0,
+      games_for: 0,
+      games_against: 0,
+      set_diff: 0,
+      game_diff: 0,
+      points: 0,
+    });
+  });
+
+  poolMatches.forEach((match) => {
+    if (match.status !== "finished") {
+      return;
+    }
+
+    const teamA = standings.get(match.team_a_id);
+    const teamB = standings.get(match.team_b_id);
+    if (!teamA || !teamB) {
+      return;
+    }
+
+    teamA.played += 1;
+    teamB.played += 1;
+    teamA.sets_for += match.sets_won_a;
+    teamA.sets_against += match.sets_won_b;
+    teamB.sets_for += match.sets_won_b;
+    teamB.sets_against += match.sets_won_a;
+    teamA.games_for += match.games_won_a;
+    teamA.games_against += match.games_won_b;
+    teamB.games_for += match.games_won_b;
+    teamB.games_against += match.games_won_a;
+
+    if (match.sets_won_a > match.sets_won_b) {
+      teamA.wins += 1;
+      teamB.losses += 1;
+      teamA.points += 2;
+    } else if (match.sets_won_b > match.sets_won_a) {
+      teamB.wins += 1;
+      teamA.losses += 1;
+      teamB.points += 2;
+    } else {
+      teamA.draws += 1;
+      teamB.draws += 1;
+      teamA.points += 1;
+      teamB.points += 1;
+    }
+  });
+
+  return Array.from(standings.values()).map((standing) => ({
+    ...standing,
+    set_diff: standing.sets_for - standing.sets_against,
+    game_diff: standing.games_for - standing.games_against,
+  }));
 };

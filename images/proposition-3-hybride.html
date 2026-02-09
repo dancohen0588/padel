@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proposition 3 - Design Hybride avec Cards</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #1E1E2E;
+            color: white;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, #ff6b35 0%, #FFDA77 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            color: rgba(255, 255, 255, 0.55);
+            margin-bottom: 35px;
+            font-size: 1rem;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .tab {
+            padding: 10px 22px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.6);
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .tab.active {
+            background: linear-gradient(135deg, #ff6b35 0%, #ff8c42 100%);
+            color: white;
+            border-color: transparent;
+            box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
+        }
+
+        .tab:hover:not(.active) {
+            border-color: #ff6b35;
+            background: rgba(255, 107, 53, 0.1);
+        }
+
+        /* Grid Layout */
+        .grid-layout {
+            display: grid;
+            grid-template-columns: 1fr 1.5fr;
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 1024px) {
+            .grid-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Card Base */
+        .card {
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 18px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .card-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #ff6b35 0%, #ff8c42 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+        }
+
+        .card-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+        }
+
+        /* Ranking List */
+        .ranking-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .ranking-item {
+            display: grid;
+            grid-template-columns: 50px 1fr auto;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .ranking-item:hover {
+            background: rgba(255, 107, 53, 0.1);
+            border-color: rgba(255, 107, 53, 0.3);
+            transform: translateX(3px);
+        }
+
+        .rank-number {
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .rank-number.r1 {
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+            color: #1E1E2E;
+            box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
+        }
+
+        .rank-number.r2 {
+            background: linear-gradient(135deg, #C0C0C0 0%, #808080 100%);
+            color: #1E1E2E;
+            box-shadow: 0 4px 12px rgba(192, 192, 192, 0.3);
+        }
+
+        .rank-number.r3 {
+            background: linear-gradient(135deg, #CD7F32 0%, #8B4513 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(205, 127, 50, 0.3);
+        }
+
+        .rank-number.other {
+            background: rgba(255, 255, 255, 0.08);
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .team-info {
+            flex: 1;
+        }
+
+        .team-name {
+            font-weight: 700;
+            font-size: 1.05rem;
+            margin-bottom: 5px;
+        }
+
+        .team-stats {
+            display: flex;
+            gap: 15px;
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .stat-label {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .stat-value {
+            font-weight: 600;
+        }
+
+        .stat-value.win {
+            color: #4CAF50;
+        }
+
+        .stat-value.draw {
+            color: #FFDA77;
+        }
+
+        .stat-value.loss {
+            color: #F44336;
+        }
+
+        .points-badge {
+            background: rgba(157, 122, 250, 0.2);
+            color: #9D7AFA;
+            padding: 8px 16px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        /* Match Card */
+        .match-card {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 14px;
+            padding: 20px;
+            margin-bottom: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            transition: all 0.3s ease;
+        }
+
+        .match-card:hover {
+            border-color: rgba(255, 107, 53, 0.4);
+            box-shadow: 0 6px 20px rgba(255, 107, 53, 0.15);
+        }
+
+        .match-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .match-date {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .status-badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-badge.finished {
+            background: rgba(76, 175, 80, 0.15);
+            color: #4CAF50;
+        }
+
+        .status-badge.live {
+            background: rgba(255, 107, 53, 0.2);
+            color: #ff6b35;
+            animation: pulse-badge 2s infinite;
+        }
+
+        .status-badge.upcoming {
+            background: rgba(255, 218, 119, 0.15);
+            color: #FFDA77;
+        }
+
+        @keyframes pulse-badge {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.6;
+            }
+        }
+
+        .match-teams-container {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 15px;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .team-side {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .team-side.reverse {
+            flex-direction: row-reverse;
+        }
+
+        .team-avatar {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #9D7AFA 0%, #7B5FD8 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.9rem;
+            flex-shrink: 0;
+        }
+
+        .team-details {
+            flex: 1;
+        }
+
+        .team-details.align-right {
+            text-align: right;
+        }
+
+        .team-label {
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .score-display {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .final-score {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #ff6b35;
+        }
+
+        .final-score.winner {
+            color: #4CAF50;
+        }
+
+        .vs-divider {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 0.85rem;
+        }
+
+        .sets-container {
+            display: flex;
+            gap: 6px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .set-badge {
+            background: rgba(255, 255, 255, 0.06);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .set-badge.won {
+            background: rgba(76, 175, 80, 0.15);
+            color: #4CAF50;
+        }
+
+        .set-badge.lost {
+            color: rgba(255, 255, 255, 0.35);
+        }
+
+        .match-actions {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 10px 18px;
+            border-radius: 10px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.85rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #ff6b35 0%, #ff8c42 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(255, 107, 53, 0.25);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(255, 107, 53, 0.35);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.08);
+            color: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: #2A2A3E;
+            border-radius: 20px;
+            padding: 35px;
+            max-width: 550px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-header {
+            font-size: 1.6rem;
+            margin-bottom: 25px;
+            font-weight: 700;
+        }
+
+        .form-section {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .score-row {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .score-field {
+            background: rgba(255, 255, 255, 0.06);
+            border: 2px solid rgba(255, 255, 255, 0.12);
+            border-radius: 10px;
+            padding: 14px;
+            color: white;
+            font-size: 1.3rem;
+            text-align: center;
+            font-weight: 700;
+        }
+
+        .score-field:focus {
+            outline: none;
+            border-color: #ff6b35;
+            background: rgba(255, 107, 53, 0.08);
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏆 Matchs & Classements</h1>
+        <p class="subtitle">Proposition 3 - Design Hybride avec Cards</p>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab active">Poule A</button>
+            <button class="tab">Poule B</button>
+            <button class="tab">Poule C</button>
+        </div>
+
+        <!-- Grid Layout -->
+        <div class="grid-layout">
+            <!-- Classement Card -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">📊</div>
+                    <div class="card-title">Classement</div>
+                </div>
+
+                <div class="ranking-list">
+                    <div class="ranking-item">
+                        <div class="rank-number r1">1</div>
+                        <div class="team-info">
+                            <div class="team-name">Les Smashers</div>
+                            <div class="team-stats">
+                                <div class="stat-item">
+                                    <span class="stat-label">G:</span>
+                                    <span class="stat-value win">5</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">N:</span>
+                                    <span class="stat-value draw">0</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">P:</span>
+                                    <span class="stat-value loss">1</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">+/-:</span>
+                                    <span class="stat-value win">+12</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="points-badge">15 pts</div>
+                    </div>
+
+                    <div class="ranking-item">
+                        <div class="rank-number r2">2</div>
+                        <div class="team-info">
+                            <div class="team-name">Padel Warriors</div>
+                            <div class="team-stats">
+                                <div class="stat-item">
+                                    <span class="stat-label">G:</span>
+                                    <span class="stat-value win">4</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">N:</span>
+                                    <span class="stat-value draw">1</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">P:</span>
+                                    <span class="stat-value loss">1</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">+/-:</span>
+                                    <span class="stat-value win">+8</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="points-badge">13 pts</div>
+                    </div>
+
+                    <div class="ranking-item">
+                        <div class="rank-number r3">3</div>
+                        <div class="team-info">
+                            <div class="team-name">Court Kings</div>
+                            <div class="team-stats">
+                                <div class="stat-item">
+                                    <span class="stat-label">G:</span>
+                                    <span class="stat-value win">3</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">N:</span>
+                                    <span class="stat-value draw">0</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">P:</span>
+                                    <span class="stat-value loss">3</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">+/-:</span>
+                                    <span class="stat-value win">+2</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="points-badge">9 pts</div>
+                    </div>
+
+                    <div class="ranking-item">
+                        <div class="rank-number other">4</div>
+                        <div class="team-info">
+                            <div class="team-name">Net Ninjas</div>
+                            <div class="team-stats">
+                                <div class="stat-item">
+                                    <span class="stat-label">G:</span>
+                                    <span class="stat-value win">1</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">N:</span>
+                                    <span class="stat-value draw">1</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">P:</span>
+                                    <span class="stat-value loss">4</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">+/-:</span>
+                                    <span class="stat-value loss">-7</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="points-badge">4 pts</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Matches List -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">⚔️</div>
+                    <div class="card-title">Matchs</div>
+                </div>
+
+                <!-- Match Terminé -->
+                <div class="match-card">
+                    <div class="match-meta">
+                        <div class="match-date">
+                            <span>📅</span>
+                            <span>8 Février 2026 • 14:00</span>
+                        </div>
+                        <span class="status-badge finished">Terminé</span>
+                    </div>
+
+                    <div class="match-teams-container">
+                        <div class="team-side">
+                            <div class="team-avatar">LS</div>
+                            <div class="team-details">
+                                <div class="team-label">Les Smashers</div>
+                            </div>
+                        </div>
+
+                        <div class="score-display">
+                            <span class="final-score winner">3</span>
+                            <span class="vs-divider">-</span>
+                            <span class="final-score">1</span>
+                        </div>
+
+                        <div class="team-side reverse">
+                            <div class="team-avatar">NN</div>
+                            <div class="team-details align-right">
+                                <div class="team-label">Net Ninjas</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="sets-container">
+                        <div class="set-badge won">Set 1: 6-3</div>
+                        <div class="set-badge won">Set 2: 7-5</div>
+                        <div class="set-badge lost">Set 3: 5-7</div>
+                        <div class="set-badge won">Set 4: 6-4</div>
+                    </div>
+
+                    <div class="match-actions">
+                        <button class="btn btn-secondary">Modifier</button>
+                    </div>
+                </div>
+
+                <!-- Match En direct -->
+                <div class="match-card" style="border-color: rgba(255, 107, 53, 0.4);">
+                    <div class="match-meta">
+                        <div class="match-date">
+                            <span>📅</span>
+                            <span>9 Février 2026 • 15:00</span>
+                        </div>
+                        <span class="status-badge live">En Direct</span>
+                    </div>
+
+                    <div class="match-teams-container">
+                        <div class="team-side">
+                            <div class="team-avatar">PW</div>
+                            <div class="team-details">
+                                <div class="team-label">Padel Warriors</div>
+                            </div>
+                        </div>
+
+                        <div class="score-display">
+                            <span class="final-score">1</span>
+                            <span class="vs-divider">-</span>
+                            <span class="final-score">1</span>
+                        </div>
+
+                        <div class="team-side reverse">
+                            <div class="team-avatar">CK</div>
+                            <div class="team-details align-right">
+                                <div class="team-label">Court Kings</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="sets-container">
+                        <div class="set-badge won">Set 1: 6-4</div>
+                        <div class="set-badge lost">Set 2: 3-6</div>
+                        <div class="set-badge" style="color: #ff6b35; background: rgba(255, 107, 53, 0.15);">Set 3: 2-1</div>
+                    </div>
+
+                    <div class="match-actions">
+                        <button class="btn btn-primary" onclick="openModal()">Mettre à jour</button>
+                    </div>
+                </div>
+
+                <!-- Match À venir -->
+                <div class="match-card">
+                    <div class="match-meta">
+                        <div class="match-date">
+                            <span>📅</span>
+                            <span>9 Février 2026 • 16:30</span>
+                        </div>
+                        <span class="status-badge upcoming">À venir</span>
+                    </div>
+
+                    <div class="match-teams-container">
+                        <div class="team-side">
+                            <div class="team-avatar">LS</div>
+                            <div class="team-details">
+                                <div class="team-label">Les Smashers</div>
+                            </div>
+                        </div>
+
+                        <div class="vs-divider">VS</div>
+
+                        <div class="team-side reverse">
+                            <div class="team-avatar">PW</div>
+                            <div class="team-details align-right">
+                                <div class="team-label">Padel Warriors</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="match-actions">
+                        <button class="btn btn-primary" onclick="openModal()">Saisir résultat</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal" id="scoreModal">
+        <div class="modal-content">
+            <h2 class="modal-header">Saisir le résultat du match</h2>
+
+            <div style="margin-bottom: 25px; padding: 15px; background: rgba(255, 255, 255, 0.05); border-radius: 12px;">
+                <div style="font-size: 0.85rem; color: rgba(255, 255, 255, 0.5); margin-bottom: 6px;">Match</div>
+                <div style="font-weight: 700; font-size: 1.1rem;">Les Smashers vs Padel Warriors</div>
+            </div>
+
+            <div class="form-section">
+                <label class="form-label">Set 1</label>
+                <div class="score-row">
+                    <input type="number" class="score-field" placeholder="0" min="0" max="7">
+                    <span style="color: rgba(255, 255, 255, 0.3); font-weight: 600;">:</span>
+                    <input type="number" class="score-field" placeholder="0" min="0" max="7">
+                </div>
+            </div>
+
+            <div class="form-section">
+                <label class="form-label">Set 2</label>
+                <div class="score-row">
+                    <input type="number" class="score-field" placeholder="0" min="0" max="7">
+                    <span style="color: rgba(255, 255, 255, 0.3); font-weight: 600;">:</span>
+                    <input type="number" class="score-field" placeholder="0" min="0" max="7">
+                </div>
+            </div>
+
+            <div class="form-section">
+                <label class="form-label">Set 3 (optionnel)</label>
+                <div class="score-row">
+                    <input type="number" class="score-field" placeholder="0" min="0" max="7">
+                    <span style="color: rgba(255, 255, 255, 0.3); font-weight: 600;">:</span>
+                    <input type="number" class="score-field" placeholder="0" min="0" max="7">
+                </div>
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn btn-primary" style="flex: 1; padding: 14px;">Enregistrer</button>
+                <button class="btn btn-secondary" style="flex: 1; padding: 14px;" onclick="closeModal()">Annuler</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function openModal() {
+            document.getElementById('scoreModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('scoreModal').classList.remove('active');
+        }
+    </script>
+</body>
+</html>

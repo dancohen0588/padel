@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menu Admin - Refonte Hybride</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #1E1E2E;
+            color: white;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .comparison {
+            margin-bottom: 60px;
+        }
+
+        .comparison-label {
+            background: rgba(255, 255, 255, 0.05);
+            border-left: 4px solid #ff6b35;
+            padding: 12px 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        /* VERSION ACTUELLE */
+        .current-version {
+            margin-bottom: 80px;
+        }
+
+        .current-header {
+            margin-bottom: 30px;
+        }
+
+        .current-title {
+            font-size: 2rem;
+            color: #1E1E2E;
+            margin-bottom: 8px;
+        }
+
+        .current-subtitle {
+            color: rgba(0, 0, 0, 0.6);
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+        }
+
+        .current-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .current-tabs {
+            display: flex;
+            gap: 8px;
+            background: white;
+            padding: 8px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            flex-wrap: wrap;
+        }
+
+        .current-tab {
+            padding: 10px 20px;
+            border-radius: 10px;
+            border: none;
+            background: transparent;
+            color: #1E1E2E;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.9rem;
+        }
+
+        .current-tab.active {
+            background: white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        /* VERSION PROPOSÉE */
+        .proposed-version {
+            padding: 40px;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        /* Header Refonte */
+        .header-card {
+            background: linear-gradient(135deg, rgba(255, 107, 53, 0.08) 0%, rgba(255, 140, 66, 0.04) 100%);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 107, 53, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(255, 107, 53, 0.1) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .header-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .title-row {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+
+        .title-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #ff6b35 0%, #ff8c42 100%);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+        }
+
+        .title-text {
+            flex: 1;
+        }
+
+        .title {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #ff6b35 0%, #FFDA77 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 6px;
+        }
+
+        .subtitle {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .subtitle-divider {
+            color: rgba(255, 255, 255, 0.3);
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(76, 175, 80, 0.15);
+            color: #4CAF50;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            border: 1px solid rgba(76, 175, 80, 0.3);
+        }
+
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #4CAF50;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 0.5;
+                transform: scale(1.2);
+            }
+        }
+
+        /* Navigation Tabs - Version 1 (Pills avec compteurs) */
+        .nav-tabs-pills {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 18px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .tab-pill {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .tab-pill:hover {
+            border-color: rgba(255, 107, 53, 0.4);
+            background: rgba(255, 107, 53, 0.1);
+            color: white;
+        }
+
+        .tab-pill.active {
+            background: linear-gradient(135deg, #ff6b35 0%, #ff8c42 100%);
+            color: white;
+            border-color: transparent;
+            box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .tab-icon {
+            font-size: 1.2rem;
+        }
+
+        .tab-label {
+            flex: 1;
+        }
+
+        .tab-counter {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 4px 10px;
+            border-radius: 10px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .tab-pill.active .tab-counter {
+            background: rgba(255, 255, 255, 0.25);
+        }
+
+        /* Navigation Tabs - Version 2 (Cards) */
+        .nav-tabs-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 40px;
+        }
+
+        .tab-card {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .tab-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: transparent;
+            transition: all 0.3s ease;
+        }
+
+        .tab-card:hover {
+            border-color: rgba(255, 107, 53, 0.4);
+            background: rgba(255, 107, 53, 0.05);
+            transform: translateY(-2px);
+        }
+
+        .tab-card:hover::before {
+            background: linear-gradient(180deg, #ff6b35 0%, #ff8c42 100%);
+        }
+
+        .tab-card.active {
+            border-color: rgba(255, 107, 53, 0.4);
+            background: rgba(255, 107, 53, 0.1);
+        }
+
+        .tab-card.active::before {
+            background: linear-gradient(180deg, #ff6b35 0%, #ff8c42 100%);
+        }
+
+        .tab-card-icon {
+            font-size: 2rem;
+            margin-bottom: 12px;
+        }
+
+        .tab-card-label {
+            font-weight: 700;
+            font-size: 1rem;
+            margin-bottom: 6px;
+            color: white;
+        }
+
+        .tab-card-description {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.5);
+            margin-bottom: 10px;
+        }
+
+        .tab-card-stats {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.75rem;
+        }
+
+        .stat-value {
+            font-weight: 700;
+            color: #ff6b35;
+        }
+
+        .stat-label {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        /* Separator */
+        .separator {
+            height: 1px;
+            background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.1) 50%, transparent 100%);
+            margin: 50px 0;
+        }
+
+        .version-label {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 25px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- VERSION ACTUELLE -->
+        <div class="current-version">
+            <div class="comparison-label">⚪ VERSION ACTUELLE</div>
+
+            <div class="current-header">
+                <h1 class="current-title" style="color: white;">Configurer le tournoi</h1>
+                <p class="current-subtitle" style="color: rgba(255, 255, 255, 0.6);">Test Tournoi 2 • 2026-02-15 • Paris</p>
+                <span class="current-status">Statut : published</span>
+            </div>
+
+            <div class="current-tabs">
+                <button class="current-tab active">À valider</button>
+                <button class="current-tab">Validés</button>
+                <button class="current-tab">Équipes</button>
+                <button class="current-tab">Poules</button>
+                <button class="current-tab">Matchs & Classements</button>
+            </div>
+        </div>
+
+        <!-- VERSION PROPOSÉE -->
+        <div class="proposed-version">
+            <div class="comparison-label" style="border-left-color: #4CAF50; margin-bottom: 30px;">✨ VERSION PROPOSÉE - Style Hybride</div>
+
+            <!-- Header Refonte -->
+            <div class="header-card">
+                <div class="header-content">
+                    <div class="title-row">
+                        <div class="title-icon">🏆</div>
+                        <div class="title-text">
+                            <h1 class="title">Configurer le tournoi</h1>
+                            <div class="subtitle">
+                                <span>Test Tournoi 2</span>
+                                <span class="subtitle-divider">•</span>
+                                <span>📅 2026-02-15</span>
+                                <span class="subtitle-divider">•</span>
+                                <span>📍 Paris</span>
+                            </div>
+                        </div>
+                        <div class="status-badge">
+                            <span class="status-dot"></span>
+                            <span>PUBLIÉ</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation Version 1 : Pills avec compteurs -->
+            <div class="version-label">Option 1 - Pills avec compteurs</div>
+            <div class="nav-tabs-pills">
+                <button class="tab-pill active">
+                    <span class="tab-icon">📋</span>
+                    <span class="tab-label">À valider</span>
+                    <span class="tab-counter">5</span>
+                </button>
+                <button class="tab-pill">
+                    <span class="tab-icon">✓</span>
+                    <span class="tab-label">Validés</span>
+                    <span class="tab-counter">12</span>
+                </button>
+                <button class="tab-pill">
+                    <span class="tab-icon">👥</span>
+                    <span class="tab-label">Équipes</span>
+                    <span class="tab-counter">6</span>
+                </button>
+                <button class="tab-pill">
+                    <span class="tab-icon">🏆</span>
+                    <span class="tab-label">Poules</span>
+                    <span class="tab-counter">4</span>
+                </button>
+                <button class="tab-pill">
+                    <span class="tab-icon">⚔️</span>
+                    <span class="tab-label">Matchs & Classements</span>
+                </button>
+            </div>
+
+            <div class="separator"></div>
+
+            <!-- Navigation Version 2 : Cards -->
+            <div class="version-label">Option 2 - Cards avec statistiques</div>
+            <div class="nav-tabs-cards">
+                <div class="tab-card active">
+                    <div class="tab-card-icon">📋</div>
+                    <div class="tab-card-label">À valider</div>
+                    <div class="tab-card-description">Inscriptions en attente</div>
+                    <div class="tab-card-stats">
+                        <div class="stat-item">
+                            <span class="stat-value">5</span>
+                            <span class="stat-label">en attente</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-card">
+                    <div class="tab-card-icon">✅</div>
+                    <div class="tab-card-label">Validés</div>
+                    <div class="tab-card-description">Joueurs confirmés</div>
+                    <div class="tab-card-stats">
+                        <div class="stat-item">
+                            <span class="stat-value">12</span>
+                            <span class="stat-label">joueurs</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-card">
+                    <div class="tab-card-icon">👥</div>
+                    <div class="tab-card-label">Équipes</div>
+                    <div class="tab-card-description">Formation des duos</div>
+                    <div class="tab-card-stats">
+                        <div class="stat-item">
+                            <span class="stat-value">6</span>
+                            <span class="stat-label">équipes</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value">4</span>
+                            <span class="stat-label">complètes</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-card">
+                    <div class="tab-card-icon">🏆</div>
+                    <div class="tab-card-label">Poules</div>
+                    <div class="tab-card-description">Répartition des groupes</div>
+                    <div class="tab-card-stats">
+                        <div class="stat-item">
+                            <span class="stat-value">4</span>
+                            <span class="stat-label">poules</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-card">
+                    <div class="tab-card-icon">⚔️</div>
+                    <div class="tab-card-label">Matchs</div>
+                    <div class="tab-card-description">Résultats & classements</div>
+                    <div class="tab-card-stats">
+                        <div class="stat-item">
+                            <span class="stat-value">24</span>
+                            <span class="stat-label">matchs</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Note -->
+        <div style="margin-top: 50px; padding: 25px; background: rgba(157, 122, 250, 0.08); border-radius: 16px; border: 1px solid rgba(157, 122, 250, 0.2);">
+            <div style="font-weight: 700; margin-bottom: 12px; color: #9D7AFA; display: flex; align-items: center; gap: 10px;">
+                <span style="font-size: 1.3rem;">💡</span>
+                <span>Recommandation</span>
+            </div>
+            <p style="color: rgba(255, 255, 255, 0.7); line-height: 1.6; margin-bottom: 12px;">
+                <strong style="color: white;">Option 1 (Pills)</strong> est recommandée pour sa compacité et sa simplicité. Elle permet de voir tous les onglets d'un coup d'œil et les compteurs donnent un feedback immédiat sur l'état du tournoi.
+            </p>
+            <p style="color: rgba(255, 255, 255, 0.7); line-height: 1.6;">
+                <strong style="color: white;">Option 2 (Cards)</strong> est plus visuelle et informative, idéale si vous voulez mettre en avant les statistiques et donner plus de contexte à chaque section.
+            </p>
+        </div>
+    </div>
+</body>
+</html>
