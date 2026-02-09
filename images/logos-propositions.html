@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Propositions de Logo — Le Tournoi des Frérots</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Outfit', sans-serif; background: #fafafa; color: #1e1e2e; }
+
+  .header {
+    background: #1e1e2e;
+    padding: 48px 24px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content: '';
+    position: absolute;
+    top: -40%;
+    right: -5%;
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(255,107,53,.2), transparent 70%);
+    border-radius: 50%;
+  }
+  .header h1 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: #fff;
+    position: relative;
+  }
+  .header h1 em {
+    font-style: normal;
+    background: linear-gradient(135deg, #FF6B35, #FFD166);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .header p {
+    color: rgba(255,255,255,.5);
+    margin-top: 8px;
+    font-weight: 600;
+    position: relative;
+  }
+
+  .container { max-width: 1100px; margin: 0 auto; padding: 40px 24px; }
+
+  .logo-section {
+    background: #fff;
+    border-radius: 16px;
+    border: 1px solid #eee;
+    overflow: hidden;
+    margin-bottom: 40px;
+    box-shadow: 0 2px 12px rgba(0,0,0,.04);
+  }
+  .logo-header {
+    padding: 20px 28px;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .logo-num {
+    background: linear-gradient(135deg, #FF6B35, #FFD166);
+    color: #fff;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .logo-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 1.3rem;
+  }
+  .logo-subtitle {
+    color: #999;
+    font-size: .85rem;
+    font-weight: 600;
+  }
+
+  .logo-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+  }
+  @media (max-width: 768px) {
+    .logo-content { grid-template-columns: 1fr; }
+  }
+
+  .logo-preview {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    min-height: 350px;
+  }
+  .logo-preview.dark { background: #1e1e2e; }
+  .logo-preview.light { background: #fafafa; }
+  .logo-preview img, .logo-preview svg {
+    max-width: 100%;
+    max-height: 300px;
+    height: auto;
+  }
+
+  .logo-description {
+    padding: 32px 28px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    border-left: 1px solid #eee;
+  }
+  .logo-description h3 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #1e1e2e;
+    margin-bottom: 12px;
+  }
+  .logo-description p {
+    color: #666;
+    font-size: .92rem;
+    line-height: 1.7;
+    margin-bottom: 16px;
+  }
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .tag {
+    padding: 5px 14px;
+    border-radius: 6px;
+    font-weight: 700;
+    font-size: .78rem;
+  }
+  .tag-orange { background: #fff0e8; color: #FF6B35; }
+  .tag-purple { background: #f0eeff; color: #6C5CE7; }
+  .tag-dark { background: #eee; color: #1e1e2e; }
+
+  .usage-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 12px;
+    padding: 20px 28px;
+    background: #fafafa;
+    border-top: 1px solid #eee;
+  }
+  .usage-item {
+    text-align: center;
+    padding: 16px 8px;
+    background: #fff;
+    border-radius: 10px;
+    border: 1px solid #eee;
+  }
+  .usage-item .label {
+    font-size: .72rem;
+    font-weight: 700;
+    color: #999;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+  }
+  .usage-item .check {
+    font-size: 1.2rem;
+  }
+
+  .footer {
+    text-align: center;
+    padding: 32px;
+    color: #aaa;
+    font-size: .85rem;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Propositions de <em>Logo</em></h1>
+  <p>Le Tournoi des Frérots — Charte Urban Sport</p>
+</div>
+
+<div class="container">
+
+  <!-- LOGO 1 -->
+  <div class="logo-section">
+    <div class="logo-header">
+      <div class="logo-num">1</div>
+      <div>
+        <div class="logo-title">L'Emblème</div>
+        <div class="logo-subtitle">Style écusson sportif</div>
+      </div>
+    </div>
+    <div class="logo-content">
+      <div class="logo-preview dark">
+        <img src="logo-1-embleme.svg" alt="Logo Emblème">
+      </div>
+      <div class="logo-description">
+        <h3>Concept</h3>
+        <p>
+          Un écusson en forme de bouclier, symbole classique du sport collectif et de l'appartenance
+          à un club. Deux raquettes de padel croisées au centre rappellent la discipline.
+          Le texte est structuré en trois niveaux (LE TOURNOI / DES / FRÉROTS) pour une lecture
+          naturelle et impactante. Les étoiles et la mention "PADEL CLUB" renforcent l'identité sportive.
+        </p>
+        <p>
+          Ce logo fonctionne très bien sur des maillots, des bannières, ou en avatar sur les réseaux.
+          Il donne un côté « vrai club » tout en restant accessible grâce aux couleurs chaudes.
+        </p>
+        <div class="tags">
+          <span class="tag tag-orange">Sportif</span>
+          <span class="tag tag-dark">Structuré</span>
+          <span class="tag tag-purple">Club</span>
+          <span class="tag tag-orange">Identitaire</span>
+        </div>
+      </div>
+    </div>
+    <div class="usage-row">
+      <div class="usage-item"><div class="label">Maillot</div><div class="check">✅</div></div>
+      <div class="usage-item"><div class="label">Avatar</div><div class="check">✅</div></div>
+      <div class="usage-item"><div class="label">Bannière</div><div class="check">✅</div></div>
+      <div class="usage-item"><div class="label">Favicon</div><div class="check">⚠️</div></div>
+      <div class="usage-item"><div class="label">Print</div><div class="check">✅</div></div>
+    </div>
+  </div>
+
+  <!-- LOGO 2 -->
+  <div class="logo-section">
+    <div class="logo-header">
+      <div class="logo-num">2</div>
+      <div>
+        <div class="logo-title">Le Dynamique</div>
+        <div class="logo-subtitle">Style moderne & bold</div>
+      </div>
+    </div>
+    <div class="logo-content">
+      <div class="logo-preview dark">
+        <img src="logo-2-dynamique.svg" alt="Logo Dynamique">
+      </div>
+      <div class="logo-description">
+        <h3>Concept</h3>
+        <p>
+          Un logo horizontal et cinétique. La raquette de padel inclinée à gauche lance une balle
+          en mouvement, créant une énergie visuelle immédiate. Le mot "FRÉROTS" domine en très grand,
+          souligné d'un trait dégradé orange. La baseline "ON JOUE ENTRE POTES" ajoute la touche
+          conviviale en violet.
+        </p>
+        <p>
+          Format paysage idéal pour les headers de site, les stories/posts réseaux sociaux,
+          et les signatures d'email. Les lignes de vitesse renforcent le dynamisme.
+          C'est le logo le plus "digital-native".
+        </p>
+        <div class="tags">
+          <span class="tag tag-orange">Dynamique</span>
+          <span class="tag tag-purple">Moderne</span>
+          <span class="tag tag-dark">Digital</span>
+          <span class="tag tag-orange">Bold</span>
+        </div>
+      </div>
+    </div>
+    <div class="usage-row">
+      <div class="usage-item"><div class="label">Header</div><div class="check">✅</div></div>
+      <div class="usage-item"><div class="label">Réseaux</div><div class="check">✅</div></div>
+      <div class="usage-item"><div class="label">Email</div><div class="check">✅</div></div>
+      <div class="usage-item"><div class="label">Favicon</div><div class="check">⚠️</div></div>
+      <div class="usage-item"><div class="label">Maillot</div><div class="check">⚠️</div></div>
+    </div>
+  </div>
+
+  <!-- LOGO 3 -->
+  <div class="logo-section">
+    <div class="logo-header">
+      <div class="logo-num">3</div>
+      <div>
+        <div class="logo-title">Le Fun</div>
+        <div class="logo-subtitle">Style mascotte & complice</div>
+      </div>
+    </div>
+    <div class="logo-content">
+      <div class="logo-preview dark">
+        <img src="logo-3-fun.svg" alt="Logo Fun">
+      </div>
+      <div class="logo-description">
+        <h3>Concept</h3>
+        <p>
+          Deux personnages stylisés se tapent un high-five avec leurs raquettes de padel en main,
+          une balle rebondissant entre eux. C'est le logo le plus expressif et le plus humain :
+          il incarne directement l'esprit "frérots" — la complicité, le fun et le fair-play.
+          Un joueur en orange, l'autre en violet, pour le duo de couleurs signature.
+        </p>
+        <p>
+          Le badge "PADEL" en bas encapsule le sport. Ce logo se décline facilement
+          en mascotte animée, en stickers, ou en merch. Il est immédiatement sympathique
+          et mémorable — parfait pour fédérer une communauté.
+        </p>
+        <div class="tags">
+          <span class="tag tag-orange">Fun</span>
+          <span class="tag tag-purple">Fédérateur</span>
+          <span class="tag tag-dark">Mascotte</span>
+          <span class="tag tag-orange">Humain</span>
+        </div>
+      </div>
+    </div>
+    <div class="usage-row">
+      <div class="usage-item"><div class="label">Avatar</div><div class="check">✅</div></div>
+      <div class="usage-item"><div class="label">Stickers</div><div class="check">✅</div></div>
+      <div class="usage-item"><div class="label">Merch</div><div class="check">✅</div></div>
+      <div class="usage-item"><div class="label">Réseaux</div><div class="check">✅</div></div>
+      <div class="usage-item"><div class="label">Header</div><div class="check">✅</div></div>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">
+  Le Tournoi des Frérots — Propositions de Logo — Février 2026
+</div>
+
+</body>
+</html>

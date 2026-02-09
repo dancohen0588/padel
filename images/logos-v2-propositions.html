@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Propositions Logo V2 — Le Tournoi des Frérots</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Outfit', sans-serif; background: #fafafa; color: #1e1e2e; }
+
+  .header {
+    background: #1e1e2e;
+    padding: 48px 24px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content: '';
+    position: absolute;
+    top: -40%;
+    right: -5%;
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(255,107,53,.2), transparent 70%);
+    border-radius: 50%;
+  }
+  .header h1 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: #fff;
+    position: relative;
+  }
+  .header h1 em {
+    font-style: normal;
+    background: linear-gradient(135deg, #FF6B35, #FFD166);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .header p {
+    color: rgba(255,255,255,.5);
+    margin-top: 8px;
+    font-weight: 600;
+    position: relative;
+  }
+  .header .criteria {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 20px;
+    position: relative;
+  }
+  .header .criteria span {
+    background: rgba(255,255,255,.08);
+    border: 1px solid rgba(255,255,255,.12);
+    color: rgba(255,255,255,.7);
+    padding: 6px 16px;
+    border-radius: 8px;
+    font-size: .82rem;
+    font-weight: 700;
+  }
+
+  .container { max-width: 1200px; margin: 0 auto; padding: 40px 24px; }
+
+  .logos-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    margin-bottom: 40px;
+  }
+  @media (max-width: 900px) {
+    .logos-grid { grid-template-columns: 1fr; }
+  }
+
+  .logo-card {
+    background: #fff;
+    border-radius: 16px;
+    border: 1px solid #eee;
+    overflow: hidden;
+    box-shadow: 0 2px 12px rgba(0,0,0,.04);
+    transition: transform .2s, box-shadow .2s;
+  }
+  .logo-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 28px rgba(0,0,0,.08);
+  }
+
+  .logo-card .num-badge {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    background: linear-gradient(135deg, #FF6B35, #FFD166);
+    color: #fff;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: .85rem;
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+  }
+
+  .logo-preview {
+    position: relative;
+    background: #1e1e2e;
+    padding: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 360px;
+  }
+  .logo-preview img {
+    max-width: 100%;
+    max-height: 310px;
+    height: auto;
+  }
+
+  .logo-info {
+    padding: 24px;
+  }
+  .logo-info h3 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .logo-info .style {
+    color: #FF6B35;
+    font-weight: 700;
+    font-size: .82rem;
+    margin-bottom: 12px;
+  }
+  .logo-info p {
+    color: #666;
+    font-size: .9rem;
+    line-height: 1.6;
+    margin-bottom: 14px;
+  }
+  .logo-info .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .logo-info .tag {
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-weight: 700;
+    font-size: .75rem;
+  }
+  .tag-orange { background: #fff0e8; color: #FF6B35; }
+  .tag-purple { background: #f0eeff; color: #6C5CE7; }
+  .tag-dark { background: #eee; color: #1e1e2e; }
+
+  /* --- Detail sections --- */
+  .detail-section {
+    background: #fff;
+    border-radius: 16px;
+    border: 1px solid #eee;
+    padding: 32px;
+    margin-bottom: 32px;
+    box-shadow: 0 2px 12px rgba(0,0,0,.04);
+  }
+  .detail-section h2 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .detail-section h2 .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #FF6B35;
+  }
+
+  .compare-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .compare-table th {
+    text-align: left;
+    font-weight: 800;
+    font-size: .82rem;
+    color: #999;
+    padding: 12px 16px;
+    border-bottom: 2px solid #eee;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .compare-table td {
+    padding: 14px 16px;
+    border-bottom: 1px solid #f5f5f5;
+    font-size: .9rem;
+  }
+  .compare-table tr:last-child td { border-bottom: none; }
+  .check { color: #2e7d32; font-weight: 800; }
+  .warn { color: #f57c00; font-weight: 800; }
+
+  .size-demos {
+    display: flex;
+    align-items: flex-end;
+    gap: 32px;
+    flex-wrap: wrap;
+    margin-top: 16px;
+  }
+  .size-demo {
+    text-align: center;
+  }
+  .size-demo img {
+    display: block;
+    margin: 0 auto 8px;
+    background: #1e1e2e;
+    border-radius: 8px;
+    padding: 8px;
+  }
+  .size-demo .label {
+    font-size: .75rem;
+    font-weight: 700;
+    color: #999;
+  }
+
+  .footer {
+    text-align: center;
+    padding: 32px;
+    color: #aaa;
+    font-size: .85rem;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Logo V2 — <em>3 nouvelles propositions</em></h1>
+  <p>Le Tournoi des Frérots — Charte Urban Sport</p>
+  <div class="criteria">
+    <span>Forme écusson</span>
+    <span>2 silhouettes sans visage</span>
+    <span>Vraies raquettes de padel</span>
+    <span>Sportif & jovial</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- 3 Logos grid -->
+  <div class="logos-grid">
+
+    <!-- LOGO A -->
+    <div class="logo-card">
+      <div class="logo-preview">
+        <div class="num-badge">A</div>
+        <img src="logo-v2-a-action.svg" alt="Logo V2-A Action">
+      </div>
+      <div class="logo-info">
+        <h3>Le Duel</h3>
+        <div class="style">Smash & Ready</div>
+        <p>
+          Les deux joueurs se font face en plein échange. L'un smashe, l'autre est en position de réception.
+          Énergie pure du match, la balle fuse entre eux. L'instant décisif d'un point.
+        </p>
+        <div class="tags">
+          <span class="tag tag-orange">Compétitif</span>
+          <span class="tag tag-dark">Intense</span>
+          <span class="tag tag-purple">Sport</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- LOGO B -->
+    <div class="logo-card">
+      <div class="logo-preview">
+        <div class="num-badge">B</div>
+        <img src="logo-v2-b-celebration.svg" alt="Logo V2-B Celebration">
+      </div>
+      <div class="logo-info">
+        <h3>Le High-Five</h3>
+        <div class="style">Célébration & Complicité</div>
+        <p>
+          Le moment juste après le point gagnant : les deux frérots se tapent un high-five,
+          raquettes en main. Éclats d'énergie au centre. L'esprit d'équipe incarné.
+        </p>
+        <div class="tags">
+          <span class="tag tag-orange">Fédérateur</span>
+          <span class="tag tag-purple">Jovial</span>
+          <span class="tag tag-dark">Complice</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- LOGO C -->
+    <div class="logo-card">
+      <div class="logo-preview">
+        <div class="num-badge">C</div>
+        <img src="logo-v2-c-backtoback.svg" alt="Logo V2-C Back to Back">
+      </div>
+      <div class="logo-info">
+        <h3>Le Dos-à-Dos</h3>
+        <div class="style">Power & Brotherhood</div>
+        <p>
+          Les deux joueurs dos-à-dos, raquettes brandies, prêts à en découdre.
+          La posture "on est ensemble" qui respire la confiance mutuelle et la force du duo.
+        </p>
+        <div class="tags">
+          <span class="tag tag-orange">Puissant</span>
+          <span class="tag tag-dark">Symétrique</span>
+          <span class="tag tag-purple">Brotherhood</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Comparison -->
+  <div class="detail-section">
+    <h2><span class="dot"></span> Comparatif des 3 propositions</h2>
+    <table class="compare-table">
+      <thead>
+        <tr>
+          <th>Critère</th>
+          <th>A — Le Duel</th>
+          <th>B — Le High-Five</th>
+          <th>C — Le Dos-à-Dos</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Esprit sportif</strong></td>
+          <td><span class="check">★★★</span></td>
+          <td><span class="check">★★☆</span></td>
+          <td><span class="check">★★★</span></td>
+        </tr>
+        <tr>
+          <td><strong>Côté jovial / fun</strong></td>
+          <td><span class="check">★★☆</span></td>
+          <td><span class="check">★★★</span></td>
+          <td><span class="check">★★☆</span></td>
+        </tr>
+        <tr>
+          <td><strong>Fédérateur / équipe</strong></td>
+          <td><span class="check">★★☆</span></td>
+          <td><span class="check">★★★</span></td>
+          <td><span class="check">★★★</span></td>
+        </tr>
+        <tr>
+          <td><strong>Lisibilité petite taille</strong></td>
+          <td><span class="check">Bonne</span></td>
+          <td><span class="check">Bonne</span></td>
+          <td><span class="check">Très bonne</span></td>
+        </tr>
+        <tr>
+          <td><strong>Adapté maillot / print</strong></td>
+          <td><span class="check">✓</span></td>
+          <td><span class="check">✓</span></td>
+          <td><span class="check">✓</span></td>
+        </tr>
+        <tr>
+          <td><strong>Adapté avatar / favicon</strong></td>
+          <td><span class="warn">Moyen</span></td>
+          <td><span class="check">Bon</span></td>
+          <td><span class="check">Bon</span></td>
+        </tr>
+        <tr>
+          <td><strong>Raquettes de padel visibles</strong></td>
+          <td><span class="check">✓ Perforées</span></td>
+          <td><span class="check">✓ Perforées</span></td>
+          <td><span class="check">✓ Perforées</span></td>
+        </tr>
+        <tr>
+          <td><strong>Émotion transmise</strong></td>
+          <td>Action, tension</td>
+          <td>Joie, complicité</td>
+          <td>Force, confiance</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Design notes -->
+  <div class="detail-section">
+    <h2><span class="dot"></span> Notes de design</h2>
+    <p style="color: #666; line-height: 1.7; margin-bottom: 16px;">
+      Les trois propositions partagent les mêmes fondamentaux de la charte <strong>Urban Sport</strong> :
+      palette orange/jaune/violet sur fond sombre, typographie bold, forme d'écusson identique.
+    </p>
+    <p style="color: #666; line-height: 1.7; margin-bottom: 16px;">
+      <strong>Raquettes de padel</strong> : chaque raquette a une surface pleine avec des perforations circulaires
+      (caractéristique unique du padel), un manche court et un grip. Pas de cordage = pas de confusion avec le tennis.
+    </p>
+    <p style="color: #666; line-height: 1.7; margin-bottom: 16px;">
+      <strong>Silhouettes</strong> : les personnages sont stylisés en "stick figures" sportifs sans traits de visage.
+      Un joueur en orange (couleur principale), un en violet (couleur fun). Cette distinction bicolore
+      fonctionne aussi en version monochrome.
+    </p>
+    <p style="color: #666; line-height: 1.7;">
+      <strong>Recommandation</strong> : le logo <strong>B (High-Five)</strong> est celui qui incarne le mieux
+      l'esprit "frérots" — il est à la fois sportif (raquettes, action) et émotionnellement chaleureux
+      (célébration entre coéquipiers). Le logo <strong>C (Dos-à-Dos)</strong> est le plus "clean"
+      et le plus facile à décliner en petit format.
+    </p>
+  </div>
+
+</div>
+
+<div class="footer">
+  Le Tournoi des Frérots — Propositions Logo V2 — Février 2026
+</div>
+
+</body>
+</html>

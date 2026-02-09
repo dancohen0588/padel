@@ -1,0 +1,158 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 700" width="600" height="700">
+  <defs>
+    <linearGradient id="gradA" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FF6B35"/>
+      <stop offset="100%" style="stop-color:#FFD166"/>
+    </linearGradient>
+    <linearGradient id="gradA2" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#FF6B35"/>
+      <stop offset="100%" style="stop-color:#FF8C42"/>
+    </linearGradient>
+    <linearGradient id="purpA" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#6C5CE7"/>
+      <stop offset="100%" style="stop-color:#a29bfe"/>
+    </linearGradient>
+    <clipPath id="shieldClipA">
+      <path d="M300 42 L530 125 L530 340 Q530 540 300 635 Q70 540 70 340 L70 125 Z"/>
+    </clipPath>
+  </defs>
+
+  <!-- Shield outer border gradient -->
+  <path d="M300 30 L540 118 L540 345 Q540 550 300 648 Q60 550 60 345 L60 118 Z" fill="url(#gradA)"/>
+  <!-- Shield inner fill -->
+  <path d="M300 42 L530 125 L530 340 Q530 540 300 635 Q70 540 70 340 L70 125 Z" fill="#1E1E2E"/>
+
+  <!-- Subtle inner glow -->
+  <ellipse cx="300" cy="300" rx="200" ry="220" fill="rgba(255,107,53,0.04)" clip-path="url(#shieldClipA)"/>
+
+  <!-- Horizontal decorative lines -->
+  <line x1="100" y1="175" x2="500" y2="175" stroke="url(#gradA)" stroke-width="1" opacity="0.15"/>
+  <line x1="100" y1="470" x2="500" y2="470" stroke="url(#gradA)" stroke-width="1" opacity="0.15"/>
+
+  <!-- ═══ LEFT PLAYER (orange) — smash pose ═══ -->
+  <g transform="translate(155, 195)">
+    <!-- Head (no face, solid circle) -->
+    <circle cx="55" cy="0" r="24" fill="url(#gradA)"/>
+    <!-- Torso -->
+    <path d="M55 24 L55 100" stroke="url(#gradA)" stroke-width="8" stroke-linecap="round"/>
+    <!-- Right arm raised with racket -->
+    <path d="M55 45 L90 15 L115 -20" stroke="url(#gradA)" stroke-width="7" stroke-linecap="round" fill="none"/>
+    <!-- Left arm balance -->
+    <path d="M55 50 L20 65" stroke="url(#gradA)" stroke-width="7" stroke-linecap="round" fill="none"/>
+    <!-- Right leg lunge forward -->
+    <path d="M55 100 L85 155" stroke="url(#gradA)" stroke-width="7" stroke-linecap="round" fill="none"/>
+    <!-- Left leg back -->
+    <path d="M55 100 L20 150" stroke="url(#gradA)" stroke-width="7" stroke-linecap="round" fill="none"/>
+    <!-- Feet -->
+    <ellipse cx="85" cy="158" rx="10" ry="5" fill="url(#gradA)" opacity="0.7"/>
+    <ellipse cx="20" cy="153" rx="10" ry="5" fill="url(#gradA)" opacity="0.7"/>
+
+    <!-- PADEL RACKET (right hand) — solid surface with holes -->
+    <g transform="translate(115, -55) rotate(25)">
+      <!-- Racket face — rounded rectangle/teardrop shape -->
+      <path d="M0 -30 Q0 -48 15 -48 Q30 -48 30 -30 L30 5 Q30 18 15 18 Q0 18 0 5 Z" fill="#FFD166" opacity="0.9"/>
+      <path d="M0 -30 Q0 -48 15 -48 Q30 -48 30 -30 L30 5 Q30 18 15 18 Q0 18 0 5 Z" fill="none" stroke="#FF6B35" stroke-width="2.5"/>
+      <!-- Perforations (padel specific!) -->
+      <circle cx="9" cy="-32" r="2.2" fill="#1E1E2E"/>
+      <circle cx="21" cy="-32" r="2.2" fill="#1E1E2E"/>
+      <circle cx="15" cy="-32" r="2.2" fill="#1E1E2E"/>
+      <circle cx="7" cy="-24" r="2.2" fill="#1E1E2E"/>
+      <circle cx="15" cy="-24" r="2.2" fill="#1E1E2E"/>
+      <circle cx="23" cy="-24" r="2.2" fill="#1E1E2E"/>
+      <circle cx="9" cy="-16" r="2.2" fill="#1E1E2E"/>
+      <circle cx="15" cy="-16" r="2.2" fill="#1E1E2E"/>
+      <circle cx="21" cy="-16" r="2.2" fill="#1E1E2E"/>
+      <circle cx="7" cy="-8" r="2.2" fill="#1E1E2E"/>
+      <circle cx="15" cy="-8" r="2.2" fill="#1E1E2E"/>
+      <circle cx="23" cy="-8" r="2.2" fill="#1E1E2E"/>
+      <circle cx="9" cy="0" r="2.2" fill="#1E1E2E"/>
+      <circle cx="15" cy="0" r="2.2" fill="#1E1E2E"/>
+      <circle cx="21" cy="0" r="2.2" fill="#1E1E2E"/>
+      <circle cx="11" cy="8" r="2" fill="#1E1E2E"/>
+      <circle cx="19" cy="8" r="2" fill="#1E1E2E"/>
+      <!-- Handle -->
+      <rect x="10" y="18" width="10" height="26" rx="4" fill="#FF6B35"/>
+      <rect x="9" y="40" width="12" height="8" rx="3" fill="#FFD166"/>
+    </g>
+  </g>
+
+  <!-- ═══ RIGHT PLAYER (violet) — ready stance ═══ -->
+  <g transform="translate(365, 200)">
+    <!-- Head (no face, solid circle) -->
+    <circle cx="45" cy="0" r="24" fill="url(#purpA)"/>
+    <!-- Torso -->
+    <path d="M45 24 L45 100" stroke="url(#purpA)" stroke-width="8" stroke-linecap="round"/>
+    <!-- Left arm with racket ready -->
+    <path d="M45 45 L10 25 L-20 -5" stroke="url(#purpA)" stroke-width="7" stroke-linecap="round" fill="none"/>
+    <!-- Right arm out for balance -->
+    <path d="M45 50 L80 38" stroke="url(#purpA)" stroke-width="7" stroke-linecap="round" fill="none"/>
+    <!-- Left leg ready -->
+    <path d="M45 100 L20 155" stroke="url(#purpA)" stroke-width="7" stroke-linecap="round" fill="none"/>
+    <!-- Right leg -->
+    <path d="M45 100 L75 148" stroke="url(#purpA)" stroke-width="7" stroke-linecap="round" fill="none"/>
+    <!-- Feet -->
+    <ellipse cx="20" cy="158" rx="10" ry="5" fill="url(#purpA)" opacity="0.7"/>
+    <ellipse cx="75" cy="151" rx="10" ry="5" fill="url(#purpA)" opacity="0.7"/>
+
+    <!-- PADEL RACKET (left hand) -->
+    <g transform="translate(-45, -35) rotate(-30)">
+      <path d="M0 -30 Q0 -48 15 -48 Q30 -48 30 -30 L30 5 Q30 18 15 18 Q0 18 0 5 Z" fill="#a29bfe" opacity="0.9"/>
+      <path d="M0 -30 Q0 -48 15 -48 Q30 -48 30 -30 L30 5 Q30 18 15 18 Q0 18 0 5 Z" fill="none" stroke="#6C5CE7" stroke-width="2.5"/>
+      <!-- Perforations -->
+      <circle cx="9" cy="-32" r="2.2" fill="#1E1E2E"/>
+      <circle cx="21" cy="-32" r="2.2" fill="#1E1E2E"/>
+      <circle cx="15" cy="-32" r="2.2" fill="#1E1E2E"/>
+      <circle cx="7" cy="-24" r="2.2" fill="#1E1E2E"/>
+      <circle cx="15" cy="-24" r="2.2" fill="#1E1E2E"/>
+      <circle cx="23" cy="-24" r="2.2" fill="#1E1E2E"/>
+      <circle cx="9" cy="-16" r="2.2" fill="#1E1E2E"/>
+      <circle cx="15" cy="-16" r="2.2" fill="#1E1E2E"/>
+      <circle cx="21" cy="-16" r="2.2" fill="#1E1E2E"/>
+      <circle cx="7" cy="-8" r="2.2" fill="#1E1E2E"/>
+      <circle cx="15" cy="-8" r="2.2" fill="#1E1E2E"/>
+      <circle cx="23" cy="-8" r="2.2" fill="#1E1E2E"/>
+      <circle cx="9" cy="0" r="2.2" fill="#1E1E2E"/>
+      <circle cx="15" cy="0" r="2.2" fill="#1E1E2E"/>
+      <circle cx="21" cy="0" r="2.2" fill="#1E1E2E"/>
+      <circle cx="11" cy="8" r="2" fill="#1E1E2E"/>
+      <circle cx="19" cy="8" r="2" fill="#1E1E2E"/>
+      <!-- Handle -->
+      <rect x="10" y="18" width="10" height="26" rx="4" fill="#6C5CE7"/>
+      <rect x="9" y="40" width="12" height="8" rx="3" fill="#a29bfe"/>
+    </g>
+  </g>
+
+  <!-- Ball between players -->
+  <circle cx="300" cy="270" r="12" fill="url(#gradA)"/>
+  <path d="M293 260 Q300 270 293 280" fill="none" stroke="#1E1E2E" stroke-width="1.3" opacity="0.4"/>
+  <path d="M307 260 Q300 270 307 280" fill="none" stroke="#1E1E2E" stroke-width="1.3" opacity="0.4"/>
+  <!-- Impact lines around ball -->
+  <line x1="300" y1="252" x2="300" y2="245" stroke="#FFD166" stroke-width="2" stroke-linecap="round" opacity="0.5"/>
+  <line x1="313" y1="258" x2="318" y2="253" stroke="#FFD166" stroke-width="2" stroke-linecap="round" opacity="0.4"/>
+  <line x1="287" y1="258" x2="282" y2="253" stroke="#FFD166" stroke-width="2" stroke-linecap="round" opacity="0.4"/>
+
+  <!-- LE TOURNOI text top -->
+  <text x="300" y="140" text-anchor="middle" font-family="'Arial Black', 'Helvetica Neue', sans-serif" font-weight="900" font-size="30" letter-spacing="7" fill="url(#gradA)">LE TOURNOI</text>
+
+  <!-- Star + DES -->
+  <line x1="155" y1="162" x2="240" y2="162" stroke="url(#gradA)" stroke-width="1.5" opacity="0.4"/>
+  <polygon points="300,154 304,163 314,163 306,169 309,178 300,172 291,178 294,169 286,163 296,163" fill="#FFD166"/>
+  <line x1="360" y1="162" x2="445" y2="162" stroke="url(#gradA)" stroke-width="1.5" opacity="0.4"/>
+
+  <!-- FRÉROTS bottom -->
+  <text x="300" y="510" text-anchor="middle" font-family="'Arial Black', 'Helvetica Neue', sans-serif" font-weight="900" font-size="58" letter-spacing="4" fill="#FFFFFF">FRÉROTS</text>
+
+  <!-- DES above FRÉROTS -->
+  <text x="300" y="462" text-anchor="middle" font-family="'Arial', sans-serif" font-weight="700" font-size="17" letter-spacing="10" fill="rgba(255,255,255,0.35)">DES</text>
+
+  <!-- PADEL CLUB -->
+  <text x="300" y="548" text-anchor="middle" font-family="'Arial', 'Helvetica Neue', sans-serif" font-weight="700" font-size="16" letter-spacing="8" fill="#6C5CE7">PADEL CLUB</text>
+
+  <!-- Bottom stars -->
+  <polygon points="245,572 248,579 256,579 250,583 252,590 245,586 238,590 240,583 234,579 242,579" fill="#FFD166" opacity="0.5"/>
+  <polygon points="300,577 304,586 314,586 306,591 309,600 300,595 291,600 294,591 286,586 296,586" fill="#FFD166"/>
+  <polygon points="355,572 358,579 366,579 360,583 362,590 355,586 348,590 350,583 344,579 352,579" fill="#FFD166" opacity="0.5"/>
+
+  <!-- EST. 2026 -->
+  <text x="300" y="618" text-anchor="middle" font-family="'Arial', sans-serif" font-weight="700" font-size="12" letter-spacing="5" fill="rgba(255,255,255,0.2)">EST. 2026</text>
+</svg>

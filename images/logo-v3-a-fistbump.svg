@@ -1,0 +1,145 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 700" width="600" height="700">
+  <defs>
+    <linearGradient id="g3a" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FF6B35"/>
+      <stop offset="100%" style="stop-color:#FFD166"/>
+    </linearGradient>
+    <linearGradient id="p3a" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#6C5CE7"/>
+      <stop offset="100%" style="stop-color:#a29bfe"/>
+    </linearGradient>
+    <clipPath id="sc3a">
+      <path d="M300 42 L530 125 L530 340 Q530 540 300 635 Q70 540 70 340 L70 125 Z"/>
+    </clipPath>
+  </defs>
+
+  <!-- Shield -->
+  <path d="M300 30 L540 118 L540 345 Q540 550 300 648 Q60 550 60 345 L60 118 Z" fill="url(#g3a)"/>
+  <path d="M300 42 L530 125 L530 340 Q530 540 300 635 Q70 540 70 340 L70 125 Z" fill="#1E1E2E"/>
+  <ellipse cx="300" cy="300" rx="200" ry="200" fill="rgba(255,107,53,0.03)" clip-path="url(#sc3a)"/>
+
+  <!-- Deco lines -->
+  <line x1="100" y1="175" x2="500" y2="175" stroke="url(#g3a)" stroke-width="1" opacity="0.15"/>
+  <line x1="100" y1="455" x2="500" y2="455" stroke="url(#g3a)" stroke-width="1" opacity="0.15"/>
+
+  <!-- LE TOURNOI -->
+  <text x="300" y="140" text-anchor="middle" font-family="'Arial Black','Helvetica Neue',sans-serif" font-weight="900" font-size="30" letter-spacing="7" fill="url(#g3a)">LE TOURNOI</text>
+  <line x1="155" y1="162" x2="240" y2="162" stroke="url(#g3a)" stroke-width="1.5" opacity="0.4"/>
+  <polygon points="300,154 304,163 314,163 306,169 309,178 300,172 291,178 294,169 286,163 296,163" fill="#FFD166"/>
+  <line x1="360" y1="162" x2="445" y2="162" stroke="url(#g3a)" stroke-width="1.5" opacity="0.4"/>
+
+  <!-- ═══ LEFT ARM + FIST (orange) coming from left ═══ -->
+  <g transform="translate(105, 280)">
+    <!-- Forearm -->
+    <path d="M-20 30 L60 10 Q75 6 82 -5 L85 -12" stroke="url(#g3a)" stroke-width="18" stroke-linecap="round" fill="none"/>
+    <!-- Fist (closed hand) -->
+    <path d="M78 -8 Q72 -28 82 -32 Q92 -36 96 -22 Q100 -36 108 -32 Q116 -28 112 -14 Q120 -22 124 -14 Q128 -6 118 2 L100 10 Q88 14 82 6 Z" fill="#FF6B35"/>
+    <!-- Fist highlight -->
+    <path d="M88 -28 Q94 -32 98 -24" fill="none" stroke="#FFD166" stroke-width="1.5" opacity="0.5"/>
+    <!-- Wristband -->
+    <rect x="62" y="2" width="22" height="10" rx="3" fill="#FFD166" transform="rotate(-12, 73, 7)"/>
+  </g>
+
+  <!-- ═══ RIGHT ARM + FIST (violet) coming from right ═══ -->
+  <g transform="translate(495, 280) scale(-1, 1)">
+    <!-- Forearm -->
+    <path d="M-20 30 L60 10 Q75 6 82 -5 L85 -12" stroke="url(#p3a)" stroke-width="18" stroke-linecap="round" fill="none"/>
+    <!-- Fist -->
+    <path d="M78 -8 Q72 -28 82 -32 Q92 -36 96 -22 Q100 -36 108 -32 Q116 -28 112 -14 Q120 -22 124 -14 Q128 -6 118 2 L100 10 Q88 14 82 6 Z" fill="#6C5CE7"/>
+    <path d="M88 -28 Q94 -32 98 -24" fill="none" stroke="#a29bfe" stroke-width="1.5" opacity="0.5"/>
+    <!-- Wristband -->
+    <rect x="62" y="2" width="22" height="10" rx="3" fill="#a29bfe" transform="rotate(-12, 73, 7)"/>
+  </g>
+
+  <!-- FIST BUMP impact zone -->
+  <g transform="translate(300, 262)">
+    <line x1="0" y1="-22" x2="0" y2="-35" stroke="#FFD166" stroke-width="3" stroke-linecap="round"/>
+    <line x1="14" y1="-18" x2="24" y2="-28" stroke="#FFD166" stroke-width="3" stroke-linecap="round"/>
+    <line x1="-14" y1="-18" x2="-24" y2="-28" stroke="#FFD166" stroke-width="3" stroke-linecap="round"/>
+    <line x1="20" y1="-4" x2="32" y2="-8" stroke="#FFD166" stroke-width="2.5" stroke-linecap="round" opacity="0.6"/>
+    <line x1="-20" y1="-4" x2="-32" y2="-8" stroke="#FFD166" stroke-width="2.5" stroke-linecap="round" opacity="0.6"/>
+    <line x1="18" y1="10" x2="28" y2="14" stroke="#FFD166" stroke-width="2" stroke-linecap="round" opacity="0.4"/>
+    <line x1="-18" y1="10" x2="-28" y2="14" stroke="#FFD166" stroke-width="2" stroke-linecap="round" opacity="0.4"/>
+  </g>
+
+  <!-- LEFT PADEL RACKET (orange, angled behind left arm) -->
+  <g transform="translate(120, 195) rotate(-35)">
+    <!-- Racket head — pear / teardrop shape -->
+    <path d="M20 -55 Q20 -78 35 -85 Q50 -90 60 -78 Q68 -68 68 -50 L68 -15 Q68 2 55 8 Q44 12 35 8 Q22 2 20 -15 Z" fill="#FFD166" opacity="0.85"/>
+    <path d="M20 -55 Q20 -78 35 -85 Q50 -90 60 -78 Q68 -68 68 -50 L68 -15 Q68 2 55 8 Q44 12 35 8 Q22 2 20 -15 Z" fill="none" stroke="#FF6B35" stroke-width="3"/>
+    <!-- Perforations -->
+    <circle cx="36" cy="-70" r="2.8" fill="#1E1E2E"/>
+    <circle cx="48" cy="-70" r="2.8" fill="#1E1E2E"/>
+    <circle cx="56" cy="-62" r="2.8" fill="#1E1E2E"/>
+    <circle cx="30" cy="-62" r="2.8" fill="#1E1E2E"/>
+    <circle cx="42" cy="-62" r="2.8" fill="#1E1E2E"/>
+    <circle cx="36" cy="-52" r="2.8" fill="#1E1E2E"/>
+    <circle cx="48" cy="-52" r="2.8" fill="#1E1E2E"/>
+    <circle cx="58" cy="-50" r="2.8" fill="#1E1E2E"/>
+    <circle cx="28" cy="-50" r="2.5" fill="#1E1E2E"/>
+    <circle cx="42" cy="-42" r="2.8" fill="#1E1E2E"/>
+    <circle cx="54" cy="-40" r="2.5" fill="#1E1E2E"/>
+    <circle cx="32" cy="-40" r="2.5" fill="#1E1E2E"/>
+    <circle cx="36" cy="-30" r="2.5" fill="#1E1E2E"/>
+    <circle cx="48" cy="-30" r="2.5" fill="#1E1E2E"/>
+    <circle cx="42" cy="-20" r="2.2" fill="#1E1E2E"/>
+    <circle cx="34" cy="-18" r="2" fill="#1E1E2E"/>
+    <circle cx="50" cy="-18" r="2" fill="#1E1E2E"/>
+    <!-- Bridge/throat -->
+    <path d="M32 8 Q32 18 38 22 L38 28" fill="none" stroke="#FF6B35" stroke-width="2.5"/>
+    <path d="M56 8 Q56 18 50 22 L50 28" fill="none" stroke="#FF6B35" stroke-width="2.5"/>
+    <!-- Handle -->
+    <rect x="36" y="26" width="16" height="35" rx="5" fill="#FF6B35"/>
+    <rect x="35" y="56" width="18" height="10" rx="4" fill="#FFD166"/>
+    <!-- Wrist strap -->
+    <path d="M44 66 L44 78 Q44 82 48 82 L52 82" stroke="#FF6B35" stroke-width="2" fill="none" stroke-linecap="round"/>
+  </g>
+
+  <!-- RIGHT PADEL RACKET (violet, mirrored) -->
+  <g transform="translate(480, 195) rotate(35) scale(-1,1)">
+    <path d="M20 -55 Q20 -78 35 -85 Q50 -90 60 -78 Q68 -68 68 -50 L68 -15 Q68 2 55 8 Q44 12 35 8 Q22 2 20 -15 Z" fill="#a29bfe" opacity="0.85"/>
+    <path d="M20 -55 Q20 -78 35 -85 Q50 -90 60 -78 Q68 -68 68 -50 L68 -15 Q68 2 55 8 Q44 12 35 8 Q22 2 20 -15 Z" fill="none" stroke="#6C5CE7" stroke-width="3"/>
+    <circle cx="36" cy="-70" r="2.8" fill="#1E1E2E"/>
+    <circle cx="48" cy="-70" r="2.8" fill="#1E1E2E"/>
+    <circle cx="56" cy="-62" r="2.8" fill="#1E1E2E"/>
+    <circle cx="30" cy="-62" r="2.8" fill="#1E1E2E"/>
+    <circle cx="42" cy="-62" r="2.8" fill="#1E1E2E"/>
+    <circle cx="36" cy="-52" r="2.8" fill="#1E1E2E"/>
+    <circle cx="48" cy="-52" r="2.8" fill="#1E1E2E"/>
+    <circle cx="58" cy="-50" r="2.8" fill="#1E1E2E"/>
+    <circle cx="28" cy="-50" r="2.5" fill="#1E1E2E"/>
+    <circle cx="42" cy="-42" r="2.8" fill="#1E1E2E"/>
+    <circle cx="54" cy="-40" r="2.5" fill="#1E1E2E"/>
+    <circle cx="32" cy="-40" r="2.5" fill="#1E1E2E"/>
+    <circle cx="36" cy="-30" r="2.5" fill="#1E1E2E"/>
+    <circle cx="48" cy="-30" r="2.5" fill="#1E1E2E"/>
+    <circle cx="42" cy="-20" r="2.2" fill="#1E1E2E"/>
+    <circle cx="34" cy="-18" r="2" fill="#1E1E2E"/>
+    <circle cx="50" cy="-18" r="2" fill="#1E1E2E"/>
+    <path d="M32 8 Q32 18 38 22 L38 28" fill="none" stroke="#6C5CE7" stroke-width="2.5"/>
+    <path d="M56 8 Q56 18 50 22 L50 28" fill="none" stroke="#6C5CE7" stroke-width="2.5"/>
+    <rect x="36" y="26" width="16" height="35" rx="5" fill="#6C5CE7"/>
+    <rect x="35" y="56" width="18" height="10" rx="4" fill="#a29bfe"/>
+    <path d="M44 66 L44 78 Q44 82 48 82 L52 82" stroke="#6C5CE7" stroke-width="2" fill="none" stroke-linecap="round"/>
+  </g>
+
+  <!-- Ball falling from impact -->
+  <circle cx="300" cy="340" r="12" fill="url(#g3a)"/>
+  <path d="M293 330 Q300 340 293 350" fill="none" stroke="#1E1E2E" stroke-width="1.3" opacity="0.4"/>
+  <path d="M307 330 Q300 340 307 350" fill="none" stroke="#1E1E2E" stroke-width="1.3" opacity="0.4"/>
+  <!-- Motion dots -->
+  <circle cx="300" cy="360" r="3" fill="#FF6B35" opacity="0.15"/>
+  <circle cx="300" cy="372" r="2" fill="#FF6B35" opacity="0.08"/>
+
+  <!-- DES -->
+  <text x="300" y="462" text-anchor="middle" font-family="'Arial',sans-serif" font-weight="700" font-size="17" letter-spacing="10" fill="rgba(255,255,255,0.35)">DES</text>
+  <!-- FRÉROTS -->
+  <text x="300" y="510" text-anchor="middle" font-family="'Arial Black','Helvetica Neue',sans-serif" font-weight="900" font-size="58" letter-spacing="4" fill="#FFFFFF">FRÉROTS</text>
+  <!-- PADEL CLUB -->
+  <text x="300" y="548" text-anchor="middle" font-family="'Arial','Helvetica Neue',sans-serif" font-weight="700" font-size="16" letter-spacing="8" fill="#6C5CE7">PADEL CLUB</text>
+  <!-- Stars -->
+  <polygon points="245,572 248,579 256,579 250,583 252,590 245,586 238,590 240,583 234,579 242,579" fill="#FFD166" opacity="0.5"/>
+  <polygon points="300,577 304,586 314,586 306,591 309,600 300,595 291,600 294,591 286,586 296,586" fill="#FFD166"/>
+  <polygon points="355,572 358,579 366,579 360,583 362,590 355,586 348,590 350,583 344,579 352,579" fill="#FFD166" opacity="0.5"/>
+  <text x="300" y="618" text-anchor="middle" font-family="'Arial',sans-serif" font-weight="700" font-size="12" letter-spacing="5" fill="rgba(255,255,255,0.2)">EST. 2026</text>
+</svg>
