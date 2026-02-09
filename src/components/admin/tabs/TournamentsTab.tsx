@@ -119,13 +119,20 @@ export function TournamentsTab({ tournaments, adminToken }: TournamentsTabProps)
     <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
       <Card className="rounded-2xl border border-border bg-white p-4 shadow-card">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <p className="text-sm font-semibold text-brand-charcoal">
-              Tournois créés
-            </p>
-            <p className="text-xs text-muted-foreground">
-              {tournaments.length} entrées
-            </p>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
+            <div>
+              <p className="text-sm font-semibold text-brand-charcoal">
+                Tournois créés
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {tournaments.length} entrées
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <GradientButton type="button" onClick={() => setSelectedId(null)}>
+                Créer
+              </GradientButton>
+            </div>
           </div>
           <Input
             placeholder="Rechercher un tournoi"
@@ -179,19 +186,10 @@ export function TournamentsTab({ tournaments, adminToken }: TournamentsTabProps)
               Configurer le format et publier
             </p>
           </div>
-          {selected ? (
-            <Button
-              type="button"
-              variant="outline"
-              className="bg-brand-violet text-white hover:bg-brand-violet/90 hover:text-white"
-              onClick={() => setSelectedId(null)}
-            >
-              Nouveau
-            </Button>
-          ) : null}
         </div>
 
         <form
+          id="tournament-form"
           className="mt-4 space-y-4"
           action={async (formData) => {
             await upsertTournamentAction(formData);
