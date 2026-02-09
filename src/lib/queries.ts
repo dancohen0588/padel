@@ -1,7 +1,11 @@
 import { getDatabaseClient } from "@/lib/database";
 import type {
+  Pool,
+  PoolTeam,
   RegistrationStatus,
   RegistrationWithPlayer,
+  Team,
+  TeamPlayer,
   Tournament,
   TournamentPhoto,
   TournamentStatus,
@@ -227,4 +231,56 @@ export const countRegistrations = async (tournamentId: string) => {
   });
 
   return counts;
+};
+
+export const getTeamsByTournament = async (tournamentId: string): Promise<Team[]> => {
+  const database = getDatabaseClient();
+  const rows = await database<Team[]>`
+    select id, tournament_id, name, created_at::text as created_at
+    from teams
+    where tournament_id = ${tournamentId}
+    order by created_at asc
+  `;
+
+  return rows;
+};
+
+export const getTeamPlayersByTournament = async (
+  tournamentId: string
+): Promise<TeamPlayer[]> => {
+  const database = getDatabaseClient();
+  const rows = await database<TeamPlayer[]>`
+    select tp.team_id, tp.player_id, tp.created_at::text as created_at
+    from team_players tp
+    join teams t on t.id = tp.team_id
+    where t.tournament_id = ${tournamentId}
+  `;
+
+  return rows;
+};
+
+export const getPoolsByTournament = async (tournamentId: string): Promise<Pool[]> => {
+  const database = getDatabaseClient();
+  const rows = await database<Pool[]>`
+    select id, tournament_id, name, pool_order, created_at::text as created_at
+    from pools
+    where tournament_id = ${tournamentId}
+    order by pool_order asc
+  `;
+
+  return rows;
+};
+
+export const getPoolTeamsByTournament = async (
+  tournamentId: string
+): Promise<PoolTeam[]> => {
+  const database = getDatabaseClient();
+  const rows = await database<PoolTeam[]>`
+    select pt.pool_id, pt.team_id, pt.created_at::text as created_at
+    from pool_teams pt
+    join pools p on p.id = pt.pool_id
+    where p.tournament_id = ${tournamentId}
+  `;
+
+  return rows;
 };
