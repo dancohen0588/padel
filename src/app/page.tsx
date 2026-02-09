@@ -29,6 +29,7 @@ export default async function Home() {
     slotsLabel: tournament.max_players
       ? `${tournament.max_players} joueurs`
       : "Capacité à définir",
+    imagePath: tournament.image_path,
     highlight: tournament.status === "published" ? "Publié" : "Nouveau",
   }));
 

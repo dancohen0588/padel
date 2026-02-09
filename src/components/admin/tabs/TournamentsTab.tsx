@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Tournament, TournamentStatus } from "@/lib/types";
 import { Card } from "@/components/ui/card";
@@ -32,6 +32,13 @@ export function TournamentsTab({ tournaments, adminToken }: TournamentsTabProps)
   const [maxPlayers, setMaxPlayers] = useState(0);
   const [poolsCount, setPoolsCount] = useState(0);
   const [teamsQualified, setTeamsQualified] = useState(0);
+  const [slugValue, setSlugValue] = useState("");
+  const [imagePath, setImagePath] = useState<string | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const tempPreviewRef = useRef<string | null>(null);
   const router = useRouter();
 
   const selected = useMemo(
@@ -62,7 +69,97 @@ export function TournamentsTab({ tournaments, adminToken }: TournamentsTabProps)
     setMaxPlayers(Number(selected?.max_players ?? 0));
     setPoolsCount(Number(selected?.config?.pools_count ?? 0));
     setTeamsQualified(Number(selected?.config?.playoffs?.teams_qualified ?? 0));
+    setSlugValue(selected?.slug ?? "");
+    setImagePath(selected?.image_path ?? null);
+    setImagePreview(selected?.image_path ?? null);
+    setUploadError(null);
   }, [selected]);
+
+  const handleFileUpload = async (file: File) => {
+    const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+    const maxSize = 5 * 1024 * 1024;
+    setUploadError(null);
+
+    if (!allowedTypes.includes(file.type)) {
+      setUploadError("Formats autorisés : JPG, PNG, WEBP.");
+      return;
+    }
+
+    if (file.size > maxSize) {
+      setUploadError("Taille maximale : 5 Mo.");
+      return;
+    }
+
+    if (tempPreviewRef.current) {
+      URL.revokeObjectURL(tempPreviewRef.current);
+    }
+
+    const localPreview = URL.createObjectURL(file);
+    tempPreviewRef.current = localPreview;
+    setImagePreview(localPreview);
+    setIsUploading(true);
+
+    try {
+      const formData = new FormData();
+      formData.set("file", file);
+      formData.set("slug", slugValue || "tournoi");
+      if (imagePath) {
+        formData.set("previousPath", imagePath);
+      }
+
+      const response = await fetch("/api/tournaments/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const payload = await response.json().catch(() => null);
+        throw new Error(payload?.error || "Upload impossible.");
+      }
+
+      const payload = (await response.json()) as { path: string };
+      setImagePath(payload.path);
+      setImagePreview(payload.path);
+      setUploadError(null);
+    } catch (error) {
+      setUploadError(error instanceof Error ? error.message : "Upload impossible.");
+      setImagePreview(imagePath);
+    } finally {
+      if (tempPreviewRef.current) {
+        URL.revokeObjectURL(tempPreviewRef.current);
+        tempPreviewRef.current = null;
+      }
+      setIsUploading(false);
+    }
+  };
+
+  const handleRemoveImage = async () => {
+    if (!imagePath) return;
+    setIsUploading(true);
+    setUploadError(null);
+
+    try {
+      const response = await fetch("/api/tournaments/upload/delete", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ path: imagePath }),
+      });
+
+      if (!response.ok) {
+        const payload = await response.json().catch(() => null);
+        throw new Error(payload?.error || "Suppression impossible.");
+      }
+
+      setImagePath(null);
+      setImagePreview(null);
+    } catch (error) {
+      setUploadError(error instanceof Error ? error.message : "Suppression impossible.");
+    } finally {
+      setIsUploading(false);
+    }
+  };
 
   const poolsInfo = useMemo(() => {
     if (!maxPlayers || !poolsCount) return null;
@@ -156,13 +253,26 @@ export function TournamentsTab({ tournaments, adminToken }: TournamentsTabProps)
                 }`}
               >
                 <div className="flex items-center justify-between gap-3">
-                  <div>
-                    <p className="text-sm font-semibold text-brand-charcoal">
-                      {tournament.name}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {tournament.date} · {tournament.location ?? "Lieu à définir"}
-                    </p>
+                  <div className="flex items-center gap-3">
+                    {tournament.image_path ? (
+                      <img
+                        src={tournament.image_path}
+                        alt={tournament.name}
+                        className="h-12 w-12 rounded-xl object-cover"
+                      />
+                    ) : (
+                      <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-muted text-[10px] font-semibold text-muted-foreground">
+                        N/A
+                      </div>
+                    )}
+                    <div>
+                      <p className="text-sm font-semibold text-brand-charcoal">
+                        {tournament.name}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {tournament.date} · {tournament.location ?? "Lieu à définir"}
+                      </p>
+                    </div>
                   </div>
                   <Badge variant="secondary">{statusLabel[tournament.status]}</Badge>
                 </div>
@@ -205,7 +315,13 @@ export function TournamentsTab({ tournaments, adminToken }: TournamentsTabProps)
           </label>
           <label className="flex flex-col gap-2 text-sm font-semibold text-brand-charcoal">
             Slug
-            <Input name="slug" placeholder="Slug" defaultValue={selected?.slug ?? ""} />
+            <Input
+              name="slug"
+              placeholder="Slug"
+              defaultValue={selected?.slug ?? ""}
+              onChange={(event) => setSlugValue(event.target.value)}
+            />
+            <input type="hidden" name="imagePath" value={imagePath ?? ""} />
           </label>
           <label className="flex flex-col gap-2 text-sm font-semibold text-brand-charcoal">
             Date
@@ -229,14 +345,61 @@ export function TournamentsTab({ tournaments, adminToken }: TournamentsTabProps)
                 onChange={(event) => setMaxPlayers(Number(event.target.value || 0))}
               />
             </label>
-          <label className="flex flex-col gap-2 text-sm font-semibold text-brand-charcoal">
-            Image (URL ou path)
-            <Input
-              name="imagePath"
-              placeholder="Image (URL ou path)"
-              defaultValue={selected?.image_path ?? ""}
+          <div className="flex flex-col gap-2 text-sm font-semibold text-brand-charcoal">
+            Photo du tournoi
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              className="hidden"
+              onChange={(event) => {
+                const file = event.target.files?.[0];
+                if (file) {
+                  void handleFileUpload(file);
+                }
+              }}
             />
-          </label>
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              onDragOver={(event) => event.preventDefault()}
+              onDrop={(event) => {
+                event.preventDefault();
+                const file = event.dataTransfer.files?.[0];
+                if (file) {
+                  void handleFileUpload(file);
+                }
+              }}
+              className="flex min-h-[140px] flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-border bg-white px-4 py-6 text-center text-xs font-semibold text-muted-foreground transition hover:bg-muted/40"
+            >
+              {imagePreview ? (
+                <img
+                  src={imagePreview}
+                  alt="Aperçu tournoi"
+                  className="h-32 w-full max-w-[280px] rounded-xl object-cover"
+                />
+              ) : (
+                <span>
+                  Glissez-déposez une image ici ou cliquez pour importer (JPG/PNG/WEBP, 5 Mo max).
+                </span>
+              )}
+              {isUploading ? <span>Upload en cours...</span> : null}
+            </button>
+            {imagePath ? (
+              <Button
+                type="button"
+                variant="outline"
+                className="w-fit bg-brand-violet text-white hover:bg-brand-violet/90 hover:text-white"
+                onClick={() => void handleRemoveImage()}
+                disabled={isUploading}
+              >
+                Supprimer l’image
+              </Button>
+            ) : null}
+            {uploadError ? (
+              <span className="text-xs font-semibold text-red-500">{uploadError}</span>
+            ) : null}
+          </div>
           <label className="flex flex-col gap-2 text-sm font-semibold text-brand-charcoal">
             Description
             <Input

@@ -9,6 +9,7 @@ type TournamentCardProps = {
   location: string;
   priceLabel: string;
   slotsLabel: string;
+  imagePath?: string | null;
   highlight?: string;
 };
 
@@ -19,11 +20,21 @@ export function TournamentCard({
   location,
   priceLabel,
   slotsLabel,
+  imagePath,
   highlight,
 }: TournamentCardProps) {
   return (
     <Card className="flex h-full flex-col justify-between rounded-3xl border border-border bg-white p-6 shadow-card">
       <div className="space-y-4">
+        {imagePath ? (
+          <div className="overflow-hidden rounded-2xl border border-border">
+            <img
+              src={imagePath}
+              alt={name}
+              className="h-36 w-full object-cover"
+            />
+          </div>
+        ) : null}
         {highlight ? (
           <span className="inline-flex w-fit items-center rounded-full bg-brand-yellow/40 px-3 py-1 text-xs font-semibold text-brand-charcoal">
             {highlight}
