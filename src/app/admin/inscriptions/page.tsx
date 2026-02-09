@@ -41,25 +41,12 @@ export default async function AdminInscriptionsPage({
     );
   }
 
-  if (!tournament) {
-    return (
-      <div className="min-h-screen bg-brand-gray">
-        <Header />
-        <main className="mx-auto w-full max-w-5xl px-6 py-10">
-          <SectionHeader
-            title="Admin inscriptions"
-            subtitle="Aucun tournoi publié. Mets un tournoi en statut published."
-          />
-        </main>
-        <Footer />
-      </div>
-    );
-  }
-
   const [registrations, counts, tournaments, photos, featuredPhotos] =
     await Promise.all([
-      getRegistrationsByStatus(tournament.id),
-      countRegistrations(tournament.id),
+      tournament ? getRegistrationsByStatus(tournament.id) : [],
+      tournament
+        ? countRegistrations(tournament.id)
+        : { approved: 0, pending: 0, rejected: 0 },
       getTournaments(),
       getTournamentPhotos(),
       getFeaturedTournamentPhotos(),
@@ -71,7 +58,11 @@ export default async function AdminInscriptionsPage({
       <main className="mx-auto w-full max-w-5xl px-6 py-10">
         <SectionHeader
           title="Admin inscriptions"
-          subtitle="Valide ou refuse les joueurs du tournoi en cours."
+          subtitle={
+            tournament
+              ? "Valide ou refuse les joueurs du tournoi en cours."
+              : "Aucun tournoi publié. Publie-en un pour activer les inscriptions."
+          }
         />
         <div className="mt-8">
           <AdminTabs

@@ -113,6 +113,7 @@ export function TournamentsTab({ tournaments, adminToken }: TournamentsTabProps)
             <Button
               type="button"
               variant="outline"
+              className="text-white hover:text-white"
               onClick={() => setSelectedId(null)}
             >
               Nouveau
@@ -205,6 +206,7 @@ export function TournamentsTab({ tournaments, adminToken }: TournamentsTabProps)
               <Button
                 type="button"
                 variant="outline"
+                className="text-white hover:text-white"
                 onClick={async () => {
                   const confirmed = window.confirm("Supprimer ce tournoi ?");
                   if (!confirmed) return;

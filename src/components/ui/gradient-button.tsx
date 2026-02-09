@@ -13,7 +13,7 @@ export function GradientButton({
   return (
     <Button
       className={cn(
-        "gradient-primary text-white shadow-glow rounded-[10px]",
+        "gradient-primary text-white hover:text-white shadow-glow rounded-[10px]",
         fullWidth && "w-full",
         className
       )}
