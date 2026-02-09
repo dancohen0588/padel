@@ -16,29 +16,60 @@ const DEFAULT_CONFIG: TournamentConfig = {
   },
 };
 
-export async function upsertTournamentAction(formData: FormData): Promise<void> {
-  const adminToken = String(formData.get("adminToken") ?? "");
+const getValue = (formData: FormData, key: string) => {
+  const direct = formData.get(key);
+  if (direct !== null) return direct;
+
+  for (const [entryKey, value] of Array.from(formData.entries())) {
+    if (entryKey === key) return value;
+    if (entryKey.endsWith(`_${key}`)) return value;
+  }
+
+  return null;
+};
+
+export async function upsertTournamentAction(
+  formData: FormData
+): Promise<{ ok: boolean; reason?: string }>
+{
+  const adminToken = String(getValue(formData, "adminToken") ?? "");
   assertAdminToken(adminToken);
 
   const database = getDatabaseClient();
-  const tournamentId = String(formData.get("tournamentId") ?? "");
-  const name = String(formData.get("name") ?? "").trim();
-  const date = String(formData.get("date") ?? "");
-  const location = String(formData.get("location") ?? "").trim();
-  const description = String(formData.get("description") ?? "").trim();
-  const slug = String(formData.get("slug") ?? "").trim();
-  const status = String(formData.get("status") ?? "draft") as TournamentStatus;
-  const maxPlayers = Number(formData.get("maxPlayers") ?? 0);
-  const imagePath = String(formData.get("imagePath") ?? "").trim();
-  const pairingMode = String(formData.get("pairingMode") ?? "balanced") as TournamentConfig["pairing_mode"];
-  const poolsCount = Number(formData.get("poolsCount") ?? 4);
-  const playoffsEnabled = String(formData.get("playoffsEnabled") ?? "true") === "true";
-  const teamsQualified = Number(formData.get("teamsQualified") ?? 8);
-  const playoffsFormat = String(formData.get("playoffsFormat") ?? "single_elim") as TournamentConfig["playoffs"]["format"];
-  const hasThirdPlace = String(formData.get("hasThirdPlace") ?? "false") === "true";
+  const tournamentId = String(getValue(formData, "tournamentId") ?? "");
+  const name = String(getValue(formData, "name") ?? "").trim();
+  const date = String(getValue(formData, "date") ?? "");
+  const location = String(getValue(formData, "location") ?? "").trim();
+  const description = String(getValue(formData, "description") ?? "").trim();
+  const slug = String(getValue(formData, "slug") ?? "").trim();
+  const status = String(getValue(formData, "status") ?? "draft") as TournamentStatus;
+  const maxPlayers = Number(getValue(formData, "maxPlayers") ?? 0);
+  const imagePath = String(getValue(formData, "imagePath") ?? "").trim();
+  const pairingMode = String(
+    getValue(formData, "pairingMode") ?? "balanced"
+  ) as TournamentConfig["pairing_mode"];
+  const poolsCount = Number(getValue(formData, "poolsCount") ?? 4);
+  const playoffsEnabled = String(getValue(formData, "playoffsEnabled") ?? "true") === "true";
+  const teamsQualified = Number(getValue(formData, "teamsQualified") ?? 8);
+  const playoffsFormat = String(
+    getValue(formData, "playoffsFormat") ?? "single_elim"
+  ) as TournamentConfig["playoffs"]["format"];
+  const hasThirdPlace = String(getValue(formData, "hasThirdPlace") ?? "false") === "true";
+
+  console.info("[tournaments] upsert payload", {
+    tournamentId,
+    name,
+    maxPlayers,
+    poolsCount,
+    teamsQualified,
+    rawMaxPlayers: formData.get("maxPlayers"),
+    rawPoolsCount: formData.get("poolsCount"),
+    rawMaxPlayersPrefixed: formData.get("1_maxPlayers"),
+    rawPoolsCountPrefixed: formData.get("1_poolsCount"),
+  });
 
   if (!name || !date) {
-    return;
+    return { ok: false, reason: "missing_name_or_date" };
   }
 
   const config: TournamentConfig = {
@@ -64,7 +95,7 @@ export async function upsertTournamentAction(formData: FormData): Promise<void> 
         status = ${status},
         max_players = ${maxPlayers || null},
         image_path = ${imagePath || null},
-        config = ${JSON.stringify(config)}::jsonb
+        config = ${database.json(config)}
       where id = ${tournamentId}
     `;
   } else {
@@ -79,12 +110,13 @@ export async function upsertTournamentAction(formData: FormData): Promise<void> 
         ${status},
         ${maxPlayers || null},
         ${imagePath || null},
-        ${JSON.stringify(config || DEFAULT_CONFIG)}::jsonb
+        ${database.json(config || DEFAULT_CONFIG)}
       )
     `;
   }
 
   revalidatePath("/admin/inscriptions");
+  return { ok: true };
 }
 
 export async function deleteTournamentAction(formData: FormData): Promise<void> {

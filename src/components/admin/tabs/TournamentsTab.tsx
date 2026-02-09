@@ -40,6 +40,7 @@ export function TournamentsTab({ tournaments, adminToken }: TournamentsTabProps)
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const tempPreviewRef = useRef<string | null>(null);
   const router = useRouter();
+  const adminQuery = `?token=${adminToken}`;
 
   const selected = useMemo(
     () => tournaments.find((tournament) => tournament.id === selectedId) ?? null,
@@ -67,12 +68,21 @@ export function TournamentsTab({ tournaments, adminToken }: TournamentsTabProps)
     setPairingMode(selected?.config?.pairing_mode ?? "balanced");
     setPlayoffsFormat(selected?.config?.playoffs?.format ?? "single_elim");
     setMaxPlayers(Number(selected?.max_players ?? 0));
-    setPoolsCount(Number(selected?.config?.pools_count ?? 0));
+    setPoolsCount(Number(selected?.config?.pools_count ?? 4));
     setTeamsQualified(Number(selected?.config?.playoffs?.teams_qualified ?? 0));
     setSlugValue(selected?.slug ?? "");
     setImagePath(selected?.image_path ?? null);
     setImagePreview(selected?.image_path ?? null);
     setUploadError(null);
+  }, [selected]);
+
+  useEffect(() => {
+    if (!selected) return;
+    console.info("[admin] tournament config", {
+      id: selected.id,
+      name: selected.name,
+      pools_count: selected.config?.pools_count,
+    });
   }, [selected]);
 
   const handleFileUpload = async (file: File) => {
@@ -162,11 +172,17 @@ export function TournamentsTab({ tournaments, adminToken }: TournamentsTabProps)
   };
 
   const poolsInfo = useMemo(() => {
-    if (!maxPlayers || !poolsCount) return null;
-    if (maxPlayers <= 0 || poolsCount <= 0) return null;
+    if (!maxPlayers || !poolsCount) {
+      return "Renseignez le nombre d'équipes et de poules pour calculer.";
+    }
+    if (maxPlayers <= 0 || poolsCount <= 0) {
+      return "Renseignez le nombre d'équipes et de poules pour calculer.";
+    }
     const baseTeams = Math.floor(maxPlayers / poolsCount);
     const remainder = maxPlayers % poolsCount;
-    if (!baseTeams) return null;
+    if (!baseTeams) {
+      return "Renseignez le nombre d'équipes et de poules pour calculer.";
+    }
     if (remainder === 0) {
       return `${baseTeams} équipes par poule`;
     }
@@ -175,6 +191,10 @@ export function TournamentsTab({ tournaments, adminToken }: TournamentsTabProps)
       remainder > 1 ? "s" : ""
     } de ${baseTeams + 1} équipes`;
   }, [maxPlayers, poolsCount]);
+
+  useEffect(() => {
+    console.info("[admin] poolsInfo", { maxPlayers, poolsCount, poolsInfo });
+  }, [maxPlayers, poolsCount, poolsInfo]);
 
   const qualifiedInfo = useMemo(() => {
     if (!teamsQualified || !poolsCount) return null;
@@ -274,7 +294,21 @@ export function TournamentsTab({ tournaments, adminToken }: TournamentsTabProps)
                       </p>
                     </div>
                   </div>
-                  <Badge variant="secondary">{statusLabel[tournament.status]}</Badge>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="secondary">{statusLabel[tournament.status]}</Badge>
+                    {tournament.slug ? (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="bg-brand-violet text-white hover:bg-brand-violet/90 hover:text-white"
+                        onClick={() =>
+                          router.push(`/tournaments/${tournament.slug}/admin${adminQuery}`)
+                        }
+                      >
+                        Configurer
+                      </Button>
+                    ) : null}
+                  </div>
                 </div>
               </button>
             ))
@@ -302,7 +336,15 @@ export function TournamentsTab({ tournaments, adminToken }: TournamentsTabProps)
           id="tournament-form"
           className="mt-4 space-y-4"
           action={async (formData) => {
-            await upsertTournamentAction(formData);
+            console.info("[admin] tournament submit payload", {
+              poolsCount: formData.get("poolsCount"),
+              maxPlayers: formData.get("maxPlayers"),
+              name: formData.get("name"),
+              date: formData.get("date"),
+              keys: Array.from(formData.keys()),
+            });
+            const result = await upsertTournamentAction(formData);
+            console.info("[admin] tournament submit result", result);
             router.refresh();
           }}
         >
@@ -443,11 +485,9 @@ export function TournamentsTab({ tournaments, adminToken }: TournamentsTabProps)
                 defaultValue={selected?.config?.pools_count ?? 4}
                 onChange={(event) => setPoolsCount(Number(event.target.value || 0))}
               />
-              {poolsInfo ? (
-                <span className="text-xs font-semibold text-status-approved">
-                  {poolsInfo}
-                </span>
-              ) : null}
+              <span className="text-xs font-semibold text-status-approved">
+                {poolsInfo}
+              </span>
             </label>
             <label className="flex flex-col gap-2 text-sm font-semibold text-brand-charcoal">
               Équipes qualifiées

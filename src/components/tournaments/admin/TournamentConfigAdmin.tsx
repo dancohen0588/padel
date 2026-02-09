@@ -1,0 +1,509 @@
+"use client";
+
+import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import {
+  DndContext,
+  PointerSensor,
+  useDroppable,
+  useDraggable,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import type {
+  Pool,
+  PoolTeam,
+  RegistrationWithPlayer,
+  Team,
+  TeamPlayer,
+  Tournament,
+} from "@/lib/types";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Toast } from "@/components/ui/toast";
+import {
+  assignPlayerToTeamAction,
+  createTeamAction,
+  deleteTeamAction,
+  removePlayerFromTeamAction,
+  updateTeamNameAction,
+} from "@/app/actions/teams";
+import {
+  assignTeamToPoolAction,
+  ensurePoolsAction,
+  removeTeamFromPoolAction,
+  updatePoolNameAction,
+} from "@/app/actions/pools";
+
+type TournamentConfigAdminProps = {
+  tournament: Tournament;
+  adminToken: string;
+  registrations: RegistrationWithPlayer[];
+  teams: Team[];
+  teamPlayers: TeamPlayer[];
+  pools: Pool[];
+  poolTeams: PoolTeam[];
+};
+
+type PlayerItem = RegistrationWithPlayer["player"];
+
+type DndItem =
+  | { type: "player"; id: string }
+  | { type: "team"; id: string };
+
+type DroppableProps = {
+  id: string;
+  className?: string;
+  children: React.ReactNode;
+};
+
+const DroppableArea = ({ id, className, children }: DroppableProps) => {
+  const { isOver, setNodeRef } = useDroppable({ id });
+  return (
+    <div
+      ref={setNodeRef}
+      className={`${className ?? ""} ${isOver ? "ring-2 ring-brand-violet" : ""}`}
+    >
+      {children}
+    </div>
+  );
+};
+
+type DraggableProps = {
+  id: string;
+  className?: string;
+  children: React.ReactNode;
+};
+
+const DraggableItem = ({ id, className, children }: DraggableProps) => {
+  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({ id });
+  const style = transform
+    ? { transform: `translate3d(${transform.x}px, ${transform.y}px, 0)` }
+    : undefined;
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={`${className ?? ""} ${isDragging ? "opacity-70" : ""}`}
+      {...listeners}
+      {...attributes}
+    >
+      {children}
+    </div>
+  );
+};
+
+export function TournamentConfigAdmin({
+  tournament,
+  adminToken,
+  registrations,
+  teams,
+  teamPlayers,
+  pools,
+  poolTeams,
+}: TournamentConfigAdminProps) {
+  const [toast, setToast] = useState<string | null>(null);
+  const [localTeams, setLocalTeams] = useState<Team[]>(teams);
+  const [localTeamPlayers, setLocalTeamPlayers] = useState<TeamPlayer[]>(teamPlayers);
+  const [localPools, setLocalPools] = useState<Pool[]>(pools);
+  const [localPoolTeams, setLocalPoolTeams] = useState<PoolTeam[]>(poolTeams);
+  const [isEnsuringPools, setIsEnsuringPools] = useState(false);
+  const router = useRouter();
+
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }));
+
+  const approvedPlayers = useMemo(() => registrations.map((r) => r.player), [registrations]);
+
+  const teamPlayerMap = useMemo(() => {
+    const map = new Map<string, string[]>();
+    localTeamPlayers.forEach((tp) => {
+      map.set(tp.team_id, [...(map.get(tp.team_id) ?? []), tp.player_id]);
+    });
+    return map;
+  }, [localTeamPlayers]);
+
+  const playerById = useMemo(() => {
+    const map = new Map<string, PlayerItem>();
+    approvedPlayers.forEach((player) => map.set(player.id, player));
+    return map;
+  }, [approvedPlayers]);
+
+  const assignedPlayerIds = useMemo(
+    () => new Set(localTeamPlayers.map((tp) => tp.player_id)),
+    [localTeamPlayers]
+  );
+
+  const unassignedPlayers = useMemo(
+    () => approvedPlayers.filter((player) => !assignedPlayerIds.has(player.id)),
+    [approvedPlayers, assignedPlayerIds]
+  );
+
+  const teamIdsByPool = useMemo(() => {
+    const map = new Map<string, string[]>();
+    localPoolTeams.forEach((pt) => {
+      map.set(pt.pool_id, [...(map.get(pt.pool_id) ?? []), pt.team_id]);
+    });
+    return map;
+  }, [localPoolTeams]);
+
+  const unassignedTeams = useMemo(() => {
+    const assignedTeams = new Set(localPoolTeams.map((pt) => pt.team_id));
+    return localTeams.filter((team) => !assignedTeams.has(team.id));
+  }, [localTeams, localPoolTeams]);
+
+  const completeTeamIds = useMemo(() => {
+    const set = new Set<string>();
+    localTeams.forEach((team) => {
+      if ((teamPlayerMap.get(team.id)?.length ?? 0) >= 2) {
+        set.add(team.id);
+      }
+    });
+    return set;
+  }, [localTeams, teamPlayerMap]);
+
+  const poolsCount = Number(
+    tournament.config?.pools_count ??
+      (tournament.config as { poolsCount?: number } | null | undefined)?.poolsCount ??
+      4
+  );
+
+  const poolsMismatch = localPools.length !== poolsCount;
+
+  useEffect(() => {
+    console.info("[tournament-admin] pools config", {
+      tournamentId: tournament.id,
+      poolsCount,
+      localPools: localPools.length,
+    });
+  }, [localPools.length, poolsCount, tournament.id]);
+
+  useEffect(() => {
+    const ensure = async () => {
+      if (poolsCount <= 0) return;
+      if (localPools.length >= poolsCount) return;
+      if (isEnsuringPools) return;
+      setIsEnsuringPools(true);
+      await ensurePoolsAction(tournament.id, poolsCount, adminToken);
+      router.refresh();
+      setIsEnsuringPools(false);
+    };
+    void ensure();
+  }, [adminToken, isEnsuringPools, localPools.length, poolsCount, router, tournament.id]);
+
+  useEffect(() => {
+    console.info("[tournament-admin] players", {
+      approved: approvedPlayers.length,
+      unassigned: unassignedPlayers.length,
+      teams: localTeams.length,
+    });
+  }, [approvedPlayers.length, localTeams.length, unassignedPlayers.length]);
+
+  const handleCreateTeam = async () => {
+    const created = await createTeamAction(tournament.id, adminToken);
+    if (!created) return;
+    setLocalTeams((prev) => [...prev, { id: created.id, tournament_id: tournament.id, name: null, created_at: "" }]);
+    setToast("Équipe créée");
+  };
+
+  const handleDeleteTeam = async (teamId: string) => {
+    await deleteTeamAction(teamId, adminToken);
+    setLocalTeams((prev) => prev.filter((team) => team.id !== teamId));
+    setLocalTeamPlayers((prev) => prev.filter((tp) => tp.team_id !== teamId));
+    setLocalPoolTeams((prev) => prev.filter((pt) => pt.team_id !== teamId));
+    setToast("Équipe supprimée");
+  };
+
+  const handleAssignPlayer = async (teamId: string, playerId: string) => {
+    const currentCount = teamPlayerMap.get(teamId)?.length ?? 0;
+    if (currentCount >= 2) {
+      setToast("Équipe complète (2/2)");
+      return;
+    }
+
+    await assignPlayerToTeamAction(teamId, playerId, adminToken);
+    setLocalTeamPlayers((prev) => [
+      ...prev.filter((tp) => tp.player_id !== playerId),
+      { team_id: teamId, player_id: playerId, created_at: "" },
+    ]);
+    setToast("Joueur ajouté");
+  };
+
+  const handleRemovePlayer = async (playerId: string) => {
+    await removePlayerFromTeamAction(playerId, adminToken);
+    setLocalTeamPlayers((prev) => prev.filter((tp) => tp.player_id !== playerId));
+    setToast("Joueur retiré");
+  };
+
+  const handleUpdateTeamName = async (teamId: string, name: string) => {
+    await updateTeamNameAction(teamId, name, adminToken);
+    setLocalTeams((prev) => prev.map((team) => (team.id === teamId ? { ...team, name } : team)));
+  };
+
+  const ensurePools = async () => {
+    console.info("[tournament-admin] ensurePools click", {
+      tournamentId: tournament.id,
+      poolsCount,
+      adminTokenPresent: Boolean(adminToken),
+    });
+    if (poolsCount <= 0) {
+      console.warn("[tournament-admin] poolsCount invalid", { poolsCount });
+      return;
+    }
+    await ensurePoolsAction(tournament.id, poolsCount, adminToken);
+    console.info("[tournament-admin] ensurePools done");
+  };
+
+  const handleAssignTeamToPool = async (teamId: string, poolId: string) => {
+    if (!completeTeamIds.has(teamId)) {
+      setToast("Équipe incomplète (2/2 requis)");
+      return;
+    }
+    await assignTeamToPoolAction(teamId, poolId, adminToken);
+    setLocalPoolTeams((prev) => [
+      ...prev.filter((pt) => pt.team_id !== teamId),
+      { pool_id: poolId, team_id: teamId, created_at: "" },
+    ]);
+    setToast("Équipe assignée à la poule");
+  };
+
+  const handleRemoveTeamFromPool = async (teamId: string) => {
+    await removeTeamFromPoolAction(teamId, adminToken);
+    setLocalPoolTeams((prev) => prev.filter((pt) => pt.team_id !== teamId));
+    setToast("Équipe retirée de la poule");
+  };
+
+  const handleUpdatePoolName = async (poolId: string, name: string) => {
+    await updatePoolNameAction(poolId, name, adminToken);
+    setLocalPools((prev) => prev.map((pool) => (pool.id === poolId ? { ...pool, name } : pool)));
+  };
+
+  const handleDragEnd = async ({ active, over }: { active: { id: string }; over: { id: string } | null }) => {
+    if (!over) return;
+    const activeId = String(active.id);
+    const overId = String(over.id);
+
+    if (activeId.startsWith("player:")) {
+      const playerId = activeId.replace("player:", "");
+      if (overId === "drop:unassignedPlayers") {
+        await handleRemovePlayer(playerId);
+        return;
+      }
+      if (overId.startsWith("drop:team:")) {
+        const teamId = overId.replace("drop:team:", "");
+        await handleAssignPlayer(teamId, playerId);
+      }
+    }
+
+    if (activeId.startsWith("team:")) {
+      const teamId = activeId.replace("team:", "");
+      if (overId === "drop:unassignedTeams") {
+        await handleRemoveTeamFromPool(teamId);
+        return;
+      }
+      if (overId.startsWith("drop:pool:")) {
+        const poolId = overId.replace("drop:pool:", "");
+        await handleAssignTeamToPool(teamId, poolId);
+      }
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      {toast ? <Toast message={toast} /> : null}
+      <Tabs defaultValue="teams" className="w-full">
+        <TabsList className="rounded-full bg-white/10 p-1">
+          <TabsTrigger value="teams" className="rounded-full px-4 py-2">
+            Équipes
+          </TabsTrigger>
+          <TabsTrigger value="pools" className="rounded-full px-4 py-2">
+            Poules
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="teams" className="mt-6">
+          <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
+            <div className="grid gap-6 lg:grid-cols-[1fr_1.4fr]">
+              <Card className="rounded-2xl border border-white/10 bg-white/5 p-4 text-white shadow-card">
+                <p className="text-sm font-semibold text-white">Joueurs validés</p>
+                <div className="mt-4 max-h-[60vh] overflow-y-auto pr-1">
+                  <DroppableArea id="drop:unassignedPlayers" className="space-y-2">
+                    {unassignedPlayers.map((player) => (
+                      <DraggableItem
+                        key={player.id}
+                        id={`player:${player.id}`}
+                        className="flex items-center justify-between rounded-xl border border-white/10 bg-white/10 px-3 py-2 text-xs shadow-sm"
+                      >
+                        <span>
+                          {player.first_name} {player.last_name}
+                        </span>
+                        <span className="text-white/50">Drag</span>
+                      </DraggableItem>
+                    ))}
+                    {!unassignedPlayers.length ? (
+                      <p className="text-xs text-white/60">Tous les joueurs sont assignés.</p>
+                    ) : null}
+                  </DroppableArea>
+                </div>
+              </Card>
+
+              <Card className="rounded-2xl border border-white/10 bg-white p-4 text-brand-charcoal shadow-card">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-semibold">Équipes</p>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="bg-brand-violet text-white hover:bg-brand-violet/90 hover:text-white"
+                    onClick={handleCreateTeam}
+                  >
+                    Créer une équipe
+                  </Button>
+                </div>
+                <div className="mt-4 max-h-[60vh] overflow-y-auto pr-1">
+                  <div className="grid gap-4">
+                    {localTeams.map((team) => {
+                      const players = teamPlayerMap.get(team.id) ?? [];
+                      return (
+                        <div key={team.id} className="rounded-2xl border border-border p-3">
+                          <div className="flex items-center justify-between gap-2">
+                            <input
+                              className="w-full rounded-xl border border-border px-3 py-2 text-sm"
+                              placeholder="Nom d’équipe"
+                              defaultValue={team.name ?? ""}
+                              onBlur={(event) => handleUpdateTeamName(team.id, event.target.value)}
+                            />
+                            {players.length === 0 ? (
+                              <Button
+                                type="button"
+                                variant="outline"
+                                className="bg-brand-violet text-white hover:bg-brand-violet/90 hover:text-white"
+                                onClick={() => handleDeleteTeam(team.id)}
+                              >
+                                Supprimer
+                              </Button>
+                            ) : null}
+                          </div>
+                          <DroppableArea
+                            id={`drop:team:${team.id}`}
+                            className="mt-3 space-y-2 rounded-2xl border border-dashed border-border p-2"
+                          >
+                            {[0, 1].map((slot) => {
+                              const playerId = players[slot];
+                              const player = playerId ? playerById.get(playerId) : null;
+                              return (
+                                <div
+                                  key={`${team.id}-${slot}`}
+                                  className="flex items-center justify-between rounded-xl bg-white px-3 py-2 text-xs"
+                                >
+                                  {player ? (
+                                    <DraggableItem id={`player:${player.id}`} className="flex-1">
+                                      <span>
+                                        {player.first_name} {player.last_name}
+                                      </span>
+                                    </DraggableItem>
+                                  ) : (
+                                    <span className="text-muted-foreground">Slot libre</span>
+                                  )}
+                                </div>
+                              );
+                            })}
+                            <p className="text-xs text-muted-foreground">
+                              {players.length}/2 joueurs
+                            </p>
+                          </DroppableArea>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </Card>
+            </div>
+          </DndContext>
+        </TabsContent>
+
+        <TabsContent value="pools" className="mt-6">
+          <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
+            <div className="flex items-center justify-between">
+              <p className="text-sm font-semibold text-white">Poules</p>
+              <Button
+                type="button"
+                variant="outline"
+                className="bg-brand-violet text-white hover:bg-brand-violet/90 hover:text-white"
+                onClick={ensurePools}
+                disabled={isEnsuringPools}
+              >
+                Générer les poules
+              </Button>
+            </div>
+            <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_2fr]">
+              <Card className="rounded-2xl border border-white/10 bg-white/5 p-4 text-white shadow-card">
+                <p className="text-sm font-semibold">Équipes complètes</p>
+                <DroppableArea id="drop:unassignedTeams" className="mt-4 space-y-2">
+                  {unassignedTeams.map((team) => (
+                    <DraggableItem
+                      key={team.id}
+                      id={`team:${team.id}`}
+                      className="rounded-xl border border-white/10 bg-white/10 px-3 py-2 text-xs"
+                    >
+                      <p className="font-semibold text-white">{team.name || "Équipe"}</p>
+                      <p className="text-white/70">
+                        {(teamPlayerMap.get(team.id) ?? [])
+                          .map((playerId) => {
+                            const player = playerById.get(playerId);
+                            return player ? `${player.first_name} ${player.last_name}` : "";
+                          })
+                          .filter(Boolean)
+                          .join(" / ")}
+                      </p>
+                    </DraggableItem>
+                  ))}
+                </DroppableArea>
+              </Card>
+
+              <div className="grid gap-4 md:grid-cols-2">
+                {localPools.map((pool) => (
+                  <Card key={pool.id} className="rounded-2xl border border-border bg-white p-4 shadow-card">
+                    <input
+                      className="w-full rounded-xl border border-border px-3 py-2 text-sm"
+                      defaultValue={pool.name}
+                      onBlur={(event) => handleUpdatePoolName(pool.id, event.target.value)}
+                    />
+                    <DroppableArea
+                      id={`drop:pool:${pool.id}`}
+                      className="mt-4 space-y-2 rounded-2xl border border-dashed border-border p-2"
+                    >
+                      {(teamIdsByPool.get(pool.id) ?? []).map((teamId) => {
+                        const team = localTeams.find((item) => item.id === teamId);
+                        if (!team) return null;
+                        return (
+                          <DraggableItem
+                            key={team.id}
+                            id={`team:${team.id}`}
+                            className="rounded-xl border border-border bg-white px-3 py-2 text-xs"
+                          >
+                            <p className="font-semibold text-brand-charcoal">
+                              {team.name || "Équipe"}
+                            </p>
+                            <p className="text-muted-foreground">
+                              {(teamPlayerMap.get(team.id) ?? [])
+                                .map((playerId) => {
+                                  const player = playerById.get(playerId);
+                                  return player ? `${player.first_name} ${player.last_name}` : "";
+                                })
+                                .filter(Boolean)
+                                .join(" / ")}
+                            </p>
+                          </DraggableItem>
+                        );
+                      })}
+                    </DroppableArea>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          </DndContext>
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+}

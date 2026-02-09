@@ -66,3 +66,30 @@ export type PlayerStats = {
   approved_registrations: number;
   last_registered_at: string | null;
 };
+
+export type Team = {
+  id: string;
+  tournament_id: string;
+  name: string | null;
+  created_at: string;
+};
+
+export type TeamPlayer = {
+  team_id: string;
+  player_id: string;
+  created_at: string;
+};
+
+export type Pool = {
+  id: string;
+  tournament_id: string;
+  name: string;
+  pool_order: number;
+  created_at: string;
+};
+
+export type PoolTeam = {
+  pool_id: string;
+  team_id: string;
+  created_at: string;
+};
