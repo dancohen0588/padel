@@ -317,26 +317,45 @@ export function TournamentConfigContent({
     }
   };
 
+  const getInitials = (player: PlayerItem) =>
+    `${player.first_name?.[0] ?? ""}${player.last_name?.[0] ?? ""}`.toUpperCase() || "??";
+
   return (
     <div className="space-y-6">
       {toast ? <Toast message={toast} /> : null}
       {mode === "teams" ? (
         <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
           <div className="grid gap-6 lg:grid-cols-[1fr_1.4fr]">
-            <Card className="rounded-2xl border border-white/10 bg-white/5 p-4 text-white shadow-card">
-              <p className="text-sm font-semibold text-white">Joueurs validés</p>
-              <div className="mt-4 max-h-[60vh] overflow-y-auto pr-1">
+            <Card className="rounded-2xl border border-violet-400/30 bg-violet-500/10 p-5 text-white shadow-card">
+              <div className="flex items-center gap-3 border-b border-white/10 pb-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-violet-400 to-violet-600 text-lg">
+                  🎯
+                </div>
+                <div>
+                  <p className="text-sm font-semibold">Joueurs disponibles</p>
+                  <p className="text-xs text-white/60">À glisser dans les équipes</p>
+                </div>
+                <span className="ml-auto text-xs font-semibold text-white/60">
+                  {unassignedPlayers.length}
+                </span>
+              </div>
+              <div className="mt-4 max-h-[60vh] overflow-y-auto pr-2">
                 <DroppableArea id="drop:unassignedPlayers" className="space-y-2">
                   {unassignedPlayers.map((player) => (
                     <DraggableItem
                       key={player.id}
                       id={`player:${player.id}`}
-                      className="flex items-center justify-between rounded-xl border border-white/10 bg-white/10 px-3 py-2 text-xs shadow-sm"
+                      className="flex items-center justify-between gap-3 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs transition hover:translate-x-1 hover:border-violet-300/60 hover:bg-violet-500/15"
                     >
-                      <span>
-                        {player.first_name} {player.last_name}
-                      </span>
-                      <span className="text-white/50">Drag</span>
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-violet-400 to-violet-600 text-xs font-semibold">
+                          {getInitials(player)}
+                        </div>
+                        <span className="text-xs font-semibold">
+                          {player.first_name} {player.last_name}
+                        </span>
+                      </div>
+                      <span className="text-base text-white/30">⋮⋮</span>
                     </DraggableItem>
                   ))}
                   {!unassignedPlayers.length ? (
@@ -346,45 +365,54 @@ export function TournamentConfigContent({
               </div>
             </Card>
 
-            <Card className="rounded-2xl border border-white/10 bg-white p-4 text-brand-charcoal shadow-card">
-              <div className="flex items-center justify-between">
-                <p className="text-sm font-semibold">Équipes</p>
+            <Card className="rounded-2xl border border-white/10 bg-white/5 p-5 text-white shadow-card">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <p className="bg-gradient-to-br from-orange-400 to-amber-200 bg-clip-text text-sm font-semibold text-transparent">
+                  Équipes du tournoi
+                </p>
                 <Button
                   type="button"
                   variant="outline"
-                  className="bg-brand-violet text-white hover:bg-brand-violet/90 hover:text-white"
+                  className="rounded-xl border-none bg-gradient-to-br from-orange-400 to-orange-500 px-4 py-2 text-xs font-semibold text-white shadow-md transition hover:translate-y-[-1px] hover:shadow-lg"
                   onClick={handleCreateTeam}
                 >
                   Créer une équipe
                 </Button>
               </div>
               <div className="mt-4 max-h-[60vh] overflow-y-auto pr-1">
-                <div className="grid gap-4">
+                <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                   {localTeams.map((team) => {
                     const players = teamPlayerMap.get(team.id) ?? [];
+                    const isComplete = players.length >= 2;
                     return (
-                      <div key={team.id} className="rounded-2xl border border-border p-3">
-                        <div className="flex items-center justify-between gap-2">
+                      <div
+                        key={team.id}
+                        className={`rounded-2xl border p-4 transition ${
+                          isComplete
+                            ? "border-emerald-400/40 bg-emerald-500/5"
+                            : "border-white/10 bg-white/5"
+                        }`}
+                      >
+                        <div className="flex items-center gap-2">
                           <input
-                            className="w-full rounded-xl border border-border px-3 py-2 text-sm"
-                            placeholder="Nom d’équipe"
+                            className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs font-semibold text-white placeholder:text-white/30 focus:border-orange-400 focus:outline-none"
+                            placeholder="Nom de l’équipe"
                             defaultValue={team.name ?? ""}
                             onBlur={(event) => handleUpdateTeamName(team.id, event.target.value)}
                           />
                           {players.length === 0 ? (
-                            <Button
+                            <button
                               type="button"
-                              variant="outline"
-                              className="bg-brand-violet text-white hover:bg-brand-violet/90 hover:text-white"
+                              className="rounded-xl border border-red-500/40 bg-red-500/10 px-3 py-2 text-xs font-semibold text-red-400 transition hover:bg-red-500/20"
                               onClick={() => handleDeleteTeam(team.id)}
                             >
-                              Supprimer
-                            </Button>
+                              ✕
+                            </button>
                           ) : null}
                         </div>
                         <DroppableArea
                           id={`drop:team:${team.id}`}
-                          className="mt-3 space-y-2 rounded-2xl border border-dashed border-border p-2"
+                          className="mt-3 space-y-2 rounded-xl border border-dashed border-white/15 bg-white/5 p-3"
                         >
                           {[0, 1].map((slot) => {
                             const playerId = players[slot];
@@ -392,24 +420,38 @@ export function TournamentConfigContent({
                             return (
                               <div
                                 key={`${team.id}-${slot}`}
-                                className="flex items-center justify-between rounded-xl bg-white px-3 py-2 text-xs"
+                                className={`flex items-center gap-3 rounded-xl px-3 py-2 text-xs ${
+                                  player
+                                    ? "border border-emerald-400/30 bg-emerald-500/10"
+                                    : "border border-white/10 bg-white/5"
+                                }`}
                               >
                                 {player ? (
-                                  <DraggableItem id={`player:${player.id}`} className="flex-1">
-                                    <span>
+                                  <DraggableItem id={`player:${player.id}`} className="flex flex-1 items-center gap-3">
+                                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-violet-400 to-violet-600 text-[10px] font-semibold">
+                                      {getInitials(player)}
+                                    </div>
+                                    <span className="text-xs font-semibold">
                                       {player.first_name} {player.last_name}
                                     </span>
                                   </DraggableItem>
                                 ) : (
-                                  <span className="text-muted-foreground">Slot libre</span>
+                                  <span className="text-xs text-white/40">Glissez un joueur ici...</span>
                                 )}
                               </div>
                             );
                           })}
-                          <p className="text-xs text-muted-foreground">
-                            {players.length}/2 joueurs
-                          </p>
                         </DroppableArea>
+                        <div className="mt-3 flex items-center justify-between border-t border-white/10 pt-3">
+                          {isComplete ? (
+                            <span className="inline-flex items-center gap-2 rounded-full bg-emerald-500/20 px-3 py-1 text-[10px] font-semibold uppercase tracking-wide text-emerald-300">
+                              <span className="h-1.5 w-1.5 rounded-full bg-emerald-300" />
+                              Complète
+                            </span>
+                          ) : (
+                            <span className="text-xs text-white/50">{players.length}/2 joueurs</span>
+                          )}
+                        </div>
                       </div>
                     );
                   })}

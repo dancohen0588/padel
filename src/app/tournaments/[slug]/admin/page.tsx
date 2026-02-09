@@ -80,7 +80,7 @@ export default async function TournamentAdminPage({
         <Tabs defaultValue="pending" className="w-full">
           <TabsList className="flex w-full flex-wrap gap-2 rounded-2xl bg-white p-2 shadow-card">
             <TabsTrigger value="pending">À valider</TabsTrigger>
-            <TabsTrigger value="approved">Validés</TabsTrigger>
+            <TabsTrigger value="approved">Joueurs</TabsTrigger>
             <TabsTrigger value="teams">Équipes</TabsTrigger>
             <TabsTrigger value="pools">Poules</TabsTrigger>
             <TabsTrigger value="matches">Matchs & Classements</TabsTrigger>
