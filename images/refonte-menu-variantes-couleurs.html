@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menu Admin - Variantes de couleurs</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #1E1E2E;
+            color: white;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .variant-section {
+            margin-bottom: 80px;
+            padding: 40px;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .variant-label {
+            background: rgba(255, 255, 255, 0.05);
+            border-left: 4px solid #ff6b35;
+            padding: 12px 20px;
+            margin-bottom: 30px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        /* Header Common */
+        .header-card {
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .title-row {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+
+        .title-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .title-text {
+            flex: 1;
+        }
+
+        .title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .subtitle {
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .subtitle-divider {
+            color: rgba(255, 255, 255, 0.3);
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.2); }
+        }
+
+        /* VARIANTE 1 - Dark/Transparent */
+        .variant-1 .header-card {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .variant-1 .header-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(255, 107, 53, 0.08) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .variant-1 .title-icon {
+            background: linear-gradient(135deg, #ff6b35 0%, #ff8c42 100%);
+        }
+
+        .variant-1 .title {
+            background: linear-gradient(135deg, #ff6b35 0%, #FFDA77 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .variant-1 .subtitle {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .variant-1 .status-badge {
+            background: rgba(76, 175, 80, 0.15);
+            color: #4CAF50;
+            border: 1px solid rgba(76, 175, 80, 0.3);
+        }
+
+        .variant-1 .status-dot {
+            background: #4CAF50;
+        }
+
+        .variant-1 .nav-tabs {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 18px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .variant-1 .tab {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .variant-1 .tab:hover {
+            border-color: rgba(255, 107, 53, 0.4);
+            background: rgba(255, 107, 53, 0.1);
+            color: white;
+        }
+
+        .variant-1 .tab.active {
+            background: linear-gradient(135deg, #ff6b35 0%, #ff8c42 100%);
+            color: white;
+            border-color: transparent;
+            box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
+        }
+
+        /* VARIANTE 2 - Gradient Orange Doux */
+        .variant-2 .header-card {
+            background: linear-gradient(135deg, rgba(255, 107, 53, 0.15) 0%, rgba(255, 140, 66, 0.08) 100%);
+            border: 1px solid rgba(255, 107, 53, 0.25);
+        }
+
+        .variant-2 .title-icon {
+            background: linear-gradient(135deg, #ff6b35 0%, #ff8c42 100%);
+        }
+
+        .variant-2 .title {
+            color: white;
+        }
+
+        .variant-2 .subtitle {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .variant-2 .status-badge {
+            background: rgba(76, 175, 80, 0.2);
+            color: #4CAF50;
+            border: 1px solid rgba(76, 175, 80, 0.4);
+        }
+
+        .variant-2 .status-dot {
+            background: #4CAF50;
+        }
+
+        .variant-2 .nav-tabs {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.15);
+            border-radius: 18px;
+            border: 1px solid rgba(255, 107, 53, 0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        .variant-2 .tab {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 20px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 2px solid rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .variant-2 .tab:hover {
+            border-color: rgba(255, 107, 53, 0.5);
+            background: rgba(255, 107, 53, 0.15);
+            color: white;
+        }
+
+        .variant-2 .tab.active {
+            background: rgba(255, 107, 53, 0.25);
+            color: white;
+            border-color: rgba(255, 107, 53, 0.6);
+            box-shadow: 0 0 20px rgba(255, 107, 53, 0.3);
+        }
+
+        /* VARIANTE 3 - Violet Premium */
+        .variant-3 .header-card {
+            background: linear-gradient(135deg, rgba(157, 122, 250, 0.12) 0%, rgba(123, 95, 216, 0.06) 100%);
+            border: 1px solid rgba(157, 122, 250, 0.25);
+        }
+
+        .variant-3 .title-icon {
+            background: linear-gradient(135deg, #9D7AFA 0%, #7B5FD8 100%);
+        }
+
+        .variant-3 .title {
+            background: linear-gradient(135deg, #9D7AFA 0%, #C9B3FF 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .variant-3 .subtitle {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .variant-3 .status-badge {
+            background: rgba(76, 175, 80, 0.2);
+            color: #4CAF50;
+            border: 1px solid rgba(76, 175, 80, 0.4);
+        }
+
+        .variant-3 .status-dot {
+            background: #4CAF50;
+        }
+
+        .variant-3 .nav-tabs {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            padding: 20px;
+            background: rgba(157, 122, 250, 0.08);
+            border-radius: 18px;
+            border: 1px solid rgba(157, 122, 250, 0.2);
+        }
+
+        .variant-3 .tab {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .variant-3 .tab:hover {
+            border-color: rgba(157, 122, 250, 0.5);
+            background: rgba(157, 122, 250, 0.12);
+            color: white;
+        }
+
+        .variant-3 .tab.active {
+            background: linear-gradient(135deg, #9D7AFA 0%, #7B5FD8 100%);
+            color: white;
+            border-color: transparent;
+            box-shadow: 0 4px 15px rgba(157, 122, 250, 0.35);
+        }
+
+        /* VARIANTE 4 - Multi-couleurs */
+        .variant-4 .header-card {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .variant-4 .title-icon {
+            background: linear-gradient(135deg, #ff6b35 0%, #ff8c42 100%);
+        }
+
+        .variant-4 .title {
+            background: linear-gradient(135deg, #ff6b35 0%, #9D7AFA 50%, #FFDA77 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .variant-4 .subtitle {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .variant-4 .status-badge {
+            background: rgba(76, 175, 80, 0.15);
+            color: #4CAF50;
+            border: 1px solid rgba(76, 175, 80, 0.3);
+        }
+
+        .variant-4 .status-dot {
+            background: #4CAF50;
+        }
+
+        .variant-4 .nav-tabs {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 18px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .variant-4 .tab {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .variant-4 .tab:hover {
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .variant-4 .tab:nth-child(1):hover {
+            border-color: rgba(255, 218, 119, 0.5);
+            background: rgba(255, 218, 119, 0.1);
+        }
+
+        .variant-4 .tab:nth-child(2):hover {
+            border-color: rgba(76, 175, 80, 0.5);
+            background: rgba(76, 175, 80, 0.1);
+        }
+
+        .variant-4 .tab:nth-child(3):hover {
+            border-color: rgba(255, 107, 53, 0.5);
+            background: rgba(255, 107, 53, 0.1);
+        }
+
+        .variant-4 .tab:nth-child(4):hover {
+            border-color: rgba(157, 122, 250, 0.5);
+            background: rgba(157, 122, 250, 0.1);
+        }
+
+        .variant-4 .tab:nth-child(5):hover {
+            border-color: rgba(255, 107, 53, 0.5);
+            background: rgba(255, 107, 53, 0.1);
+        }
+
+        .variant-4 .tab:nth-child(1).active {
+            background: linear-gradient(135deg, #FFDA77 0%, #FFE699 100%);
+            color: #1E1E2E;
+            border-color: transparent;
+            box-shadow: 0 4px 15px rgba(255, 218, 119, 0.3);
+        }
+
+        .variant-4 .tab:nth-child(2).active {
+            background: linear-gradient(135deg, #4CAF50 0%, #66BB6A 100%);
+            color: white;
+            border-color: transparent;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+        }
+
+        .variant-4 .tab:nth-child(3).active {
+            background: linear-gradient(135deg, #ff6b35 0%, #ff8c42 100%);
+            color: white;
+            border-color: transparent;
+            box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
+        }
+
+        .variant-4 .tab:nth-child(4).active {
+            background: linear-gradient(135deg, #9D7AFA 0%, #7B5FD8 100%);
+            color: white;
+            border-color: transparent;
+            box-shadow: 0 4px 15px rgba(157, 122, 250, 0.3);
+        }
+
+        .variant-4 .tab:nth-child(5).active {
+            background: linear-gradient(135deg, #ff6b35 0%, #ff8c42 100%);
+            color: white;
+            border-color: transparent;
+            box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
+        }
+
+        /* Common Tab Elements */
+        .tab-icon {
+            font-size: 1.2rem;
+        }
+
+        .tab-label {
+            flex: 1;
+        }
+
+        .tab-counter {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 4px 10px;
+            border-radius: 10px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .tab.active .tab-counter {
+            background: rgba(255, 255, 255, 0.25);
+        }
+
+        .variant-4 .tab:nth-child(1).active .tab-counter {
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        /* Recommendation Box */
+        .recommendation {
+            margin-top: 40px;
+            padding: 25px;
+            background: rgba(157, 122, 250, 0.08);
+            border-radius: 16px;
+            border: 1px solid rgba(157, 122, 250, 0.2);
+        }
+
+        .recommendation-title {
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: #9D7AFA;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .recommendation-text {
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 style="font-size: 2.5rem; margin-bottom: 15px; background: linear-gradient(135deg, #ff6b35 0%, #9D7AFA 50%, #FFDA77 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; text-align: center;">🎨 Variantes de couleurs pour le menu</h1>
+        <p style="text-align: center; color: rgba(255, 255, 255, 0.5); margin-bottom: 60px;">Explorez différentes options de couleurs tout en respectant la charte urban-sport</p>
+
+        <!-- VARIANTE 1 - Dark/Transparent -->
+        <div class="variant-section variant-1">
+            <div class="variant-label">✨ Variante 1 - Dark/Transparent (Élégant et discret)</div>
+
+            <div class="header-card">
+                <div class="header-content">
+                    <div class="title-row">
+                        <div class="title-icon">🏆</div>
+                        <div class="title-text">
+                            <h1 class="title">Configurer le tournoi</h1>
+                            <div class="subtitle">
+                                <span>Test Tournoi 2</span>
+                                <span class="subtitle-divider">•</span>
+                                <span>📅 2026-02-15</span>
+                                <span class="subtitle-divider">•</span>
+                                <span>📍 Paris</span>
+                            </div>
+                        </div>
+                        <div class="status-badge">
+                            <span class="status-dot"></span>
+                            <span>PUBLIÉ</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="nav-tabs">
+                <button class="tab active">
+                    <span class="tab-icon">📋</span>
+                    <span class="tab-label">À valider</span>
+                    <span class="tab-counter">5</span>
+                </button>
+                <button class="tab">
+                    <span class="tab-icon">✓</span>
+                    <span class="tab-label">Joueurs</span>
+                    <span class="tab-counter">12</span>
+                </button>
+                <button class="tab">
+                    <span class="tab-icon">👥</span>
+                    <span class="tab-label">Équipes</span>
+                    <span class="tab-counter">6</span>
+                </button>
+                <button class="tab">
+                    <span class="tab-icon">🏆</span>
+                    <span class="tab-label">Poules</span>
+                    <span class="tab-counter">4</span>
+                </button>
+                <button class="tab">
+                    <span class="tab-icon">⚔️</span>
+                    <span class="tab-label">Matchs & Classements</span>
+                </button>
+            </div>
+
+            <div class="recommendation">
+                <div class="recommendation-title">
+                    <span style="font-size: 1.2rem;">👍</span>
+                    <span>Idéal pour :</span>
+                </div>
+                <p class="recommendation-text">
+                    Design épuré et professionnel. S'intègre parfaitement avec le fond dark. L'accent orange sur l'onglet actif attire l'œil sans être agressif.
+                </p>
+            </div>
+        </div>
+
+        <!-- VARIANTE 2 - Gradient Orange Doux -->
+        <div class="variant-section variant-2">
+            <div class="variant-label" style="border-left-color: #ff8c42;">🔥 Variante 2 - Gradient Orange Doux (Chaleureux et engageant)</div>
+
+            <div class="header-card">
+                <div class="header-content">
+                    <div class="title-row">
+                        <div class="title-icon">🏆</div>
+                        <div class="title-text">
+                            <h1 class="title">Configurer le tournoi</h1>
+                            <div class="subtitle">
+                                <span>Test Tournoi 2</span>
+                                <span class="subtitle-divider">•</span>
+                                <span>📅 2026-02-15</span>
+                                <span class="subtitle-divider">•</span>
+                                <span>📍 Paris</span>
+                            </div>
+                        </div>
+                        <div class="status-badge">
+                            <span class="status-dot"></span>
+                            <span>PUBLIÉ</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="nav-tabs">
+                <button class="tab active">
+                    <span class="tab-icon">📋</span>
+                    <span class="tab-label">À valider</span>
+                    <span class="tab-counter">5</span>
+                </button>
+                <button class="tab">
+                    <span class="tab-icon">✓</span>
+                    <span class="tab-label">Joueurs</span>
+                    <span class="tab-counter">12</span>
+                </button>
+                <button class="tab">
+                    <span class="tab-icon">👥</span>
+                    <span class="tab-label">Équipes</span>
+                    <span class="tab-counter">6</span>
+                </button>
+                <button class="tab">
+                    <span class="tab-icon">🏆</span>
+                    <span class="tab-label">Poules</span>
+                    <span class="tab-counter">4</span>
+                </button>
+                <button class="tab">
+                    <span class="tab-icon">⚔️</span>
+                    <span class="tab-label">Matchs & Classements</span>
+                </button>
+            </div>
+
+            <div class="recommendation">
+                <div class="recommendation-title">
+                    <span style="font-size: 1.2rem;">🎯</span>
+                    <span>Idéal pour :</span>
+                </div>
+                <p class="recommendation-text">
+                    Créer une ambiance chaleureuse et énergique. Le gradient orange subtil renforce l'identité visuelle sans être trop présent. L'effet glassmorphism sur le menu apporte une touche moderne.
+                </p>
+            </div>
+        </div>
+
+        <!-- VARIANTE 3 - Violet Premium -->
+        <div class="variant-section variant-3">
+            <div class="variant-label" style="border-left-color: #9D7AFA;">💜 Variante 3 - Violet Premium (Raffiné et moderne)</div>
+
+            <div class="header-card">
+                <div class="header-content">
+                    <div class="title-row">
+                        <div class="title-icon">🏆</div>
+                        <div class="title-text">
+                            <h1 class="title">Configurer le tournoi</h1>
+                            <div class="subtitle">
+                                <span>Test Tournoi 2</span>
+                                <span class="subtitle-divider">•</span>
+                                <span>📅 2026-02-15</span>
+                                <span class="subtitle-divider">•</span>
+                                <span>📍 Paris</span>
+                            </div>
+                        </div>
+                        <div class="status-badge">
+                            <span class="status-dot"></span>
+                            <span>PUBLIÉ</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="nav-tabs">
+                <button class="tab active">
+                    <span class="tab-icon">📋</span>
+                    <span class="tab-label">À valider</span>
+                    <span class="tab-counter">5</span>
+                </button>
+                <button class="tab">
+                    <span class="tab-icon">✓</span>
+                    <span class="tab-label">Joueurs</span>
+                    <span class="tab-counter">12</span>
+                </button>
+                <button class="tab">
+                    <span class="tab-icon">👥</span>
+                    <span class="tab-label">Équipes</span>
+                    <span class="tab-counter">6</span>
+                </button>
+                <button class="tab">
+                    <span class="tab-icon">🏆</span>
+                    <span class="tab-label">Poules</span>
+                    <span class="tab-counter">4</span>
+                </button>
+                <button class="tab">
+                    <span class="tab-icon">⚔️</span>
+                    <span class="tab-label">Matchs & Classements</span>
+                </button>
+            </div>
+
+            <div class="recommendation">
+                <div class="recommendation-title">
+                    <span style="font-size: 1.2rem;">✨</span>
+                    <span>Idéal pour :</span>
+                </div>
+                <p class="recommendation-text">
+                    Look premium et sophistiqué. Le violet est moins commun dans les interfaces sportives, ce qui rend le design unique. Parfait pour se démarquer tout en restant élégant.
+                </p>
+            </div>
+        </div>
+
+        <!-- VARIANTE 4 - Multi-couleurs -->
+        <div class="variant-section variant-4">
+            <div class="variant-label" style="border-left-color: #FFDA77;">🌈 Variante 4 - Multi-couleurs (Coloré et ludique)</div>
+
+            <div class="header-card">
+                <div class="header-content">
+                    <div class="title-row">
+                        <div class="title-icon">🏆</div>
+                        <div class="title-text">
+                            <h1 class="title">Configurer le tournoi</h1>
+                            <div class="subtitle">
+                                <span>Test Tournoi 2</span>
+                                <span class="subtitle-divider">•</span>
+                                <span>📅 2026-02-15</span>
+                                <span class="subtitle-divider">•</span>
+                                <span>📍 Paris</span>
+                            </div>
+                        </div>
+                        <div class="status-badge">
+                            <span class="status-dot"></span>
+                            <span>PUBLIÉ</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="nav-tabs">
+                <button class="tab active">
+                    <span class="tab-icon">📋</span>
+                    <span class="tab-label">À valider</span>
+                    <span class="tab-counter">5</span>
+                </button>
+                <button class="tab">
+                    <span class="tab-icon">✓</span>
+                    <span class="tab-label">Joueurs</span>
+                    <span class="tab-counter">12</span>
+                </button>
+                <button class="tab">
+                    <span class="tab-icon">👥</span>
+                    <span class="tab-label">Équipes</span>
+                    <span class="tab-counter">6</span>
+                </button>
+                <button class="tab">
+                    <span class="tab-icon">🏆</span>
+                    <span class="tab-label">Poules</span>
+                    <span class="tab-counter">4</span>
+                </button>
+                <button class="tab">
+                    <span class="tab-icon">⚔️</span>
+                    <span class="tab-label">Matchs & Classements</span>
+                </button>
+            </div>
+
+            <div class="recommendation">
+                <div class="recommendation-title">
+                    <span style="font-size: 1.2rem;">🎨</span>
+                    <span>Idéal pour :</span>
+                </div>
+                <p class="recommendation-text">
+                    Interface ludique et dynamique qui utilise toute la palette de couleurs de la charte. Chaque onglet a sa propre identité colorée, facilitant la navigation visuelle. Parfait pour un tournoi convivial et festif.
+                </p>
+            </div>
+        </div>
+
+        <!-- Comparaison Finale -->
+        <div style="margin-top: 60px; padding: 40px; background: linear-gradient(135deg, rgba(255, 107, 53, 0.1) 0%, rgba(157, 122, 250, 0.1) 100%); border-radius: 24px; border: 1px solid rgba(255, 255, 255, 0.1);">
+            <div style="text-align: center; margin-bottom: 30px;">
+                <h2 style="font-size: 1.8rem; margin-bottom: 12px; background: linear-gradient(135deg, #ff6b35 0%, #9D7AFA 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Quelle variante choisir ?</h2>
+                <p style="color: rgba(255, 255, 255, 0.6);">Chaque variante a ses avantages selon le style recherché</p>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+                <div style="background: rgba(255, 255, 255, 0.04); padding: 20px; border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.08);">
+                    <div style="font-weight: 700; margin-bottom: 8px; color: #ff6b35;">Variante 1</div>
+                    <div style="font-size: 0.85rem; color: rgba(255, 255, 255, 0.6);">Professional et sobre, excellent contraste, accessible</div>
+                </div>
+                <div style="background: rgba(255, 255, 255, 0.04); padding: 20px; border-radius: 16px; border: 1px solid rgba(255, 107, 53, 0.2);">
+                    <div style="font-weight: 700; margin-bottom: 8px; color: #ff8c42;">Variante 2 ⭐</div>
+                    <div style="font-size: 0.85rem; color: rgba(255, 255, 255, 0.6);">Identité forte, chaleureux, moderne avec glassmorphism</div>
+                </div>
+                <div style="background: rgba(255, 255, 255, 0.04); padding: 20px; border-radius: 16px; border: 1px solid rgba(157, 122, 250, 0.2);">
+                    <div style="font-weight: 700; margin-bottom: 8px; color: #9D7AFA;">Variante 3</div>
+                    <div style="font-size: 0.85rem; color: rgba(255, 255, 255, 0.6);">Premium et unique, se démarque, élégant</div>
+                </div>
+                <div style="background: rgba(255, 255, 255, 0.04); padding: 20px; border-radius: 16px; border: 1px solid rgba(255, 218, 119, 0.2);">
+                    <div style="font-weight: 700; margin-bottom: 8px; color: #FFDA77;">Variante 4</div>
+                    <div style="font-size: 0.85rem; color: rgba(255, 255, 255, 0.6);">Ludique et fun, navigation visuelle facile, festif</div>
+                </div>
+            </div>
+
+            <div style="margin-top: 30px; padding: 20px; background: rgba(255, 107, 53, 0.1); border-radius: 12px; border-left: 4px solid #ff6b35;">
+                <div style="font-weight: 700; margin-bottom: 8px; color: white;">💡 Recommandation personnelle</div>
+                <p style="color: rgba(255, 255, 255, 0.7); line-height: 1.6;">
+                    La <strong style="color: #ff8c42;">Variante 2 (Gradient Orange Doux)</strong> offre le meilleur équilibre entre identité visuelle forte et modernité. Elle renforce la charte urban-sport tout en restant élégante et professionnelle.
+                </p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

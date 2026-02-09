@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menu Admin - Variante Dark/Transparent</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #1E1E2E;
+            color: white;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Header Card */
+        .header-card {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(255, 107, 53, 0.08) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .header-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .title-row {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+
+        .title-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #ff6b35 0%, #ff8c42 100%);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+        }
+
+        .title-text {
+            flex: 1;
+        }
+
+        .title {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #ff6b35 0%, #FFDA77 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 6px;
+        }
+
+        .subtitle {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .subtitle-divider {
+            color: rgba(255, 255, 255, 0.3);
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(76, 175, 80, 0.15);
+            color: #4CAF50;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            border: 1px solid rgba(76, 175, 80, 0.3);
+        }
+
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #4CAF50;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 0.5;
+                transform: scale(1.2);
+            }
+        }
+
+        /* Navigation Tabs */
+        .nav-tabs {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 18px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .tab {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .tab:hover {
+            border-color: rgba(255, 107, 53, 0.4);
+            background: rgba(255, 107, 53, 0.1);
+            color: white;
+        }
+
+        .tab.active {
+            background: linear-gradient(135deg, #ff6b35 0%, #ff8c42 100%);
+            color: white;
+            border-color: transparent;
+            box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .tab-icon {
+            font-size: 1.2rem;
+        }
+
+        .tab-label {
+            flex: 1;
+        }
+
+        .tab-counter {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 4px 10px;
+            border-radius: 10px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .tab.active .tab-counter {
+            background: rgba(255, 255, 255, 0.25);
+        }
+
+        /* Content Placeholder */
+        .content-placeholder {
+            margin-top: 30px;
+            padding: 60px 40px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 2px dashed rgba(255, 255, 255, 0.1);
+            border-radius: 18px;
+            text-align: center;
+        }
+
+        .content-placeholder-icon {
+            font-size: 4rem;
+            margin-bottom: 15px;
+            opacity: 0.3;
+        }
+
+        .content-placeholder-text {
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header Card -->
+        <div class="header-card">
+            <div class="header-content">
+                <div class="title-row">
+                    <div class="title-icon">🏆</div>
+                    <div class="title-text">
+                        <h1 class="title">Configurer le tournoi</h1>
+                        <div class="subtitle">
+                            <span>Test Tournoi 2</span>
+                            <span class="subtitle-divider">•</span>
+                            <span>📅 2026-02-15</span>
+                            <span class="subtitle-divider">•</span>
+                            <span>📍 Paris</span>
+                        </div>
+                    </div>
+                    <div class="status-badge">
+                        <span class="status-dot"></span>
+                        <span>PUBLIÉ</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <div class="nav-tabs">
+            <button class="tab active">
+                <span class="tab-icon">📋</span>
+                <span class="tab-label">À valider</span>
+                <span class="tab-counter">5</span>
+            </button>
+            <button class="tab">
+                <span class="tab-icon">✓</span>
+                <span class="tab-label">Joueurs</span>
+                <span class="tab-counter">12</span>
+            </button>
+            <button class="tab">
+                <span class="tab-icon">👥</span>
+                <span class="tab-label">Équipes</span>
+                <span class="tab-counter">6</span>
+            </button>
+            <button class="tab">
+                <span class="tab-icon">🏆</span>
+                <span class="tab-label">Poules</span>
+                <span class="tab-counter">4</span>
+            </button>
+            <button class="tab">
+                <span class="tab-icon">⚔️</span>
+                <span class="tab-label">Matchs & Classements</span>
+            </button>
+        </div>
+
+        <!-- Content Placeholder -->
+        <div class="content-placeholder">
+            <div class="content-placeholder-icon">📋</div>
+            <div class="content-placeholder-text">Le contenu de l'onglet s'affichera ici</div>
+        </div>
+    </div>
+
+    <script>
+        // Gestion des tabs
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                // Retirer la classe active de tous les tabs
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                // Ajouter la classe active au tab cliqué
+                this.classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>
