@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Onglet "Poules" - Refonte Hybride</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #1E1E2E;
+            color: white;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .page-title {
+            font-size: 2.2rem;
+            background: linear-gradient(135deg, #ff6b35 0%, #FFDA77 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .btn-generate {
+            background: linear-gradient(135deg, #9D7AFA 0%, #7B5FD8 100%);
+            color: white;
+            padding: 14px 28px;
+            border-radius: 12px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(157, 122, 250, 0.25);
+            font-size: 0.95rem;
+        }
+
+        .btn-generate:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(157, 122, 250, 0.35);
+        }
+
+        /* Layout */
+        .pools-layout {
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            gap: 25px;
+        }
+
+        @media (max-width: 1024px) {
+            .pools-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Teams Pool */
+        .teams-pool {
+            background: rgba(255, 107, 53, 0.08);
+            border-radius: 18px;
+            padding: 25px;
+            border: 1px solid rgba(255, 107, 53, 0.2);
+            height: fit-content;
+            position: sticky;
+            top: 20px;
+        }
+
+        .pool-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .pool-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #ff6b35 0%, #ff8c42 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+        }
+
+        .pool-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        .pool-count {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.85rem;
+            margin-left: auto;
+        }
+
+        .team-item {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 14px;
+            margin-bottom: 10px;
+            cursor: grab;
+            transition: all 0.2s ease;
+        }
+
+        .team-item:hover {
+            background: rgba(255, 107, 53, 0.15);
+            border-color: rgba(255, 107, 53, 0.4);
+            transform: translateX(4px);
+        }
+
+        .team-item:active {
+            cursor: grabbing;
+        }
+
+        .team-name {
+            font-weight: 700;
+            font-size: 0.95rem;
+            margin-bottom: 6px;
+        }
+
+        .team-players {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.8rem;
+        }
+
+        .drag-indicator {
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 1rem;
+            float: right;
+        }
+
+        /* Pools Grid */
+        .pools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 20px;
+        }
+
+        .pool-card {
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.3s ease;
+        }
+
+        .pool-card:nth-child(1) {
+            border-color: rgba(255, 107, 53, 0.3);
+        }
+
+        .pool-card:nth-child(2) {
+            border-color: rgba(76, 175, 80, 0.3);
+        }
+
+        .pool-card:nth-child(3) {
+            border-color: rgba(157, 122, 250, 0.3);
+        }
+
+        .pool-card:nth-child(4) {
+            border-color: rgba(255, 218, 119, 0.3);
+        }
+
+        .pool-card-header {
+            margin-bottom: 15px;
+        }
+
+        .pool-name-input {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.06);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 12px 14px;
+            color: white;
+            font-size: 1rem;
+            font-weight: 700;
+        }
+
+        .pool-name-input:focus {
+            outline: none;
+            border-color: #ff6b35;
+        }
+
+        .drop-zone {
+            background: rgba(255, 255, 255, 0.02);
+            border: 2px dashed rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            padding: 12px;
+            min-height: 200px;
+        }
+
+        .drop-zone.dragover {
+            background: rgba(255, 107, 53, 0.1);
+            border-color: #ff6b35;
+        }
+
+        .drop-zone.empty {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .empty-text {
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 0.9rem;
+            text-align: center;
+        }
+
+        .assigned-team {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 8px;
+            cursor: grab;
+            transition: all 0.2s ease;
+        }
+
+        .assigned-team:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .pool-stats {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .pool-team-count {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .pool-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .pool-badge.ready {
+            background: rgba(76, 175, 80, 0.15);
+            color: #4CAF50;
+        }
+
+        .pool-badge.incomplete {
+            background: rgba(255, 218, 119, 0.15);
+            color: #FFDA77;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">🏆 Répartition des poules</h1>
+                <p style="color: rgba(255, 255, 255, 0.5); margin-top: 8px;">Glissez-déposez les équipes complètes dans les poules</p>
+            </div>
+            <button class="btn-generate">⚡ Générer les poules</button>
+        </div>
+
+        <div class="pools-layout">
+            <!-- Available Teams -->
+            <div class="teams-pool">
+                <div class="pool-header">
+                    <div class="pool-icon">👥</div>
+                    <div class="pool-title">Équipes complètes</div>
+                    <div class="pool-count">6</div>
+                </div>
+
+                <div>
+                    <div class="team-item">
+                        <span class="drag-indicator">⋮⋮</span>
+                        <div class="team-name">Les Smashers</div>
+                        <div class="team-players">Antoine Leroy / Lucas Garcia</div>
+                    </div>
+                    <div class="team-item">
+                        <span class="drag-indicator">⋮⋮</span>
+                        <div class="team-name">Padel Warriors</div>
+                        <div class="team-players">Emma Moreau / Sophie Bernard</div>
+                    </div>
+                    <div class="team-item">
+                        <span class="drag-indicator">⋮⋮</span>
+                        <div class="team-name">Court Kings</div>
+                        <div class="team-players">Jean Dupont / Marie Martin</div>
+                    </div>
+                    <div class="team-item">
+                        <span class="drag-indicator">⋮⋮</span>
+                        <div class="team-name">Net Ninjas</div>
+                        <div class="team-players">Pierre Lefebvre / Thomas Robert</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pools Grid -->
+            <div class="pools-grid">
+                <!-- Poule A -->
+                <div class="pool-card">
+                    <div class="pool-card-header">
+                        <input type="text" class="pool-name-input" value="Poule A" placeholder="Nom de la poule">
+                    </div>
+                    <div class="drop-zone">
+                        <div class="assigned-team">
+                            <div class="team-name">Les Rockets</div>
+                            <div class="team-players">Claire Dubois / Julien Petit</div>
+                        </div>
+                        <div class="assigned-team">
+                            <div class="team-name">Ace Squad</div>
+                            <div class="team-players">Camille Laurent / Nicolas Roux</div>
+                        </div>
+                    </div>
+                    <div class="pool-stats">
+                        <span class="pool-team-count">2 équipes</span>
+                        <span class="pool-badge incomplete">INCOMPLÈTE</span>
+                    </div>
+                </div>
+
+                <!-- Poule B -->
+                <div class="pool-card">
+                    <div class="pool-card-header">
+                        <input type="text" class="pool-name-input" value="Poule B" placeholder="Nom de la poule">
+                    </div>
+                    <div class="drop-zone empty">
+                        <div class="empty-text">Glissez les équipes ici...</div>
+                    </div>
+                    <div class="pool-stats">
+                        <span class="pool-team-count">0 équipe</span>
+                        <span class="pool-badge incomplete">VIDE</span>
+                    </div>
+                </div>
+
+                <!-- Poule C -->
+                <div class="pool-card">
+                    <div class="pool-card-header">
+                        <input type="text" class="pool-name-input" value="Poule C" placeholder="Nom de la poule">
+                    </div>
+                    <div class="drop-zone empty">
+                        <div class="empty-text">Glissez les équipes ici...</div>
+                    </div>
+                    <div class="pool-stats">
+                        <span class="pool-team-count">0 équipe</span>
+                        <span class="pool-badge incomplete">VIDE</span>
+                    </div>
+                </div>
+
+                <!-- Poule D -->
+                <div class="pool-card">
+                    <div class="pool-card-header">
+                        <input type="text" class="pool-name-input" value="Poule D" placeholder="Nom de la poule">
+                    </div>
+                    <div class="drop-zone">
+                        <div class="assigned-team">
+                            <div class="team-name">Volley Vipers</div>
+                            <div class="team-players">Mathieu Simon / Laura Blanc</div>
+                        </div>
+                        <div class="assigned-team">
+                            <div class="team-name">Spin Masters</div>
+                            <div class="team-players">Amélie Fontaine / Hugo Mercier</div>
+                        </div>
+                        <div class="assigned-team">
+                            <div class="team-name">Baseline Bros</div>
+                            <div class="team-players">Sarah Girard / Alex Moreau</div>
+                        </div>
+                        <div class="assigned-team">
+                            <div class="team-name">Power Players</div>
+                            <div class="team-players">Léa Martinez / Tom Dufour</div>
+                        </div>
+                    </div>
+                    <div class="pool-stats">
+                        <span class="pool-team-count">4 équipes</span>
+                        <span class="pool-badge ready">PRÊTE</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

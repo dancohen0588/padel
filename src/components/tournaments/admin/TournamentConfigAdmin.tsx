@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   DndContext,
+  type DragEndEvent,
   PointerSensor,
   useDroppable,
   useDraggable,
@@ -20,7 +21,6 @@ import type {
 } from "@/lib/types";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Toast } from "@/components/ui/toast";
 import {
   assignPlayerToTeamAction,
@@ -48,9 +48,6 @@ type TournamentConfigAdminProps = {
 
 type PlayerItem = RegistrationWithPlayer["player"];
 
-type DndItem =
-  | { type: "player"; id: string }
-  | { type: "team"; id: string };
 
 type DroppableProps = {
   id: string;
@@ -94,7 +91,18 @@ const DraggableItem = ({ id, className, children }: DraggableProps) => {
   );
 };
 
-export function TournamentConfigAdmin({
+type TournamentConfigContentProps = {
+  adminToken: string;
+  tournament: Tournament;
+  registrations: RegistrationWithPlayer[];
+  teams: Team[];
+  teamPlayers: TeamPlayer[];
+  pools: Pool[];
+  poolTeams: PoolTeam[];
+  mode?: "teams" | "pools";
+};
+
+export function TournamentConfigContent({
   tournament,
   adminToken,
   registrations,
@@ -102,7 +110,8 @@ export function TournamentConfigAdmin({
   teamPlayers,
   pools,
   poolTeams,
-}: TournamentConfigAdminProps) {
+  mode = "teams",
+}: TournamentConfigContentProps) {
   const [toast, setToast] = useState<string | null>(null);
   const [localTeams, setLocalTeams] = useState<Team[]>(teams);
   const [localTeamPlayers, setLocalTeamPlayers] = useState<TeamPlayer[]>(teamPlayers);
@@ -168,7 +177,6 @@ export function TournamentConfigAdmin({
       4
   );
 
-  const poolsMismatch = localPools.length !== poolsCount;
 
   useEffect(() => {
     console.info("[tournament-admin] pools config", {
@@ -278,7 +286,8 @@ export function TournamentConfigAdmin({
     setLocalPools((prev) => prev.map((pool) => (pool.id === poolId ? { ...pool, name } : pool)));
   };
 
-  const handleDragEnd = async ({ active, over }: { active: { id: string }; over: { id: string } | null }) => {
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
     if (!over) return;
     const activeId = String(active.id);
     const overId = String(over.id);
@@ -311,199 +320,190 @@ export function TournamentConfigAdmin({
   return (
     <div className="space-y-6">
       {toast ? <Toast message={toast} /> : null}
-      <Tabs defaultValue="teams" className="w-full">
-        <TabsList className="rounded-full bg-white/10 p-1">
-          <TabsTrigger value="teams" className="rounded-full px-4 py-2">
-            Équipes
-          </TabsTrigger>
-          <TabsTrigger value="pools" className="rounded-full px-4 py-2">
-            Poules
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="teams" className="mt-6">
-          <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
-            <div className="grid gap-6 lg:grid-cols-[1fr_1.4fr]">
-              <Card className="rounded-2xl border border-white/10 bg-white/5 p-4 text-white shadow-card">
-                <p className="text-sm font-semibold text-white">Joueurs validés</p>
-                <div className="mt-4 max-h-[60vh] overflow-y-auto pr-1">
-                  <DroppableArea id="drop:unassignedPlayers" className="space-y-2">
-                    {unassignedPlayers.map((player) => (
-                      <DraggableItem
-                        key={player.id}
-                        id={`player:${player.id}`}
-                        className="flex items-center justify-between rounded-xl border border-white/10 bg-white/10 px-3 py-2 text-xs shadow-sm"
-                      >
-                        <span>
-                          {player.first_name} {player.last_name}
-                        </span>
-                        <span className="text-white/50">Drag</span>
-                      </DraggableItem>
-                    ))}
-                    {!unassignedPlayers.length ? (
-                      <p className="text-xs text-white/60">Tous les joueurs sont assignés.</p>
-                    ) : null}
-                  </DroppableArea>
-                </div>
-              </Card>
-
-              <Card className="rounded-2xl border border-white/10 bg-white p-4 text-brand-charcoal shadow-card">
-                <div className="flex items-center justify-between">
-                  <p className="text-sm font-semibold">Équipes</p>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="bg-brand-violet text-white hover:bg-brand-violet/90 hover:text-white"
-                    onClick={handleCreateTeam}
-                  >
-                    Créer une équipe
-                  </Button>
-                </div>
-                <div className="mt-4 max-h-[60vh] overflow-y-auto pr-1">
-                  <div className="grid gap-4">
-                    {localTeams.map((team) => {
-                      const players = teamPlayerMap.get(team.id) ?? [];
-                      return (
-                        <div key={team.id} className="rounded-2xl border border-border p-3">
-                          <div className="flex items-center justify-between gap-2">
-                            <input
-                              className="w-full rounded-xl border border-border px-3 py-2 text-sm"
-                              placeholder="Nom d’équipe"
-                              defaultValue={team.name ?? ""}
-                              onBlur={(event) => handleUpdateTeamName(team.id, event.target.value)}
-                            />
-                            {players.length === 0 ? (
-                              <Button
-                                type="button"
-                                variant="outline"
-                                className="bg-brand-violet text-white hover:bg-brand-violet/90 hover:text-white"
-                                onClick={() => handleDeleteTeam(team.id)}
-                              >
-                                Supprimer
-                              </Button>
-                            ) : null}
-                          </div>
-                          <DroppableArea
-                            id={`drop:team:${team.id}`}
-                            className="mt-3 space-y-2 rounded-2xl border border-dashed border-border p-2"
-                          >
-                            {[0, 1].map((slot) => {
-                              const playerId = players[slot];
-                              const player = playerId ? playerById.get(playerId) : null;
-                              return (
-                                <div
-                                  key={`${team.id}-${slot}`}
-                                  className="flex items-center justify-between rounded-xl bg-white px-3 py-2 text-xs"
-                                >
-                                  {player ? (
-                                    <DraggableItem id={`player:${player.id}`} className="flex-1">
-                                      <span>
-                                        {player.first_name} {player.last_name}
-                                      </span>
-                                    </DraggableItem>
-                                  ) : (
-                                    <span className="text-muted-foreground">Slot libre</span>
-                                  )}
-                                </div>
-                              );
-                            })}
-                            <p className="text-xs text-muted-foreground">
-                              {players.length}/2 joueurs
-                            </p>
-                          </DroppableArea>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              </Card>
-            </div>
-          </DndContext>
-        </TabsContent>
-
-        <TabsContent value="pools" className="mt-6">
-          <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
-            <div className="flex items-center justify-between">
-              <p className="text-sm font-semibold text-white">Poules</p>
-              <Button
-                type="button"
-                variant="outline"
-                className="bg-brand-violet text-white hover:bg-brand-violet/90 hover:text-white"
-                onClick={ensurePools}
-                disabled={isEnsuringPools}
-              >
-                Générer les poules
-              </Button>
-            </div>
-            <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_2fr]">
-              <Card className="rounded-2xl border border-white/10 bg-white/5 p-4 text-white shadow-card">
-                <p className="text-sm font-semibold">Équipes complètes</p>
-                <DroppableArea id="drop:unassignedTeams" className="mt-4 space-y-2">
-                  {unassignedTeams.map((team) => (
+      {mode === "teams" ? (
+        <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
+          <div className="grid gap-6 lg:grid-cols-[1fr_1.4fr]">
+            <Card className="rounded-2xl border border-white/10 bg-white/5 p-4 text-white shadow-card">
+              <p className="text-sm font-semibold text-white">Joueurs validés</p>
+              <div className="mt-4 max-h-[60vh] overflow-y-auto pr-1">
+                <DroppableArea id="drop:unassignedPlayers" className="space-y-2">
+                  {unassignedPlayers.map((player) => (
                     <DraggableItem
-                      key={team.id}
-                      id={`team:${team.id}`}
-                      className="rounded-xl border border-white/10 bg-white/10 px-3 py-2 text-xs"
+                      key={player.id}
+                      id={`player:${player.id}`}
+                      className="flex items-center justify-between rounded-xl border border-white/10 bg-white/10 px-3 py-2 text-xs shadow-sm"
                     >
-                      <p className="font-semibold text-white">{team.name || "Équipe"}</p>
-                      <p className="text-white/70">
-                        {(teamPlayerMap.get(team.id) ?? [])
-                          .map((playerId) => {
-                            const player = playerById.get(playerId);
-                            return player ? `${player.first_name} ${player.last_name}` : "";
-                          })
-                          .filter(Boolean)
-                          .join(" / ")}
-                      </p>
+                      <span>
+                        {player.first_name} {player.last_name}
+                      </span>
+                      <span className="text-white/50">Drag</span>
                     </DraggableItem>
                   ))}
+                  {!unassignedPlayers.length ? (
+                    <p className="text-xs text-white/60">Tous les joueurs sont assignés.</p>
+                  ) : null}
                 </DroppableArea>
-              </Card>
-
-              <div className="grid gap-4 md:grid-cols-2">
-                {localPools.map((pool) => (
-                  <Card key={pool.id} className="rounded-2xl border border-border bg-white p-4 shadow-card">
-                    <input
-                      className="w-full rounded-xl border border-border px-3 py-2 text-sm"
-                      defaultValue={pool.name}
-                      onBlur={(event) => handleUpdatePoolName(pool.id, event.target.value)}
-                    />
-                    <DroppableArea
-                      id={`drop:pool:${pool.id}`}
-                      className="mt-4 space-y-2 rounded-2xl border border-dashed border-border p-2"
-                    >
-                      {(teamIdsByPool.get(pool.id) ?? []).map((teamId) => {
-                        const team = localTeams.find((item) => item.id === teamId);
-                        if (!team) return null;
-                        return (
-                          <DraggableItem
-                            key={team.id}
-                            id={`team:${team.id}`}
-                            className="rounded-xl border border-border bg-white px-3 py-2 text-xs"
-                          >
-                            <p className="font-semibold text-brand-charcoal">
-                              {team.name || "Équipe"}
-                            </p>
-                            <p className="text-muted-foreground">
-                              {(teamPlayerMap.get(team.id) ?? [])
-                                .map((playerId) => {
-                                  const player = playerById.get(playerId);
-                                  return player ? `${player.first_name} ${player.last_name}` : "";
-                                })
-                                .filter(Boolean)
-                                .join(" / ")}
-                            </p>
-                          </DraggableItem>
-                        );
-                      })}
-                    </DroppableArea>
-                  </Card>
-                ))}
               </div>
+            </Card>
+
+            <Card className="rounded-2xl border border-white/10 bg-white p-4 text-brand-charcoal shadow-card">
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-semibold">Équipes</p>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="bg-brand-violet text-white hover:bg-brand-violet/90 hover:text-white"
+                  onClick={handleCreateTeam}
+                >
+                  Créer une équipe
+                </Button>
+              </div>
+              <div className="mt-4 max-h-[60vh] overflow-y-auto pr-1">
+                <div className="grid gap-4">
+                  {localTeams.map((team) => {
+                    const players = teamPlayerMap.get(team.id) ?? [];
+                    return (
+                      <div key={team.id} className="rounded-2xl border border-border p-3">
+                        <div className="flex items-center justify-between gap-2">
+                          <input
+                            className="w-full rounded-xl border border-border px-3 py-2 text-sm"
+                            placeholder="Nom d’équipe"
+                            defaultValue={team.name ?? ""}
+                            onBlur={(event) => handleUpdateTeamName(team.id, event.target.value)}
+                          />
+                          {players.length === 0 ? (
+                            <Button
+                              type="button"
+                              variant="outline"
+                              className="bg-brand-violet text-white hover:bg-brand-violet/90 hover:text-white"
+                              onClick={() => handleDeleteTeam(team.id)}
+                            >
+                              Supprimer
+                            </Button>
+                          ) : null}
+                        </div>
+                        <DroppableArea
+                          id={`drop:team:${team.id}`}
+                          className="mt-3 space-y-2 rounded-2xl border border-dashed border-border p-2"
+                        >
+                          {[0, 1].map((slot) => {
+                            const playerId = players[slot];
+                            const player = playerId ? playerById.get(playerId) : null;
+                            return (
+                              <div
+                                key={`${team.id}-${slot}`}
+                                className="flex items-center justify-between rounded-xl bg-white px-3 py-2 text-xs"
+                              >
+                                {player ? (
+                                  <DraggableItem id={`player:${player.id}`} className="flex-1">
+                                    <span>
+                                      {player.first_name} {player.last_name}
+                                    </span>
+                                  </DraggableItem>
+                                ) : (
+                                  <span className="text-muted-foreground">Slot libre</span>
+                                )}
+                              </div>
+                            );
+                          })}
+                          <p className="text-xs text-muted-foreground">
+                            {players.length}/2 joueurs
+                          </p>
+                        </DroppableArea>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </Card>
+          </div>
+        </DndContext>
+      ) : (
+        <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-semibold text-white">Poules</p>
+            <Button
+              type="button"
+              variant="outline"
+              className="bg-brand-violet text-white hover:bg-brand-violet/90 hover:text-white"
+              onClick={ensurePools}
+              disabled={isEnsuringPools}
+            >
+              Générer les poules
+            </Button>
+          </div>
+          <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_2fr]">
+            <Card className="rounded-2xl border border-white/10 bg-white/5 p-4 text-white shadow-card">
+              <p className="text-sm font-semibold">Équipes complètes</p>
+              <DroppableArea id="drop:unassignedTeams" className="mt-4 space-y-2">
+                {unassignedTeams.map((team) => (
+                  <DraggableItem
+                    key={team.id}
+                    id={`team:${team.id}`}
+                    className="rounded-xl border border-white/10 bg-white/10 px-3 py-2 text-xs"
+                  >
+                    <p className="font-semibold text-white">{team.name || "Équipe"}</p>
+                    <p className="text-white/70">
+                      {(teamPlayerMap.get(team.id) ?? [])
+                        .map((playerId) => {
+                          const player = playerById.get(playerId);
+                          return player ? `${player.first_name} ${player.last_name}` : "";
+                        })
+                        .filter(Boolean)
+                        .join(" / ")}
+                    </p>
+                  </DraggableItem>
+                ))}
+              </DroppableArea>
+            </Card>
+
+            <div className="grid gap-4 md:grid-cols-2">
+              {localPools.map((pool) => (
+                <Card key={pool.id} className="rounded-2xl border border-border bg-white p-4 shadow-card">
+                  <input
+                    className="w-full rounded-xl border border-border px-3 py-2 text-sm"
+                    defaultValue={pool.name}
+                    onBlur={(event) => handleUpdatePoolName(pool.id, event.target.value)}
+                  />
+                  <DroppableArea
+                    id={`drop:pool:${pool.id}`}
+                    className="mt-4 space-y-2 rounded-2xl border border-dashed border-border p-2"
+                  >
+                    {(teamIdsByPool.get(pool.id) ?? []).map((teamId) => {
+                      const team = localTeams.find((item) => item.id === teamId);
+                      if (!team) return null;
+                      return (
+                        <DraggableItem
+                          key={team.id}
+                          id={`team:${team.id}`}
+                          className="rounded-xl border border-border bg-white px-3 py-2 text-xs"
+                        >
+                          <p className="font-semibold text-brand-charcoal">
+                            {team.name || "Équipe"}
+                          </p>
+                          <p className="text-muted-foreground">
+                            {(teamPlayerMap.get(team.id) ?? [])
+                              .map((playerId) => {
+                                const player = playerById.get(playerId);
+                                return player ? `${player.first_name} ${player.last_name}` : "";
+                              })
+                              .filter(Boolean)
+                              .join(" / ")}
+                          </p>
+                        </DraggableItem>
+                      );
+                    })}
+                  </DroppableArea>
+                </Card>
+              ))}
             </div>
-          </DndContext>
-        </TabsContent>
-      </Tabs>
+          </div>
+        </DndContext>
+      )}
     </div>
   );
+}
+
+export function TournamentConfigAdmin(props: TournamentConfigAdminProps) {
+  return <TournamentConfigContent {...props} />;
 }

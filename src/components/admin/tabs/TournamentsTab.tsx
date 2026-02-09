@@ -262,10 +262,17 @@ export function TournamentsTab({ tournaments, adminToken }: TournamentsTabProps)
         <div className="mt-4 space-y-3">
           {filtered.length ? (
             filtered.map((tournament) => (
-              <button
+              <div
                 key={tournament.id}
-                type="button"
+                role="button"
+                tabIndex={0}
                 onClick={() => setSelectedId(tournament.id)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    setSelectedId(tournament.id);
+                  }
+                }}
                 className={`w-full rounded-2xl border p-3 text-left transition ${
                   selectedId === tournament.id
                     ? "border-brand-charcoal bg-brand-gray/20"
@@ -310,7 +317,7 @@ export function TournamentsTab({ tournaments, adminToken }: TournamentsTabProps)
                     ) : null}
                   </div>
                 </div>
-              </button>
+              </div>
             ))
           ) : (
             <div className="rounded-2xl border border-dashed border-border bg-white p-6 text-center text-sm text-muted-foreground">
@@ -378,7 +385,7 @@ export function TournamentsTab({ tournaments, adminToken }: TournamentsTabProps)
             />
           </label>
             <label className="flex flex-col gap-2 text-sm font-semibold text-brand-charcoal">
-              Nombre d'équipes
+              Nombre d&apos;équipes
               <Input
                 name="maxPlayers"
                 type="number"
@@ -453,7 +460,7 @@ export function TournamentsTab({ tournaments, adminToken }: TournamentsTabProps)
 
           <div className="flex flex-col gap-3">
             <label className="flex flex-col gap-2 text-sm font-semibold text-brand-charcoal">
-              Mode d'appariement des joueurs
+              Mode d&apos;appariement des joueurs
               <input type="hidden" name="pairingMode" value={pairingMode} />
               <div className="grid grid-cols-3 gap-2">
                 {(["manual", "random", "balanced"] as const).map((value) => (

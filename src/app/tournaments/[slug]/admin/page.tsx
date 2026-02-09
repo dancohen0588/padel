@@ -2,8 +2,12 @@ import { redirect } from "next/navigation";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { SectionHeader } from "@/components/ui/section-header";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { assertAdminToken } from "@/lib/admin";
 import {
+  countRegistrations,
+  getMatchesWithTeamsByPool,
+  getPoolStandings,
   getRegistrationsByStatus,
   getTournaments,
   getTeamsByTournament,
@@ -11,7 +15,12 @@ import {
   getPoolsByTournament,
   getPoolTeamsByTournament,
 } from "@/lib/queries";
-import { TournamentConfigAdmin } from "@/components/tournaments/admin/TournamentConfigAdmin";
+import {
+  TournamentConfigContent,
+} from "@/components/tournaments/admin/TournamentConfigAdmin";
+import { MatchesAdminTab } from "@/components/tournaments/admin/MatchesAdminTab";
+import { UsersApprovalTab } from "@/components/admin/tabs/UsersApprovalTab";
+import { UsersValidatedTab } from "@/components/admin/tabs/UsersValidatedTab";
 
 type TournamentAdminPageProps = {
   params: { slug: string };
@@ -36,13 +45,23 @@ export default async function TournamentAdminPage({
     redirect("/");
   }
 
-  const [registrations, teams, teamPlayers, pools, poolTeams] = await Promise.all([
-    getRegistrationsByStatus(tournament.id, "approved"),
-    getTeamsByTournament(tournament.id),
-    getTeamPlayersByTournament(tournament.id),
-    getPoolsByTournament(tournament.id),
-    getPoolTeamsByTournament(tournament.id),
-  ]);
+  const [registrations, counts, teams, teamPlayers, pools, poolTeams] =
+    await Promise.all([
+      getRegistrationsByStatus(tournament.id),
+      countRegistrations(tournament.id),
+      getTeamsByTournament(tournament.id),
+      getTeamPlayersByTournament(tournament.id),
+      getPoolsByTournament(tournament.id),
+      getPoolTeamsByTournament(tournament.id),
+    ]);
+
+  const poolData = await Promise.all(
+    pools.map(async (pool) => ({
+      pool,
+      matches: await getMatchesWithTeamsByPool(tournament.id, pool.id),
+      standings: await getPoolStandings(tournament.id, pool.id),
+    }))
+  );
 
   return (
     <div className="min-h-screen bg-[#1E1E2E] text-white">
@@ -58,15 +77,61 @@ export default async function TournamentAdminPage({
           </div>
         </div>
 
-        <TournamentConfigAdmin
-          tournament={tournament}
-          adminToken={adminToken}
-          registrations={registrations}
-          teams={teams}
-          teamPlayers={teamPlayers}
-          pools={pools}
-          poolTeams={poolTeams}
-        />
+        <Tabs defaultValue="pending" className="w-full">
+          <TabsList className="flex w-full flex-wrap gap-2 rounded-2xl bg-white p-2 shadow-card">
+            <TabsTrigger value="pending">À valider</TabsTrigger>
+            <TabsTrigger value="approved">Validés</TabsTrigger>
+            <TabsTrigger value="teams">Équipes</TabsTrigger>
+            <TabsTrigger value="pools">Poules</TabsTrigger>
+            <TabsTrigger value="matches">Matchs & Classements</TabsTrigger>
+          </TabsList>
+          <TabsContent value="pending" className="mt-6">
+            <UsersApprovalTab
+              registrations={registrations}
+              statusCounts={counts}
+              adminToken={adminToken}
+            />
+          </TabsContent>
+          <TabsContent value="approved" className="mt-6">
+            <UsersValidatedTab
+              registrations={registrations}
+              statusCounts={counts}
+              adminToken={adminToken}
+            />
+          </TabsContent>
+          <TabsContent value="teams" className="mt-6">
+            <TournamentConfigContent
+              tournament={tournament}
+              adminToken={adminToken}
+              registrations={registrations}
+              teams={teams}
+              teamPlayers={teamPlayers}
+              pools={pools}
+              poolTeams={poolTeams}
+              mode="teams"
+            />
+          </TabsContent>
+          <TabsContent value="pools" className="mt-6">
+            <TournamentConfigContent
+              tournament={tournament}
+              adminToken={adminToken}
+              registrations={registrations}
+              teams={teams}
+              teamPlayers={teamPlayers}
+              pools={pools}
+              poolTeams={poolTeams}
+              mode="pools"
+            />
+          </TabsContent>
+          <TabsContent value="matches" className="mt-6">
+            <MatchesAdminTab
+              tournamentId={tournament.id}
+              pools={pools}
+              poolData={poolData}
+              adminToken={adminToken}
+            />
+          </TabsContent>
+        </Tabs>
       </main>
       <Footer />
     </div>

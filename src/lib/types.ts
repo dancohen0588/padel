@@ -93,3 +93,52 @@ export type PoolTeam = {
   team_id: string;
   created_at: string;
 };
+
+export type MatchStatus = "upcoming" | "live" | "finished";
+
+export type Match = {
+  id: string;
+  tournament_id: string;
+  pool_id: string | null;
+  team_a_id: string;
+  team_b_id: string;
+  status: MatchStatus;
+  scheduled_at: string | null;
+  winner_team_id: string | null;
+  sets_won_a: number;
+  sets_won_b: number;
+  games_won_a: number;
+  games_won_b: number;
+  created_at: string;
+};
+
+export type MatchSet = {
+  id: string;
+  match_id: string;
+  set_order: number;
+  team_a_games: number;
+  team_b_games: number;
+  created_at: string;
+};
+
+export type MatchWithTeams = Match & {
+  team_a: Team;
+  team_b: Team;
+  sets: MatchSet[];
+};
+
+export type PoolStanding = {
+  team_id: string;
+  team_name: string | null;
+  played: number;
+  wins: number;
+  draws: number;
+  losses: number;
+  sets_for: number;
+  sets_against: number;
+  games_for: number;
+  games_against: number;
+  set_diff: number;
+  game_diff: number;
+  points: number;
+};

@@ -3,11 +3,111 @@
 import { getDatabaseClient } from "@/lib/database";
 import { assertAdminToken } from "@/lib/admin";
 import type { RegistrationStatus } from "@/lib/types";
+import type { Sql } from "postgres";
 import { revalidatePath } from "next/cache";
 
 type RegistrationResult =
   | { status: "ok"; message: string }
   | { status: "error"; message: string };
+
+type TournamentIdentifier =
+  | { id: string }
+  | { slug: string };
+
+const insertOrUpdatePlayer = async (
+  database: Sql,
+  {
+    firstName,
+    lastName,
+    email,
+    phone,
+  }: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone: string;
+  }
+): Promise<string> => {
+  let playerId: string | null = null;
+  const existingPlayers = await database<Array<{ id: string }>>`
+    select id
+    from players
+    where email = ${email}
+    limit 1
+  `;
+
+  if (existingPlayers[0]?.id) {
+    const updatedPlayers = await database<Array<{ id: string }>>`
+      update players
+      set
+        first_name = ${firstName},
+        last_name = ${lastName},
+        phone = ${phone || null}
+      where id = ${existingPlayers[0].id}
+      returning id
+    `;
+
+    if (!updatedPlayers[0]?.id) {
+      throw new Error("Mise à jour joueur échouée.");
+    }
+
+    playerId = updatedPlayers[0].id;
+  } else {
+    const createdPlayers = await database<Array<{ id: string }>>`
+      insert into players (email, first_name, last_name, phone)
+      values (${email}, ${firstName}, ${lastName}, ${phone || null})
+      returning id
+    `;
+
+    if (!createdPlayers[0]?.id) {
+      throw new Error("Création joueur échouée.");
+    }
+
+    playerId = createdPlayers[0].id;
+  }
+
+  return playerId;
+};
+
+const ensureRegistration = async (
+  database: Sql,
+  tournamentId: string,
+  playerId: string
+): Promise<void> => {
+  const existingRegistrations = await database<Array<{ id: string }>>`
+    select id
+    from registrations
+    where tournament_id = ${tournamentId} and player_id = ${playerId}
+    limit 1
+  `;
+
+  if (existingRegistrations.length > 0) {
+    throw new Error("Vous êtes déjà inscrit pour ce tournoi.");
+  }
+
+  await database`
+    insert into registrations (tournament_id, player_id, status)
+    values (${tournamentId}, ${playerId}, 'pending')
+  `;
+};
+
+const resolveTournamentId = async (
+  database: Sql,
+  identifier: TournamentIdentifier
+): Promise<string | null> => {
+  if ("id" in identifier) {
+    return identifier.id;
+  }
+
+  const rows = await database<Array<{ id: string }>>`
+    select id
+    from tournaments
+    where slug = ${identifier.slug} and status = 'published'
+    limit 1
+  `;
+
+  return rows[0]?.id ?? null;
+};
 
 export async function registerPlayer(
   _prevState: RegistrationResult | null,
@@ -42,62 +142,67 @@ export async function registerPlayer(
       };
     }
 
-    let playerId: string | null = null;
-    const existingPlayers = await database<Array<{ id: string }>>`
-      select id
-      from players
-      where email = ${email}
-      limit 1
-    `;
+    const playerId = await insertOrUpdatePlayer(database, {
+      firstName,
+      lastName,
+      email,
+      phone,
+    });
 
-    if (existingPlayers[0]?.id) {
-      const updatedPlayers = await database<Array<{ id: string }>>`
-        update players
-        set
-          first_name = ${firstName},
-          last_name = ${lastName},
-          phone = ${phone || null}
-        where id = ${existingPlayers[0].id}
-        returning id
-      `;
+    await ensureRegistration(database, tournament.id, playerId);
 
-      if (!updatedPlayers[0]?.id) {
-        return { status: "error", message: "Mise à jour joueur échouée." };
-      }
+    return {
+      status: "ok",
+      message: "Inscription reçue. Validation en cours.",
+    };
+  } catch (error) {
+    return {
+      status: "error",
+      message: error instanceof Error ? error.message : "Erreur inconnue",
+    };
+  }
+}
 
-      playerId = updatedPlayers[0].id;
-    } else {
-      const createdPlayers = await database<Array<{ id: string }>>`
-        insert into players (email, first_name, last_name, phone)
-        values (${email}, ${firstName}, ${lastName}, ${phone || null})
-        returning id
-      `;
+export async function registerPlayerForTournament(
+  _prevState: RegistrationResult | null,
+  formData: FormData
+): Promise<RegistrationResult> {
+  try {
+    const database = getDatabaseClient();
+    const firstName = String(formData.get("firstName") ?? "").trim();
+    const lastName = String(formData.get("lastName") ?? "").trim();
+    const email = String(formData.get("email") ?? "").trim().toLowerCase();
+    const phone = String(formData.get("phone") ?? "").trim();
+    const slug = String(formData.get("slug") ?? "").trim();
 
-      if (!createdPlayers[0]?.id) {
-        return { status: "error", message: "Création joueur échouée." };
-      }
-
-      playerId = createdPlayers[0].id;
+    if (!firstName || !lastName || !email) {
+      return { status: "error", message: "Champs requis manquants." };
     }
 
-    const existingRegistrations = await database<Array<{ id: string }>>`
-      select id
-      from registrations
-      where tournament_id = ${tournament.id} and player_id = ${playerId}
-      limit 1
-    `;
-
-    if (existingRegistrations.length > 0) {
+    if (!slug) {
       return {
         status: "error",
-        message: "Vous êtes déjà inscrit pour ce tournoi.",
+        message: "Tournoi introuvable.",
       };
     }
 
-    await database`
-      insert into registrations (tournament_id, player_id, status)
-      values (${tournament.id}, ${playerId}, 'pending')
-    `;
+    const tournamentId = await resolveTournamentId(database, { slug });
+
+    if (!tournamentId) {
+      return {
+        status: "error",
+        message: "Tournoi introuvable.",
+      };
+    }
+
+    const playerId = await insertOrUpdatePlayer(database, {
+      firstName,
+      lastName,
+      email,
+      phone,
+    });
+
+    await ensureRegistration(database, tournamentId, playerId);
 
     return {
       status: "ok",

@@ -50,9 +50,12 @@ export function TournamentCard({
           <p>🎟️ {slotsLabel}</p>
         </div>
       </div>
-      <div className="mt-6">
+      <div className="mt-6 grid gap-3">
         <Link href={`/tournaments/${slug}`} className="block">
           <GradientButton fullWidth>Voir le tournoi</GradientButton>
+        </Link>
+        <Link href={`/tournaments/${slug}/register`} className="block">
+          <GradientButton fullWidth>S&apos;inscrire</GradientButton>
         </Link>
       </div>
     </Card>

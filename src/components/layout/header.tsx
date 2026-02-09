@@ -19,9 +19,6 @@ export function Header({ className }: HeaderProps) {
           Le Tournoi des Frérots
         </Link>
         <nav className="hidden items-center gap-6 text-sm md:flex">
-          <Link className="text-white/80 hover:text-white" href="/inscription">
-            Inscription
-          </Link>
           <Link
             className="text-white/80 hover:text-white"
             href="/tournoi/en-cours"

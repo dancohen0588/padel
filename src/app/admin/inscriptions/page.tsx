@@ -3,15 +3,11 @@ import { Footer } from "@/components/layout/footer";
 import { SectionHeader } from "@/components/ui/section-header";
 import { AdminTabs } from "@/components/admin/AdminTabs";
 import {
-  countRegistrations,
-  getActiveTournament,
   getFeaturedTournamentPhotos,
-  getRegistrationsByStatus,
   getTournamentPhotos,
   getTournaments,
 } from "@/lib/queries";
 import { assertAdminToken } from "@/lib/admin";
-import type { RegistrationWithPlayer } from "@/lib/types";
 
 export default async function AdminInscriptionsPage({
   searchParams,
@@ -19,7 +15,6 @@ export default async function AdminInscriptionsPage({
   searchParams: { token?: string };
 }) {
   const adminToken = searchParams.token ?? "";
-  const tournament = await getActiveTournament();
 
   try {
     assertAdminToken(adminToken);
@@ -41,16 +36,11 @@ export default async function AdminInscriptionsPage({
     );
   }
 
-  const [registrations, counts, tournaments, photos, featuredPhotos] =
-    await Promise.all([
-      tournament ? getRegistrationsByStatus(tournament.id) : [],
-      tournament
-        ? countRegistrations(tournament.id)
-        : { approved: 0, pending: 0, rejected: 0 },
-      getTournaments(),
-      getTournamentPhotos(),
-      getFeaturedTournamentPhotos(),
-    ]);
+  const [tournaments, photos, featuredPhotos] = await Promise.all([
+    getTournaments(),
+    getTournamentPhotos(),
+    getFeaturedTournamentPhotos(),
+  ]);
 
   return (
     <div className="min-h-screen bg-brand-gray">
@@ -59,16 +49,12 @@ export default async function AdminInscriptionsPage({
         <SectionHeader
           title="Admin inscriptions"
           subtitle={
-            tournament
-              ? "Valide ou refuse les joueurs du tournoi en cours."
-              : "Aucun tournoi publié. Publie-en un pour activer les inscriptions."
+            "Gère les tournois, photos et contenus de la home."
           }
         />
         <div className="mt-8">
           <AdminTabs
-            registrations={registrations as RegistrationWithPlayer[]}
             adminToken={adminToken}
-            statusCounts={counts}
             tournaments={tournaments}
             photos={photos}
             featuredPhotos={featuredPhotos}
