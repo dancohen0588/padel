@@ -6,6 +6,11 @@ import { getDatabaseClient } from "@/lib/database";
 
 const maxSets = 5;
 
+type PublicSetInput = {
+  team1_score: number;
+  team2_score: number;
+};
+
 type SetInput = {
   teamA: number;
   teamB: number;
@@ -46,6 +51,35 @@ const ensureValidSets = (sets: SetInput[]) => {
     if (set.teamA < 0 || set.teamB < 0) {
       throw new Error("Score négatif interdit");
     }
+  });
+};
+
+const ensureValidPadelSet = (set: PublicSetInput) => {
+  const maxScore = Math.max(set.team1_score, set.team2_score);
+  const minScore = Math.min(set.team1_score, set.team2_score);
+  if (maxScore < 6) {
+    throw new Error("Un set doit aller au moins jusqu'à 6 jeux.");
+  }
+  const diff = maxScore - minScore;
+  const isValidStandard = maxScore === 6 && diff >= 2;
+  const isValidExtended = maxScore === 7 && (diff === 2 || diff === 1);
+  if (!isValidStandard && !isValidExtended) {
+    throw new Error("Score de set invalide (règles padel).");
+  }
+};
+
+const ensureValidPadelSets = (sets: PublicSetInput[]) => {
+  if (sets.length === 0 || sets.length > maxSets) {
+    throw new Error("Nombre de sets invalide");
+  }
+  sets.forEach((set) => {
+    if (!Number.isFinite(set.team1_score) || !Number.isFinite(set.team2_score)) {
+      throw new Error("Score de set invalide");
+    }
+    if (set.team1_score < 0 || set.team2_score < 0) {
+      throw new Error("Score négatif interdit");
+    }
+    ensureValidPadelSet(set);
   });
 };
 
@@ -154,6 +188,87 @@ export async function upsertMatchResultAction(
   }
 
   revalidatePath("/tournaments");
+}
+
+export async function updateMatchScoresAction(
+  matchId: string,
+  sets: PublicSetInput[],
+  adminToken?: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    if (adminToken) {
+      assertAdminToken(adminToken);
+    }
+    ensureValidPadelSets(sets);
+    const database = getDatabaseClient();
+
+    const matches = await database<Array<{ team_a_id: string; team_b_id: string; tournament_id: string }>>`
+      select team_a_id, team_b_id, tournament_id
+      from matches
+      where id = ${matchId}
+      limit 1
+    `;
+
+    const match = matches[0];
+    if (!match) {
+      return { success: false, error: "Match introuvable" };
+    }
+
+    const tournaments = await database<Array<{ status: string }>>`
+      select status
+      from tournaments
+      where id = ${match.tournament_id}
+      limit 1
+    `;
+
+    if (tournaments[0]?.status === "archived") {
+      return { success: false, error: "Tournoi archivé : modification interdite." };
+    }
+
+    const converted = sets.map((set) => ({
+      teamA: set.team1_score,
+      teamB: set.team2_score,
+    }));
+    const { setsWonA, setsWonB, gamesWonA, gamesWonB } = computeAggregates(converted);
+
+    const winnerId =
+      setsWonA === setsWonB
+        ? null
+        : setsWonA > setsWonB
+          ? match.team_a_id
+          : match.team_b_id;
+
+    await database`
+      update matches
+      set
+        status = 'finished',
+        winner_team_id = ${winnerId},
+        sets_won_a = ${setsWonA},
+        sets_won_b = ${setsWonB},
+        games_won_a = ${gamesWonA},
+        games_won_b = ${gamesWonB}
+      where id = ${matchId}
+    `;
+
+    await database`
+      delete from match_sets
+      where match_id = ${matchId}
+    `;
+
+    for (let index = 0; index < converted.length; index += 1) {
+      const set = converted[index];
+      await database`
+        insert into match_sets (match_id, set_order, team_a_games, team_b_games)
+        values (${matchId}, ${index + 1}, ${set.teamA}, ${set.teamB})
+      `;
+    }
+
+    revalidatePath("/tournoi/en-cours");
+    return { success: true };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Erreur inconnue";
+    return { success: false, error: message };
+  }
 }
 
 export async function updateMatchStatusAction(

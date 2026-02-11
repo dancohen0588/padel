@@ -23,7 +23,7 @@ export function Header({ className }: HeaderProps) {
             className="text-white/80 hover:text-white"
             href="/tournoi/en-cours"
           >
-            Tournoi en cours
+            Tournoi
           </Link>
           <Link className="text-white/80 hover:text-white" href="/admin/inscriptions">
             Admin

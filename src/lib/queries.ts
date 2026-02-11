@@ -41,6 +41,58 @@ export const getActiveTournament = async (): Promise<Tournament | null> => {
   return tournaments[0] ?? null;
 };
 
+export const getPublishedTournaments = async (): Promise<Tournament[]> => {
+  return getTournaments("published");
+};
+
+export const getTournamentWithAllData = async (tournamentId: string) => {
+  const [
+    tournament,
+    registrations,
+    teams,
+    teamPlayers,
+    pools,
+    poolTeams,
+    matches,
+    matchSets,
+  ] = await Promise.all([
+    getTournamentById(tournamentId),
+    getRegistrationsByStatus(tournamentId, "approved"),
+    getTeamsByTournament(tournamentId),
+    getTeamPlayersByTournament(tournamentId),
+    getPoolsByTournament(tournamentId),
+    getPoolTeamsByTournament(tournamentId),
+    getMatchesByTournament(tournamentId),
+    getMatchSetsByTournament(tournamentId),
+  ]);
+
+  return {
+    tournament,
+    registrations,
+    teams,
+    teamPlayers,
+    pools,
+    poolTeams,
+    matches,
+    matchSets,
+  };
+};
+
+export const checkIfTournamentStarted = async (
+  tournamentId: string
+): Promise<boolean> => {
+  const database = getDatabaseClient();
+  const rows = await database<Array<{ id: string }>>`
+    select ms.id
+    from match_sets ms
+    join matches m on m.id = ms.match_id
+    where m.tournament_id = ${tournamentId}
+    limit 1
+  `;
+
+  return rows.length > 0;
+};
+
 export const getActiveTournamentId = async (): Promise<string | null> => {
   const database = getDatabaseClient();
   const rows = await database<Array<{ id: string }>>`
