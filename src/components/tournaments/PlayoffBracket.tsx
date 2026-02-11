@@ -9,13 +9,6 @@ type PlayoffBracketProps = {
   onMatchClick: (matchId: string) => void;
 };
 
-const roundLabels: Record<number, string> = {
-  1: "16èmes",
-  2: "8èmes",
-  3: "Quarts",
-  4: "Demi",
-};
-
 const roundSpacing: Record<number, string> = {
   1: "mb-2",
   2: "mb-[42px]",
@@ -153,11 +146,25 @@ type RoundColumnProps = {
   onMatchClick: (matchId: string) => void;
 };
 
+function getRoundLabel(matches: PlayoffMatch[], roundNumber: number): string {
+  const roundName = matches[0]?.round?.round_name;
+
+  if (roundName) {
+    if (roundName.includes("16èmes")) return "16èmes";
+    if (roundName.includes("8èmes")) return "8èmes";
+    if (roundName.includes("Quarts")) return "Quarts";
+    if (roundName.includes("Demi")) return "Demi";
+    if (roundName.includes("Finale")) return "Finale";
+  }
+
+  return `Round ${roundNumber}`;
+}
+
 function RoundColumn({ roundNumber, matches, onMatchClick }: RoundColumnProps) {
   return (
     <div className="flex flex-col gap-3">
       <div className="rounded-lg bg-white/5 p-2 text-center text-sm font-semibold uppercase text-white/50">
-        {roundLabels[roundNumber] ?? `Round ${roundNumber}`}
+        {getRoundLabel(matches, roundNumber)}
       </div>
       <div className="flex flex-col">
         {matches.map((match, index) => (

@@ -45,9 +45,9 @@ const tabs = [
 
 ### 2. Implémenter l'affichage du bracket style horizontal (March Madness)
 
-**Design de référence** : `/mnt/padel/bracket-proposition-2-32-equipes.html`
+**Design de référence** : `bracket-proposition-2-32-equipes.html` (dans le dossier du projet)
 
-**Spécification fonctionnelle** : `/mnt/padel/specification-phases-finales.md`
+**Spécification fonctionnelle** : `specification-phases-finales.md` (dans le dossier du projet)
 
 **Structure du bracket** :
 ```
@@ -352,7 +352,7 @@ export default async function TournoiEnCoursPage() {
 
 ### Tables PostgreSQL nécessaires
 
-**1. Table `playoff_rounds`** (déjà définie dans la spec) :
+**1. Table `playoff_rounds`** :
 ```sql
 CREATE TABLE playoff_rounds (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

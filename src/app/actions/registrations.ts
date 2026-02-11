@@ -5,6 +5,7 @@ import { assertAdminToken } from "@/lib/admin";
 import type { RegistrationStatus } from "@/lib/types";
 import type { Sql } from "postgres";
 import { revalidatePath } from "next/cache";
+import { updatePlayerPhoto } from "@/app/actions/photo-actions";
 
 type RegistrationResult =
   | { status: "ok"; message: string }
@@ -149,6 +150,13 @@ export async function registerPlayer(
       phone,
     });
 
+    const playerPhoto = formData.get("player_photo") as File | null;
+    if (playerPhoto && playerPhoto.size > 0) {
+      const photoData = new FormData();
+      photoData.set("player_photo", playerPhoto);
+      await updatePlayerPhoto(playerId, photoData);
+    }
+
     await ensureRegistration(database, tournament.id, playerId);
 
     return {
@@ -201,6 +209,13 @@ export async function registerPlayerForTournament(
       email,
       phone,
     });
+
+    const playerPhoto = formData.get("player_photo") as File | null;
+    if (playerPhoto && playerPhoto.size > 0) {
+      const photoData = new FormData();
+      photoData.set("player_photo", playerPhoto);
+      await updatePlayerPhoto(playerId, photoData);
+    }
 
     await ensureRegistration(database, tournamentId, playerId);
 

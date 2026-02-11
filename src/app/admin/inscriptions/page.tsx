@@ -4,6 +4,8 @@ import { SectionHeader } from "@/components/ui/section-header";
 import { AdminTabs } from "@/components/admin/AdminTabs";
 import {
   getFeaturedTournamentPhotos,
+  getHomeConfig,
+  getHomeGallery,
   getTournamentPhotos,
   getTournaments,
 } from "@/lib/queries";
@@ -36,10 +38,12 @@ export default async function AdminInscriptionsPage({
     );
   }
 
-  const [tournaments, photos, featuredPhotos] = await Promise.all([
+  const [tournaments, photos, featuredPhotos, homeConfig, homeGallery] = await Promise.all([
     getTournaments(),
     getTournamentPhotos(),
     getFeaturedTournamentPhotos(),
+    getHomeConfig(),
+    getHomeGallery(),
   ]);
 
   return (
@@ -58,6 +62,8 @@ export default async function AdminInscriptionsPage({
             tournaments={tournaments}
             photos={photos}
             featuredPhotos={featuredPhotos}
+            homeConfig={homeConfig}
+            homeGallery={homeGallery}
           />
         </div>
       </main>

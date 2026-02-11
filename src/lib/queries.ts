@@ -211,6 +211,34 @@ export const getTournamentPhotos = async (
   return rows;
 };
 
+export const getHomeConfig = async (): Promise<
+  { id: string; cover_photo_url: string | null } | null
+> => {
+  const database = getDatabaseClient();
+  const [config] = await database<
+    { id: string; cover_photo_url: string | null }[]
+  >`
+    select id, cover_photo_url
+    from home_config
+    where id = ${"00000000-0000-0000-0000-000000000001"}
+  `;
+  return config ?? null;
+};
+
+export const getHomeGallery = async (): Promise<
+  { id: string; photo_url: string; caption: string | null; display_order: number }[]
+> => {
+  const database = getDatabaseClient();
+  return database<
+    { id: string; photo_url: string; caption: string | null; display_order: number }[]
+  >`
+    select id, photo_url, caption, display_order
+    from home_gallery
+    where is_active = true
+    order by display_order asc
+  `;
+};
+
 export const getRegistrationsByStatus = async (
   tournamentId: string,
   status?: RegistrationStatus

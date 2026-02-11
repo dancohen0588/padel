@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Le tournoi des frérots - Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #1E1E2E;
+            color: #E0E0E0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .logo {
+            font-size: 32px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #ff6b35 0%, #ff8c42 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Stats globales */
+        .global-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(255, 107, 53, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .stat-value {
+            font-size: 36px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #ff6b35 0%, #ff8c42 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.6);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Layout principal */
+        .main-layout {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+
+        /* Section KPIs */
+        .kpi-section {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .section-icon {
+            font-size: 24px;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        /* Podium des vainqueurs */
+        .podium {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .podium-card {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .podium-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+        }
+
+        .podium-card.first::before {
+            background: linear-gradient(90deg, #FFD700, #FFA500);
+        }
+
+        .podium-card.second::before {
+            background: linear-gradient(90deg, #C0C0C0, #A8A8A8);
+        }
+
+        .podium-card.third::before {
+            background: linear-gradient(90deg, #CD7F32, #8B4513);
+        }
+
+        .podium-rank {
+            font-size: 40px;
+            margin-bottom: 8px;
+        }
+
+        .podium-team {
+            font-size: 16px;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 4px;
+        }
+
+        .podium-tournament {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.5);
+            margin-bottom: 8px;
+        }
+
+        .podium-date {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        /* Classements */
+        .ranking-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .ranking-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .ranking-item:hover {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(255, 107, 53, 0.4);
+            transform: translateX(4px);
+        }
+
+        .rank-badge {
+            min-width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 16px;
+            border-radius: 8px;
+        }
+
+        .rank-badge.top-3 {
+            background: linear-gradient(135deg, #ff6b35 0%, #ff8c42 100%);
+            color: #fff;
+        }
+
+        .rank-badge.regular {
+            background: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .rank-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .rank-name {
+            font-size: 15px;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 4px;
+        }
+
+        .rank-players {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .rank-stat {
+            font-size: 20px;
+            font-weight: 700;
+            color: #4CAF50;
+            min-width: 60px;
+            text-align: right;
+        }
+
+        .rank-label {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.5);
+            text-transform: uppercase;
+        }
+
+        /* Match du mois / Records */
+        .highlight-card {
+            background: linear-gradient(135deg, rgba(255, 107, 53, 0.1) 0%, rgba(157, 122, 250, 0.1) 100%);
+            border: 1px solid rgba(255, 107, 53, 0.3);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .highlight-header {
+            font-size: 14px;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 12px;
+            letter-spacing: 1px;
+        }
+
+        .highlight-match {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .team-score {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .team-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .score {
+            font-size: 24px;
+            font-weight: 700;
+            color: #ff6b35;
+        }
+
+        .vs {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.5);
+            text-transform: uppercase;
+        }
+
+        .match-details {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.6);
+            padding-top: 12px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Sidebar */
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        /* Prochains tournois (discret) */
+        .upcoming-tournaments {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 20px;
+        }
+
+        .sidebar-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tournament-item {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 12px;
+        }
+
+        .tournament-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .tournament-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 4px;
+        }
+
+        .tournament-date {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.6);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-badge.live {
+            background: rgba(255, 107, 53, 0.2);
+            color: #ff6b35;
+        }
+
+        .status-badge.upcoming {
+            background: rgba(157, 122, 250, 0.2);
+            color: #9D7AFA;
+        }
+
+        /* Module "On se rejoint ?" */
+        .join-module {
+            background: linear-gradient(135deg, #ff6b35 0%, #ff8c42 100%);
+            border-radius: 16px;
+            padding: 24px;
+            text-align: center;
+        }
+
+        .join-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 8px;
+        }
+
+        .join-subtitle {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 16px;
+        }
+
+        .join-button {
+            background: #fff;
+            color: #ff6b35;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 24px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .join-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Tendances / Progression */
+        .trend-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 12px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+
+        .trend-indicator.up {
+            background: rgba(76, 175, 80, 0.2);
+            color: #4CAF50;
+        }
+
+        .trend-indicator.down {
+            background: rgba(244, 67, 54, 0.2);
+            color: #F44336;
+        }
+
+        .trend-indicator.neutral {
+            background: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .main-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                grid-column: 1;
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            }
+        }
+
+        @media (max-width: 768px) {
+            .podium {
+                grid-template-columns: 1fr;
+            }
+
+            .global-stats {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo">🏆 Le tournoi des frérots</div>
+        </div>
+
+        <!-- Stats globales -->
+        <div class="global-stats">
+            <div class="stat-card">
+                <div class="stat-value">24</div>
+                <div class="stat-label">Tournois organisés</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">486</div>
+                <div class="stat-label">Matchs joués</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">64</div>
+                <div class="stat-label">Joueurs actifs</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">1,458</div>
+                <div class="stat-label">Sets joués</div>
+            </div>
+        </div>
+
+        <!-- Layout principal -->
+        <div class="main-layout">
+            <!-- Colonne principale -->
+            <div class="main-content">
+
+                <!-- Derniers vainqueurs -->
+                <div class="kpi-section">
+                    <div class="section-header">
+                        <span class="section-icon">🥇</span>
+                        <h2 class="section-title">Derniers vainqueurs</h2>
+                    </div>
+                    <div class="podium">
+                        <div class="podium-card first">
+                            <div class="podium-rank">🥇</div>
+                            <div class="podium-team">Les Champions A</div>
+                            <div class="podium-tournament">Tournoi de février</div>
+                            <div class="podium-date">5 fév. 2026</div>
+                        </div>
+                        <div class="podium-card second">
+                            <div class="podium-rank">🥈</div>
+                            <div class="podium-team">Fire Squad</div>
+                            <div class="podium-tournament">Tournoi de janvier</div>
+                            <div class="podium-date">8 jan. 2026</div>
+                        </div>
+                        <div class="podium-card third">
+                            <div class="podium-rank">🥉</div>
+                            <div class="podium-team">Dream Team C</div>
+                            <div class="podium-tournament">Tournoi de décembre</div>
+                            <div class="podium-date">10 déc. 2025</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Match le plus serré -->
+                <div class="highlight-card">
+                    <div class="highlight-header">⚡ Match le plus serré du dernier tournoi</div>
+                    <div class="highlight-match">
+                        <div class="team-score">
+                            <span class="team-name">Les Champions A</span>
+                            <span class="score">2</span>
+                        </div>
+                        <span class="vs">vs</span>
+                        <div class="team-score">
+                            <span class="score">1</span>
+                            <span class="team-name">Masters Pro</span>
+                        </div>
+                    </div>
+                    <div class="match-details">
+                        Score : 7-6, 6-7, 7-6 • 42 jeux joués • Durée : 2h15
+                    </div>
+                </div>
+
+                <!-- Classement paires - Victoires de tournois -->
+                <div class="kpi-section">
+                    <div class="section-header">
+                        <span class="section-icon">🏅</span>
+                        <h2 class="section-title">Top paires - Victoires de tournois</h2>
+                    </div>
+                    <div class="ranking-list">
+                        <div class="ranking-item">
+                            <div class="rank-badge top-3">1</div>
+                            <div class="rank-info">
+                                <div class="rank-name">Les Champions A</div>
+                                <div class="rank-players">Alex M. • Thomas D.</div>
+                            </div>
+                            <div>
+                                <div class="rank-stat">8</div>
+                                <div class="rank-label">Victoires</div>
+                            </div>
+                            <div class="trend-indicator up">↑ +2</div>
+                        </div>
+                        <div class="ranking-item">
+                            <div class="rank-badge top-3">2</div>
+                            <div class="rank-info">
+                                <div class="rank-name">Fire Squad</div>
+                                <div class="rank-players">Jordan B. • Kevin L.</div>
+                            </div>
+                            <div>
+                                <div class="rank-stat">6</div>
+                                <div class="rank-label">Victoires</div>
+                            </div>
+                            <div class="trend-indicator neutral">—</div>
+                        </div>
+                        <div class="ranking-item">
+                            <div class="rank-badge top-3">3</div>
+                            <div class="rank-info">
+                                <div class="rank-name">Dream Team C</div>
+                                <div class="rank-players">Lucas R. • Paul W.</div>
+                            </div>
+                            <div>
+                                <div class="rank-stat">5</div>
+                                <div class="rank-label">Victoires</div>
+                            </div>
+                            <div class="trend-indicator up">↑ +1</div>
+                        </div>
+                        <div class="ranking-item">
+                            <div class="rank-badge regular">4</div>
+                            <div class="rank-info">
+                                <div class="rank-name">Thunder Squad</div>
+                                <div class="rank-players">Marc P. • Antoine G.</div>
+                            </div>
+                            <div>
+                                <div class="rank-stat">4</div>
+                                <div class="rank-label">Victoires</div>
+                            </div>
+                            <div class="trend-indicator down">↓ -1</div>
+                        </div>
+                        <div class="ranking-item">
+                            <div class="rank-badge regular">5</div>
+                            <div class="rank-info">
+                                <div class="rank-name">Elite Force</div>
+                                <div class="rank-players">David S. • Nicolas F.</div>
+                            </div>
+                            <div>
+                                <div class="rank-stat">3</div>
+                                <div class="rank-label">Victoires</div>
+                            </div>
+                            <div class="trend-indicator neutral">—</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Classement paires - Total victoires -->
+                <div class="kpi-section">
+                    <div class="section-header">
+                        <span class="section-icon">🔥</span>
+                        <h2 class="section-title">Top paires - Total victoires (matchs)</h2>
+                    </div>
+                    <div class="ranking-list">
+                        <div class="ranking-item">
+                            <div class="rank-badge top-3">1</div>
+                            <div class="rank-info">
+                                <div class="rank-name">Les Champions A</div>
+                                <div class="rank-players">Taux de victoire : 78%</div>
+                            </div>
+                            <div>
+                                <div class="rank-stat">156</div>
+                                <div class="rank-label">Victoires</div>
+                            </div>
+                        </div>
+                        <div class="ranking-item">
+                            <div class="rank-badge top-3">2</div>
+                            <div class="rank-info">
+                                <div class="rank-name">Fire Squad</div>
+                                <div class="rank-players">Taux de victoire : 72%</div>
+                            </div>
+                            <div>
+                                <div class="rank-stat">134</div>
+                                <div class="rank-label">Victoires</div>
+                            </div>
+                        </div>
+                        <div class="ranking-item">
+                            <div class="rank-badge top-3">3</div>
+                            <div class="rank-info">
+                                <div class="rank-name">Dream Team C</div>
+                                <div class="rank-players">Taux de victoire : 68%</div>
+                            </div>
+                            <div>
+                                <div class="rank-stat">128</div>
+                                <div class="rank-label">Victoires</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Records -->
+                <div class="kpi-section">
+                    <div class="section-header">
+                        <span class="section-icon">📊</span>
+                        <h2 class="section-title">Records & Statistiques</h2>
+                    </div>
+                    <div class="ranking-list">
+                        <div class="ranking-item">
+                            <div class="rank-badge top-3">🎯</div>
+                            <div class="rank-info">
+                                <div class="rank-name">Plus longue série de victoires</div>
+                                <div class="rank-players">Les Champions A</div>
+                            </div>
+                            <div>
+                                <div class="rank-stat">12</div>
+                                <div class="rank-label">Matchs</div>
+                            </div>
+                        </div>
+                        <div class="ranking-item">
+                            <div class="rank-badge top-3">💪</div>
+                            <div class="rank-info">
+                                <div class="rank-name">Plus gros comeback</div>
+                                <div class="rank-players">Fire Squad • 8 victoires après 0-1</div>
+                            </div>
+                            <div>
+                                <div class="rank-stat">8</div>
+                                <div class="rank-label">Matchs</div>
+                            </div>
+                        </div>
+                        <div class="ranking-item">
+                            <div class="rank-badge top-3">⚡</div>
+                            <div class="rank-info">
+                                <div class="rank-name">Meilleur goal average</div>
+                                <div class="rank-players">Les Champions A</div>
+                            </div>
+                            <div>
+                                <div class="rank-stat">+3.2</div>
+                                <div class="rank-label">Moy/match</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Classement joueurs -->
+                <div class="kpi-section">
+                    <div class="section-header">
+                        <span class="section-icon">👤</span>
+                        <h2 class="section-title">Top joueurs - Victoires de tournois</h2>
+                    </div>
+                    <div class="ranking-list">
+                        <div class="ranking-item">
+                            <div class="rank-badge top-3">1</div>
+                            <div class="rank-info">
+                                <div class="rank-name">Alex M.</div>
+                                <div class="rank-players">Polyvalence : 5 partenaires différents</div>
+                            </div>
+                            <div>
+                                <div class="rank-stat">10</div>
+                                <div class="rank-label">Victoires</div>
+                            </div>
+                        </div>
+                        <div class="ranking-item">
+                            <div class="rank-badge top-3">2</div>
+                            <div class="rank-info">
+                                <div class="rank-name">Thomas D.</div>
+                                <div class="rank-players">Polyvalence : 3 partenaires différents</div>
+                            </div>
+                            <div>
+                                <div class="rank-stat">8</div>
+                                <div class="rank-label">Victoires</div>
+                            </div>
+                        </div>
+                        <div class="ranking-item">
+                            <div class="rank-badge top-3">3</div>
+                            <div class="rank-info">
+                                <div class="rank-name">Jordan B.</div>
+                                <div class="rank-players">Polyvalence : 4 partenaires différents</div>
+                            </div>
+                            <div>
+                                <div class="rank-stat">7</div>
+                                <div class="rank-label">Victoires</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Sidebar -->
+            <div class="sidebar">
+
+                <!-- Prochains tournois (discret) -->
+                <div class="upcoming-tournaments">
+                    <div class="sidebar-title">
+                        <span>📅</span>
+                        <span>Prochains tournois</span>
+                    </div>
+                    <div class="tournament-item">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                            <span class="tournament-name">Tournoi de mars</span>
+                            <span class="status-badge live">En cours</span>
+                        </div>
+                        <div class="tournament-date">
+                            <span>📍</span>
+                            <span>Terrain 2 • 14h00</span>
+                        </div>
+                    </div>
+                    <div class="tournament-item">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                            <span class="tournament-name">Tournoi d'avril</span>
+                            <span class="status-badge upcoming">À venir</span>
+                        </div>
+                        <div class="tournament-date">
+                            <span>📅</span>
+                            <span>15 avril 2026</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Module "On se rejoint ?" -->
+                <div class="join-module">
+                    <div class="join-title">On se rejoint ?</div>
+                    <div class="join-subtitle">Inscris-toi au prochain tournoi et viens défier les meilleurs</div>
+                    <button class="join-button">S'inscrire au prochain tournoi</button>
+                </div>
+
+                <!-- Statistiques rapides supplémentaires -->
+                <div class="upcoming-tournaments">
+                    <div class="sidebar-title">
+                        <span>🎲</span>
+                        <span>Le savais-tu ?</span>
+                    </div>
+                    <div style="padding: 12px; background: rgba(255, 255, 255, 0.04); border-radius: 8px; margin-bottom: 12px;">
+                        <div style="font-size: 13px; color: rgba(255, 255, 255, 0.8); line-height: 1.6;">
+                            La rivalité du mois oppose <strong style="color: #ff6b35;">Les Champions A</strong> et <strong style="color: #9D7AFA;">Fire Squad</strong> avec 6 confrontations ce mois-ci.
+                        </div>
+                    </div>
+                    <div style="padding: 12px; background: rgba(255, 255, 255, 0.04); border-radius: 8px;">
+                        <div style="font-size: 13px; color: rgba(255, 255, 255, 0.8); line-height: 1.6;">
+                            Record de participation : <strong style="color: #4CAF50;">Alex M.</strong> a participé à 24 tournois consécutifs !
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</body>
+</html>
