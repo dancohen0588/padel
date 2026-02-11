@@ -11,10 +11,14 @@ import type {
   TeamPlayer,
   Tournament,
 } from "@/lib/types";
+import type { PlayoffBracketData, PlayoffMatch } from "@/types/playoff";
 import { TournamentSelector } from "@/components/tournaments/current/TournamentSelector";
 import { TeamsReadOnlyView } from "@/components/tournaments/current/TeamsReadOnlyView";
 import { MatchesAndStandingsView } from "@/components/tournaments/current/MatchesAndStandingsView";
 import { Toast } from "@/components/ui/toast";
+import { PlayoffBracket } from "@/components/tournaments/PlayoffBracket";
+import { PlayoffScoreModal } from "@/components/tournaments/PlayoffScoreModal";
+import { cn } from "@/lib/utils";
 
 type TournamentPayload = {
   tournament: Tournament | null;
@@ -26,6 +30,8 @@ type TournamentPayload = {
   matches: Match[];
   matchSets: MatchSet[];
   hasStarted: boolean;
+  playoffMatches: PlayoffMatch[];
+  playoffBracketData: PlayoffBracketData;
 };
 
 type CurrentTournamentClientProps = {
@@ -48,6 +54,8 @@ export function CurrentTournamentClient({ tournaments }: CurrentTournamentClient
   const [error, setError] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
   const [toastTone, setToastTone] = useState<"success" | "error">("success");
+  const [activeTab, setActiveTab] = useState<"matches" | "playoffs">("matches");
+  const [activePlayoffMatchId, setActivePlayoffMatchId] = useState<string | null>(null);
 
   const handleLoad = async (tournamentId: string) => {
     if (!tournamentId) return;
@@ -76,6 +84,13 @@ export function CurrentTournamentClient({ tournaments }: CurrentTournamentClient
 
   const selectedTournament = sortedTournaments.find((item) => item.id === selectedId);
   const tournamentData = payload?.tournament?.id === selectedId ? payload : null;
+  const activePlayoffMatch = useMemo(() => {
+    if (!activePlayoffMatchId || !tournamentData) return null;
+    return (
+      tournamentData.playoffMatches.find((match) => match.id === activePlayoffMatchId) ??
+      null
+    );
+  }, [activePlayoffMatchId, tournamentData]);
 
   useEffect(() => {
     if (!selectedId) return;
@@ -113,20 +128,70 @@ export function CurrentTournamentClient({ tournaments }: CurrentTournamentClient
 
       {tournamentData && selectedTournament ? (
         tournamentData.hasStarted ? (
-          <MatchesAndStandingsView
-            tournament={selectedTournament}
-            pools={tournamentData.pools}
-            poolTeams={tournamentData.poolTeams}
-            teams={tournamentData.teams}
-            teamPlayers={tournamentData.teamPlayers}
-            matches={tournamentData.matches}
-            matchSets={tournamentData.matchSets}
-            onSaved={() => {
-              handleToast("Score enregistré", "success");
-              void handleLoad(selectedId);
-            }}
-            onError={(message) => handleToast(message, "error")}
-          />
+          <div className="space-y-6">
+            <div className="flex gap-2 border-b border-white/10">
+              <button
+                type="button"
+                onClick={() => setActiveTab("matches")}
+                className={cn(
+                  "rounded-t-lg px-6 py-3 text-sm font-semibold transition",
+                  activeTab === "matches"
+                    ? "bg-gradient-to-r from-orange-500 to-orange-400 text-white"
+                    : "text-white/60 hover:text-white"
+                )}
+              >
+                Matchs & Classement
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveTab("playoffs")}
+                className={cn(
+                  "rounded-t-lg px-6 py-3 text-sm font-semibold transition",
+                  activeTab === "playoffs"
+                    ? "bg-gradient-to-r from-orange-500 to-orange-400 text-white"
+                    : "text-white/60 hover:text-white"
+                )}
+              >
+                Phases finales
+              </button>
+            </div>
+
+            {activeTab === "matches" ? (
+              <MatchesAndStandingsView
+                tournament={selectedTournament}
+                pools={tournamentData.pools}
+                poolTeams={tournamentData.poolTeams}
+                teams={tournamentData.teams}
+                teamPlayers={tournamentData.teamPlayers}
+                matches={tournamentData.matches}
+                matchSets={tournamentData.matchSets}
+                onSaved={() => {
+                  handleToast("Score enregistré", "success");
+                  void handleLoad(selectedId);
+                }}
+                onError={(message) => handleToast(message, "error")}
+              />
+            ) : (
+              <div className="space-y-4">
+                <PlayoffBracket
+                  bracketData={tournamentData.playoffBracketData}
+                  onMatchClick={(matchId) => setActivePlayoffMatchId(matchId)}
+                />
+                {activePlayoffMatch ? (
+                  <PlayoffScoreModal
+                    match={activePlayoffMatch}
+                    onClose={() => setActivePlayoffMatchId(null)}
+                    onSaved={() => {
+                      handleToast("Score playoffs enregistré", "success");
+                      void handleLoad(selectedId);
+                      setActivePlayoffMatchId(null);
+                    }}
+                    onError={(message) => handleToast(message, "error")}
+                  />
+                ) : null}
+              </div>
+            )}
+          </div>
         ) : (
           <TeamsReadOnlyView
             tournament={selectedTournament}

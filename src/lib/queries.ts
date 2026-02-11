@@ -15,6 +15,13 @@ import type {
   TournamentPhoto,
   TournamentStatus,
 } from "@/lib/types";
+import type {
+  PlayoffMatch,
+  PlayoffMatchStatus,
+  PlayoffRound,
+  PlayoffSet,
+  PlayoffBracketData,
+} from "@/types/playoff";
 
 export const getActiveTournament = async (): Promise<Tournament | null> => {
   const database = getDatabaseClient();
@@ -577,4 +584,219 @@ export const getPoolStandings = async (
     set_diff: standing.sets_for - standing.sets_against,
     game_diff: standing.games_for - standing.games_against,
   }));
+};
+
+export const getPlayoffRoundsByTournament = async (
+  tournamentId: string
+): Promise<PlayoffRound[]> => {
+  const database = getDatabaseClient();
+  const rows = await database<PlayoffRound[]>`
+    select
+      id,
+      tournament_id,
+      round_number,
+      round_name,
+      created_at::text as created_at
+    from playoff_rounds
+    where tournament_id = ${tournamentId}
+    order by round_number asc
+  `;
+
+  return rows;
+};
+
+export const getPlayoffMatchesByTournament = async (
+  tournamentId: string
+): Promise<PlayoffMatch[]> => {
+  const database = getDatabaseClient();
+  const rows = await database<PlayoffMatch[]>`
+    select
+      id,
+      tournament_id,
+      round_id,
+      match_number,
+      team1_id,
+      team2_id,
+      winner_id,
+      team1_seed,
+      team2_seed,
+      scheduled_at::text as scheduled_at,
+      next_match_id,
+      next_match_position,
+      status,
+      created_at::text as created_at
+    from playoff_matches
+    where tournament_id = ${tournamentId}
+    order by round_id asc, match_number asc
+  `;
+
+  return rows.map((row) => ({
+    ...row,
+    status: row.status as PlayoffMatchStatus,
+  }));
+};
+
+export const getPlayoffSetsByTournament = async (
+  tournamentId: string
+): Promise<PlayoffSet[]> => {
+  const database = getDatabaseClient();
+  const rows = await database<PlayoffSet[]>`
+    select
+      ps.id,
+      ps.match_id,
+      ps.set_number,
+      ps.team1_score,
+      ps.team2_score,
+      ps.created_at::text as created_at
+    from playoff_sets ps
+    join playoff_matches pm on pm.id = ps.match_id
+    where pm.tournament_id = ${tournamentId}
+    order by ps.match_id asc, ps.set_number asc
+  `;
+
+  return rows;
+};
+
+export const getPlayoffMatchesWithTeams = async (
+  tournamentId: string
+): Promise<PlayoffMatch[]> => {
+  const database = getDatabaseClient();
+  type PlayoffMatchRow = PlayoffMatch & {
+    team1_name: string | null;
+    team2_name: string | null;
+    winner_name: string | null;
+    team1_created_at: string | null;
+    team2_created_at: string | null;
+    winner_created_at: string | null;
+    round_number: number;
+    round_name: string;
+  };
+
+  const rows = await database<PlayoffMatchRow[]>`
+    select
+      pm.id,
+      pm.tournament_id,
+      pm.round_id,
+      pm.match_number,
+      pm.team1_id,
+      pm.team2_id,
+      pm.winner_id,
+      pm.team1_seed,
+      pm.team2_seed,
+      pm.scheduled_at::text as scheduled_at,
+      pm.next_match_id,
+      pm.next_match_position,
+      pm.status,
+      pm.created_at::text as created_at,
+      pr.round_number,
+      pr.round_name,
+      t1.name as team1_name,
+      t1.created_at::text as team1_created_at,
+      t2.name as team2_name,
+      t2.created_at::text as team2_created_at,
+      tw.name as winner_name,
+      tw.created_at::text as winner_created_at
+    from playoff_matches pm
+    join playoff_rounds pr on pr.id = pm.round_id
+    left join teams t1 on t1.id = pm.team1_id
+    left join teams t2 on t2.id = pm.team2_id
+    left join teams tw on tw.id = pm.winner_id
+    where pm.tournament_id = ${tournamentId}
+    order by pr.round_number asc, pm.match_number asc
+  `;
+
+  const matchIds = rows.map((row) => row.id);
+  const sets = matchIds.length
+    ? await database<PlayoffSet[]>`
+        select
+          id,
+          match_id,
+          set_number,
+          team1_score,
+          team2_score,
+          created_at::text as created_at
+        from playoff_sets
+        where match_id in ${database(matchIds)}
+        order by match_id asc, set_number asc
+      `
+    : [];
+
+  const setsByMatch = new Map<string, PlayoffSet[]>();
+  sets.forEach((set) => {
+    const list = setsByMatch.get(set.match_id) ?? [];
+    list.push(set);
+    setsByMatch.set(set.match_id, list);
+  });
+
+  return rows.map((row) => ({
+    id: row.id,
+    tournament_id: row.tournament_id,
+    round_id: row.round_id,
+    match_number: row.match_number,
+    team1_id: row.team1_id,
+    team2_id: row.team2_id,
+    winner_id: row.winner_id,
+    team1_seed: row.team1_seed,
+    team2_seed: row.team2_seed,
+    scheduled_at: row.scheduled_at,
+    next_match_id: row.next_match_id,
+    next_match_position: row.next_match_position,
+    status: row.status as PlayoffMatchStatus,
+    created_at: row.created_at,
+    round: {
+      id: row.round_id,
+      tournament_id: row.tournament_id,
+      round_number: row.round_number,
+      round_name: row.round_name,
+      created_at: "",
+    },
+    team1: row.team1_id
+      ? {
+          id: row.team1_id,
+          tournament_id: row.tournament_id,
+          name: row.team1_name,
+          created_at: row.team1_created_at ?? "",
+        }
+      : null,
+    team2: row.team2_id
+      ? {
+          id: row.team2_id,
+          tournament_id: row.tournament_id,
+          name: row.team2_name,
+          created_at: row.team2_created_at ?? "",
+        }
+      : null,
+    winner: row.winner_id
+      ? {
+          id: row.winner_id,
+          tournament_id: row.tournament_id,
+          name: row.winner_name,
+          created_at: row.winner_created_at ?? "",
+        }
+      : null,
+    sets: setsByMatch.get(row.id) ?? [],
+  }));
+};
+
+export const getPlayoffBracketData = async (
+  tournamentId: string
+): Promise<PlayoffBracketData> => {
+  const matches = await getPlayoffMatchesWithTeams(tournamentId);
+  const rounds = matches.reduce<Record<number, PlayoffMatch[]>>((acc, match) => {
+    const roundNumber = match.round?.round_number ?? 0;
+    if (!acc[roundNumber]) {
+      acc[roundNumber] = [];
+    }
+    acc[roundNumber].push(match);
+    return acc;
+  }, {});
+
+  const roundNumbers = Object.keys(rounds)
+    .map((value) => Number(value))
+    .filter((value) => Number.isFinite(value));
+  const finalRound = roundNumbers.length ? Math.max(...roundNumbers) : 0;
+  const finalMatch = finalRound ? rounds[finalRound]?.[0] : undefined;
+  const champion = finalMatch?.winner ?? null;
+
+  return { rounds, champion };
 };

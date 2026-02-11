@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { assertAdminToken } from "@/lib/admin";
 import { getDatabaseClient } from "@/lib/database";
+import { updatePlayoffSeeding } from "@/app/actions/playoff-actions";
 
 const maxSets = 5;
 
@@ -264,6 +265,7 @@ export async function updateMatchScoresAction(
     }
 
     revalidatePath("/tournoi/en-cours");
+    await updatePlayoffSeeding(match.tournament_id);
     return { success: true };
   } catch (error) {
     const message = error instanceof Error ? error.message : "Erreur inconnue";

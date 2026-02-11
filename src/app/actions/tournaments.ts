@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { assertAdminToken } from "@/lib/admin";
 import { getDatabaseClient } from "@/lib/database";
+import { generateEmptyPlayoffBracket } from "@/app/actions/playoff-actions";
 import type { TournamentConfig, TournamentStatus } from "@/lib/types";
 
 const DEFAULT_CONFIG: TournamentConfig = {
@@ -84,6 +85,13 @@ export async function upsertTournamentAction(
   };
 
   if (tournamentId) {
+    const previous = await database<Array<{ config: TournamentConfig }>>`
+      select config
+      from tournaments
+      where id = ${tournamentId}
+      limit 1
+    `;
+    const wasPlayoffsEnabled = previous[0]?.config?.playoffs?.enabled ?? false;
     await database`
       update tournaments
       set
@@ -98,8 +106,12 @@ export async function upsertTournamentAction(
         config = ${database.json(config)}
       where id = ${tournamentId}
     `;
+    const shouldGenerateBracket = !wasPlayoffsEnabled && config.playoffs.enabled;
+    if (shouldGenerateBracket) {
+      await generateEmptyPlayoffBracket(tournamentId);
+    }
   } else {
-    await database`
+    const created = await database<Array<{ id: string }>>`
       insert into tournaments (slug, name, date, location, description, status, max_players, image_path, config)
       values (
         ${slug || null},
@@ -112,7 +124,12 @@ export async function upsertTournamentAction(
         ${imagePath || null},
         ${database.json(config || DEFAULT_CONFIG)}
       )
+      returning id
     `;
+    const createdId = created[0]?.id;
+    if (createdId && config.playoffs.enabled) {
+      await generateEmptyPlayoffBracket(createdId);
+    }
   }
 
   revalidatePath("/admin/inscriptions");

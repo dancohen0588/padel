@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tableau des Phases Finales - 32 Équipes - Style Horizontal</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #1E1E2E;
+            color: #E0E0E0;
+            padding: 40px 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #ff6b35 0%, #ff8c42 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 16px;
+        }
+
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            margin-bottom: 32px;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .legend-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .legend-dot.live {
+            background: #ff6b35;
+            animation: pulse-dot 2s infinite;
+        }
+
+        .legend-dot.completed {
+            background: #4CAF50;
+        }
+
+        .legend-dot.upcoming {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.6; transform: scale(1.2); }
+        }
+
+        .bracket-wrapper {
+            overflow-x: auto;
+            padding: 20px 0;
+        }
+
+        .bracket {
+            display: grid;
+            grid-template-columns: 2fr 1.5fr 1fr 0.8fr auto 0.8fr 1fr 1.5fr 2fr;
+            gap: 16px;
+            min-width: 1400px;
+            align-items: center;
+        }
+
+        .round {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .round-header {
+            text-align: center;
+            font-size: 14px;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.5);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 8px;
+        }
+
+        .match {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 8px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .match:hover {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(255, 107, 53, 0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .match.live {
+            border-color: rgba(255, 107, 53, 0.6);
+            background: rgba(255, 107, 53, 0.08);
+        }
+
+        .match.completed .team.winner {
+            background: rgba(76, 175, 80, 0.1);
+        }
+
+        .team {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 6px 8px;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .team:not(:last-child) {
+            margin-bottom: 4px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .team-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .seed {
+            font-size: 11px;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.5);
+            min-width: 20px;
+            text-align: center;
+        }
+
+        .seed.top-seed {
+            background: linear-gradient(135deg, #ff6b35 0%, #ff8c42 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 700;
+        }
+
+        .team-name {
+            font-size: 13px;
+            font-weight: 500;
+            color: #E0E0E0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .team.winner .team-name {
+            font-weight: 600;
+            color: #FFFFFF;
+        }
+
+        .score {
+            font-size: 14px;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.7);
+            min-width: 24px;
+            text-align: right;
+        }
+
+        .team.winner .score {
+            color: #4CAF50;
+        }
+
+        .status-indicator {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+        }
+
+        .status-indicator.live {
+            background: #ff6b35;
+            animation: pulse-dot 2s infinite;
+        }
+
+        .status-indicator.completed {
+            background: #4CAF50;
+        }
+
+        .status-indicator.upcoming {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .final-match {
+            background: rgba(255, 107, 53, 0.08);
+            border: 2px solid rgba(255, 107, 53, 0.4);
+            padding: 16px;
+            border-radius: 12px;
+        }
+
+        .final-match .team {
+            padding: 10px 12px;
+            font-size: 15px;
+        }
+
+        .final-match .seed {
+            font-size: 13px;
+        }
+
+        .final-match .team-name {
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        .final-match .score {
+            font-size: 16px;
+        }
+
+        .champion-banner {
+            margin-top: 16px;
+            padding: 12px;
+            background: linear-gradient(135deg, #ff6b35 0%, #ff8c42 100%);
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .champion-banner .label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 4px;
+        }
+
+        .champion-banner .team-name {
+            font-size: 18px;
+            font-weight: 700;
+            color: #FFFFFF;
+        }
+
+        /* Spacing adjustments for rounds */
+        .round-16 .match {
+            margin-bottom: 8px;
+        }
+
+        .round-8 .match {
+            margin-bottom: 42px;
+        }
+
+        .round-8 .match:last-child {
+            margin-bottom: 0;
+        }
+
+        .round-quarter .match {
+            margin-bottom: 106px;
+        }
+
+        .round-quarter .match:last-child {
+            margin-bottom: 0;
+        }
+
+        .round-semi .match {
+            margin-bottom: 230px;
+        }
+
+        .round-semi .match:last-child {
+            margin-bottom: 0;
+        }
+
+        @media (max-width: 1400px) {
+            .bracket-wrapper {
+                padding-bottom: 40px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏆 Tableau des Phases Finales</h1>
+            <p>32 Équipes qualifiées - Format à élimination directe</p>
+        </div>
+
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-dot live"></div>
+                <span>Match en cours</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-dot completed"></div>
+                <span>Terminé</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-dot upcoming"></div>
+                <span>À venir</span>
+            </div>
+        </div>
+
+        <div class="bracket-wrapper">
+            <div class="bracket">
+                <!-- Left Side: Seeds 1-16 -->
+
+                <!-- Round of 16 - Left Top Half -->
+                <div class="round round-16">
+                    <div class="round-header">16èmes</div>
+
+                    <div class="match completed">
+                        <div class="status-indicator completed"></div>
+                        <div class="team winner">
+                            <div class="team-info">
+                                <span class="seed top-seed">1</span>
+                                <span class="team-name">Les Champions A</span>
+                            </div>
+                            <span class="score">7-5</span>
+                        </div>
+                        <div class="team">
+                            <div class="team-info">
+                                <span class="seed">32</span>
+                                <span class="team-name">Team Delta</span>
+                            </div>
+                            <span class="score">6-4</span>
+                        </div>
+                    </div>
+
+                    <div class="match completed">
+                        <div class="status-indicator completed"></div>
+                        <div class="team">
+                            <div class="team-info">
+                                <span class="seed">16</span>
+                                <span class="team-name">Squad Omega</span>
+                            </div>
+                            <span class="score">3-6</span>
+                        </div>
+                        <div class="team winner">
+                            <div class="team-info">
+                                <span class="seed">17</span>
+                                <span class="team-name">Fire Birds</span>
+                            </div>
+                            <span class="score">6-3</span>
+                        </div>
+                    </div>
+
+                    <div class="match completed">
+                        <div class="status-indicator completed"></div>
+                        <div class="team winner">
+                            <div class="team-info">
+                                <span class="seed">8</span>
+                                <span class="team-name">Thunder Squad</span>
+                            </div>
+                            <span class="score">6-4</span>
+                        </div>
+                        <div class="team">
+                            <div class="team-info">
+                                <span class="seed">25</span>
+                                <span class="team-name">Les Rookies</span>
+                            </div>
+                            <span class="score">4-6</span>
+                        </div>
+                    </div>
+
+                    <div class="match completed">
+                        <div class="status-indicator completed"></div>
+                        <div class="team winner">
+                            <div class="team-info">
+                                <span class="seed">9</span>
+                                <span class="team-name">Phoenix Team</span>
+                            </div>
+                            <span class="score">7-6</span>
+                        </div>
+                        <div class="team">
+                            <div class="team-info">
+                                <span class="seed">24</span>
+                                <span class="team-name">Shadow Wolves</span>
+                            </div>
+                            <span class="score">6-4</span>
+                        </div>
+                    </div>
+
+                    <div class="match completed">
+                        <div class="status-indicator completed"></div>
+                        <div class="team winner">
+                            <div class="team-info">
+                                <span class="seed top-seed">4</span>
+                                <span class="team-name">Masters Pro</span>
+                            </div>
+                            <span class="score">6-3</span>
+                        </div>
+                        <div class="team">
+                            <div class="team-info">
+                                <span class="seed">29</span>
+                                <span class="team-name">Wild Cards</span>
+                            </div>
+                            <span class="score">3-6</span>
+                        </div>
+                    </div>
+
+                    <div class="match completed">
+                        <div class="status-indicator completed"></div>
+                        <div class="team">
+                            <div class="team-info">
+                                <span class="seed">13</span>
+                                <span class="team-name">Speed Demons</span>
+                            </div>
+                            <span class="score">5-7</span>
+                        </div>
+                        <div class="team winner">
+                            <div class="team-info">
+                                <span class="seed">20</span>
+                                <span class="team-name">Rising Stars</span>
+                            </div>
+                            <span class="score">7-5</span>
+                        </div>
+                    </div>
+
+                    <div class="match completed">
+                        <div class="status-indicator completed"></div>
+                        <div class="team winner">
+                            <div class="team-info">
+                                <span class="seed">5</span>
+                                <span class="team-name">Elite Force</span>
+                            </div>
+                            <span class="score">6-2</span>
+                        </div>
+                        <div class="team">
+                            <div class="team-info">
+                                <span class="seed">28</span>
+                                <span class="team-name">Team Epsilon</span>
+                            </div>
+                            <span class="score">2-6</span>
+                        </div>
+                    </div>
+
+                    <div class="match completed">
+                        <div class="status-indicator completed"></div>
+                        <div class="team">
+                            <div class="team-info">
+                                <span class="seed">12</span>
+                                <span class="team-name">Challengers</span>
+                            </div>
+                            <span class="score">4-6</span>
+                        </div>
+                        <div class="team winner">
+                            <div class="team-info">
+                                <span class="seed">21</span>
+                                <span class="team-name">Storm Chasers</span>
+                            </div>
+                            <span class="score">6-4</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Round of 8 - Left -->
+                <div class="round round-8">
+                    <div class="round-header">8èmes</div>
+
+                    <div class="match completed">
+                        <div class="status-indicator completed"></div>
+                        <div class="team winner">
+                            <div class="team-info">
+                                <span class="seed top-seed">1</span>
+                                <span class="team-name">Les Champions A</span>
+                            </div>
+                            <span class="score">6-4</span>
+                        </div>
+                        <div class="team">
+                            <div class="team-info">
+                                <span class="seed">17</span>
+                                <span class="team-name">Fire Birds</span>
+                            </div>
+                            <span class="score">4-6</span>
+                        </div>
+                    </div>
+
+                    <div class="match completed">
+                        <div class="status-indicator completed"></div>
+                        <div class="team winner">
+                            <div class="team-info">
+                                <span class="seed">8</span>
+                                <span class="team-name">Thunder Squad</span>
+                            </div>
+                            <span class="score">7-6</span>
+                        </div>
+                        <div class="team">
+                            <div class="team-info">
+                                <span class="seed">9</span>
+                                <span class="team-name">Phoenix Team</span>
+                            </div>
+                            <span class="score">6-3</span>
+                        </div>
+                    </div>
+
+                    <div class="match completed">
+                        <div class="status-indicator completed"></div>
+                        <div class="team winner">
+                            <div class="team-info">
+                                <span class="seed top-seed">4</span>
+                                <span class="team-name">Masters Pro</span>
+                            </div>
+                            <span class="score">6-3</span>
+                        </div>
+                        <div class="team">
+                            <div class="team-info">
+                                <span class="seed">20</span>
+                                <span class="team-name">Rising Stars</span>
+                            </div>
+                            <span class="score">3-6</span>
+                        </div>
+                    </div>
+
+                    <div class="match completed">
+                        <div class="status-indicator completed"></div>
+                        <div class="team winner">
+                            <div class="team-info">
+                                <span class="seed">5</span>
+                                <span class="team-name">Elite Force</span>
+                            </div>
+                            <span class="score">6-4</span>
+                        </div>
+                        <div class="team">
+                            <div class="team-info">
+                                <span class="seed">21</span>
+                                <span class="team-name">Storm Chasers</span>
+                            </div>
+                            <span class="score">4-6</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quarter Finals - Left -->
+                <div class="round round-quarter">
+                    <div class="round-header">Quarts</div>
+
+                    <div class="match completed">
+                        <div class="status-indicator completed"></div>
+                        <div class="team winner">
+                            <div class="team-info">
+                                <span class="seed top-seed">1</span>
+                                <span class="team-name">Les Champions A</span>
+                            </div>
+                            <span class="score">6-4</span>
+                        </div>
+                        <div class="team">
+                            <div class="team-info">
+                                <span class="seed">8</span>
+                                <span class="team-name">Thunder Squad</span>
+                            </div>
+                            <span class="score">4-6</span>
+                        </div>
+                    </div>
+
+                    <div class="match completed">
+                        <div class="status-indicator completed"></div>
+                        <div class="team winner">
+                            <div class="team-info">
+                                <span class="seed top-seed">4</span>
+                                <span class="team-name">Masters Pro</span>
+                            </div>
+                            <span class="score">7-5</span>
+                        </div>
+                        <div class="team">
+                            <div class="team-info">
+                                <span class="seed">5</span>
+                                <span class="team-name">Elite Force</span>
+                            </div>
+                            <span class="score">5-7</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Semi Finals - Left -->
+                <div class="round round-semi">
+                    <div class="round-header">Demi</div>
+
+                    <div class="match completed">
+                        <div class="status-indicator completed"></div>
+                        <div class="team winner">
+                            <div class="team-info">
+                                <span class="seed top-seed">1</span>
+                                <span class="team-name">Les Champions A</span>
+                            </div>
+                            <span class="score">6-4</span>
+                        </div>
+                        <div class="team">
+                            <div class="team-info">
+                                <span class="seed top-seed">4</span>
+                                <span class="team-name">Masters Pro</span>
+                            </div>
+                            <span class="score">4-6</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Final -->
+                <div class="round">
+                    <div class="round-header">Finale</div>
+
+                    <div class="match final-match completed">
+                        <div class="status-indicator completed"></div>
+                        <div class="team winner">
+                            <div class="team-info">
+                                <span class="seed top-seed">1</span>
+                                <span class="team-name">Les Champions A</span>
+                            </div>
+                            <span class="score">6-4</span>
+                        </div>
+                        <div class="team">
+                            <div class="team-info">
+                                <span class="seed top-seed">2</span>
+                                <span class="team-name">Les Invincibles B</span>
+                            </div>
+                            <span class="score">4-6</span>
+                        </div>
+                    </div>
+
+                    <div class="champion-banner">
+                        <div class="label">Champion du Tournoi</div>
+                        <div class="team-name">Les Champions A</div>
+                    </div>
+                </div>
+
+                <!-- Semi Finals - Right -->
+                <div class="round round-semi">
+                    <div class="round-header">Demi</div>
+
+                    <div class="match completed">
+                        <div class="status-indicator completed"></div>
+                        <div class="team winner">
+                            <div class="team-info">
+                                <span class="seed top-seed">2</span>
+                                <span class="team-name">Les Invincibles B</span>
+                            </div>
+                            <span class="score">7-6</span>
+                        </div>
+                        <div class="team">
+                            <div class="team-info">
+                                <span class="seed top-seed">3</span>
+                                <span class="team-name">Dream Team C</span>
+                            </div>
+                            <span class="score">6-4</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quarter Finals - Right -->
+                <div class="round round-quarter">
+                    <div class="round-header">Quarts</div>
+
+                    <div class="match completed">
+                        <div class="status-indicator completed"></div>
+                        <div class="team winner">
+                            <div class="team-info">
+                                <span class="seed top-seed">2</span>
+                                <span class="team-name">Les Invincibles B</span>
+                            </div>
+                            <span class="score">6-2</span>
+                        </div>
+                        <div class="team">
+                            <div class="team-info">
+                                <span class="seed">7</span>
+                                <span class="team-name">Victory Lions</span>
+                            </div>
+                            <span class="score">2-6</span>
+                        </div>
+                    </div>
+
+                    <div class="match completed">
+                        <div class="status-indicator completed"></div>
+                        <div class="team winner">
+                            <div class="team-info">
+                                <span class="seed top-seed">3</span>
+                                <span class="team-name">Dream Team C</span>
+                            </div>
+                            <span class="score">6-3</span>
+                        </div>
+                        <div class="team">
+                            <div class="team-info">
+                                <span class="seed">6</span>
+                                <span class="team-name">Power Rangers</span>
+                            </div>
+                            <span class="score">3-6</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Round of 8 - Right -->
+                <div class="round round-8">
+                    <div class="round-header">8èmes</div>
+
+                    <div class="match completed">
+                        <div class="status-indicator completed"></div>
+                        <div class="team winner">
+                            <div class="team-info">
+                                <span class="seed top-seed">2</span>
+                                <span class="team-name">Les Invincibles B</span>
+                            </div>
+                            <span class="score">6-1</span>
+                        </div>
+                        <div class="team">
+                            <div class="team-info">
+                                <span class="seed">15</span>
+                                <span class="team-name">Warriors United</span>
+                            </div>
+                            <span class="score">1-6</span>
+                        </div>
+                    </div>
+
+                    <div class="match completed">
+                        <div class="status-indicator completed"></div>
+                        <div class="team winner">
+                            <div class="team-info">
+                                <span class="seed">7</span>
+                                <span class="team-name">Victory Lions</span>
+                            </div>
+                            <span class="score">6-4</span>
+                        </div>
+                        <div class="team">
+                            <div class="team-info">
+                                <span class="seed">10</span>
+                                <span class="team-name">Titan Force</span>
+                            </div>
+                            <span class="score">4-6</span>
+                        </div>
+                    </div>
+
+                    <div class="match completed">
+                        <div class="status-indicator completed"></div>
+                        <div class="team winner">
+                            <div class="team-info">
+                                <span class="seed top-seed">3</span>
+                                <span class="team-name">Dream Team C</span>
+                            </div>
+                            <span class="score">6-3</span>
+                        </div>
+                        <div class="team">
+                            <div class="team-info">
+                                <span class="seed">19</span>
+                                <span class="team-name">Rapid Strikers</span>
+                            </div>
+                            <span class="score">3-6</span>
+                        </div>
+                    </div>
+
+                    <div class="match completed">
+                        <div class="status-indicator completed"></div>
+                        <div class="team winner">
+                            <div class="team-info">
+                                <span class="seed">6</span>
+                                <span class="team-name">Power Rangers</span>
+                            </div>
+                            <span class="score">7-5</span>
+                        </div>
+                        <div class="team">
+                            <div class="team-info">
+                                <span class="seed">11</span>
+                                <span class="team-name">Blaze Squad</span>
+                            </div>
+                            <span class="score">5-7</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Round of 16 - Right Bottom Half -->
+                <div class="round round-16">
+                    <div class="round-header">16èmes</div>
+
+                    <div class="match completed">
+                        <div class="status-indicator completed"></div>
+                        <div class="team winner">
+                            <div class="team-info">
+                                <span class="seed top-seed">2</span>
+                                <span class="team-name">Les Invincibles B</span>
+                            </div>
+                            <span class="score">6-2</span>
+                        </div>
+                        <div class="team">
+                            <div class="team-info">
+                                <span class="seed">31</span>
+                                <span class="team-name">Brave Hearts</span>
+                            </div>
+                            <span class="score">2-6</span>
+                        </div>
+                    </div>
+
+                    <div class="match completed">
+                        <div class="status-indicator completed"></div>
+                        <div class="team winner">
+                            <div class="team-info">
+                                <span class="seed">15</span>
+                                <span class="team-name">Warriors United</span>
+                            </div>
+                            <span class="score">6-4</span>
+                        </div>
+                        <div class="team">
+                            <div class="team-info">
+                                <span class="seed">18</span>
+                                <span class="team-name">Mighty Ducks</span>
+                            </div>
+                            <span class="score">4-6</span>
+                        </div>
+                    </div>
+
+                    <div class="match completed">
+                        <div class="status-indicator completed"></div>
+                        <div class="team winner">
+                            <div class="team-info">
+                                <span class="seed">7</span>
+                                <span class="team-name">Victory Lions</span>
+                            </div>
+                            <span class="score">6-3</span>
+                        </div>
+                        <div class="team">
+                            <div class="team-info">
+                                <span class="seed">26</span>
+                                <span class="team-name">Steel Panthers</span>
+                            </div>
+                            <span class="score">3-6</span>
+                        </div>
+                    </div>
+
+                    <div class="match completed">
+                        <div class="status-indicator completed"></div>
+                        <div class="team winner">
+                            <div class="team-info">
+                                <span class="seed">10</span>
+                                <span class="team-name">Titan Force</span>
+                            </div>
+                            <span class="score">7-6</span>
+                        </div>
+                        <div class="team">
+                            <div class="team-info">
+                                <span class="seed">23</span>
+                                <span class="team-name">Iron Eagles</span>
+                            </div>
+                            <span class="score">6-4</span>
+                        </div>
+                    </div>
+
+                    <div class="match completed">
+                        <div class="status-indicator completed"></div>
+                        <div class="team winner">
+                            <div class="team-info">
+                                <span class="seed top-seed">3</span>
+                                <span class="team-name">Dream Team C</span>
+                            </div>
+                            <span class="score">6-1</span>
+                        </div>
+                        <div class="team">
+                            <div class="team-info">
+                                <span class="seed">30</span>
+                                <span class="team-name">Night Hawks</span>
+                            </div>
+                            <span class="score">1-6</span>
+                        </div>
+                    </div>
+
+                    <div class="match completed">
+                        <div class="status-indicator completed"></div>
+                        <div class="team">
+                            <div class="team-info">
+                                <span class="seed">14</span>
+                                <span class="team-name">Cobra Strike</span>
+                            </div>
+                            <span class="score">4-6</span>
+                        </div>
+                        <div class="team winner">
+                            <div class="team-info">
+                                <span class="seed">19</span>
+                                <span class="team-name">Rapid Strikers</span>
+                            </div>
+                            <span class="score">6-4</span>
+                        </div>
+                    </div>
+
+                    <div class="match completed">
+                        <div class="status-indicator completed"></div>
+                        <div class="team winner">
+                            <div class="team-info">
+                                <span class="seed">6</span>
+                                <span class="team-name">Power Rangers</span>
+                            </div>
+                            <span class="score">6-2</span>
+                        </div>
+                        <div class="team">
+                            <div class="team-info">
+                                <span class="seed">27</span>
+                                <span class="team-name">Silver Bullets</span>
+                            </div>
+                            <span class="score">2-6</span>
+                        </div>
+                    </div>
+
+                    <div class="match completed">
+                        <div class="status-indicator completed"></div>
+                        <div class="team winner">
+                            <div class="team-info">
+                                <span class="seed">11</span>
+                                <span class="team-name">Blaze Squad</span>
+                            </div>
+                            <span class="score">7-6</span>
+                        </div>
+                        <div class="team">
+                            <div class="team-info">
+                                <span class="seed">22</span>
+                                <span class="team-name">Golden Tigers</span>
+                            </div>
+                            <span class="score">6-3</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</body>
+</html>

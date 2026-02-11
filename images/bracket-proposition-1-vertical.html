@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bracket Proposition 1 - Vertical (Tennis Style)</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #1E1E2E;
+            color: white;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, #ff6b35 0%, #FFDA77 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 1rem;
+        }
+
+        /* Bracket Container */
+        .bracket {
+            display: flex;
+            gap: 30px;
+            overflow-x: auto;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        /* Round Column */
+        .round {
+            display: flex;
+            flex-direction: column;
+            min-width: 280px;
+        }
+
+        .round-header {
+            text-align: center;
+            padding: 15px;
+            background: rgba(255, 107, 53, 0.1);
+            border-radius: 12px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 107, 53, 0.2);
+        }
+
+        .round-title {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: #ff6b35;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .round-subtitle {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.5);
+            margin-top: 4px;
+        }
+
+        /* Match Container */
+        .matches {
+            display: flex;
+            flex-direction: column;
+            gap: 60px;
+            flex: 1;
+        }
+
+        .match {
+            position: relative;
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .match:hover {
+            border-color: rgba(255, 107, 53, 0.4);
+            box-shadow: 0 4px 20px rgba(255, 107, 53, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .match.completed {
+            border-color: rgba(76, 175, 80, 0.3);
+        }
+
+        .match.live {
+            border-color: rgba(255, 107, 53, 0.6);
+            background: rgba(255, 107, 53, 0.05);
+            animation: pulse-border 2s infinite;
+        }
+
+        @keyframes pulse-border {
+            0%, 100% {
+                border-color: rgba(255, 107, 53, 0.6);
+            }
+            50% {
+                border-color: rgba(255, 107, 53, 0.3);
+            }
+        }
+
+        .match-status {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            padding: 4px 10px;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .match-status.live {
+            background: rgba(255, 107, 53, 0.2);
+            color: #ff6b35;
+        }
+
+        .match-status.completed {
+            background: rgba(76, 175, 80, 0.2);
+            color: #4CAF50;
+        }
+
+        .match-status.upcoming {
+            background: rgba(255, 218, 119, 0.2);
+            color: #FFDA77;
+        }
+
+        /* Team Row */
+        .team {
+            display: flex;
+            align-items: center;
+            padding: 14px 16px;
+            gap: 12px;
+            transition: all 0.2s ease;
+        }
+
+        .team:first-child {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .team.winner {
+            background: rgba(76, 175, 80, 0.08);
+        }
+
+        .seed {
+            width: 28px;
+            height: 28px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.6);
+            flex-shrink: 0;
+        }
+
+        .seed.top {
+            background: linear-gradient(135deg, #ff6b35 0%, #ff8c42 100%);
+            color: white;
+        }
+
+        .team-name {
+            flex: 1;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .team.winner .team-name {
+            font-weight: 700;
+            color: white;
+        }
+
+        .team-name.placeholder {
+            color: rgba(255, 255, 255, 0.3);
+            font-style: italic;
+        }
+
+        .score {
+            font-size: 1.3rem;
+            font-weight: 700;
+            min-width: 30px;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .team.winner .score {
+            color: #4CAF50;
+        }
+
+        /* Connector Lines */
+        .round:not(:last-child) .match::after {
+            content: '';
+            position: absolute;
+            right: -30px;
+            top: 50%;
+            width: 30px;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-1px);
+        }
+
+        /* Final Match Styling */
+        .round.final .match {
+            border: 2px solid rgba(255, 107, 53, 0.4);
+            background: linear-gradient(135deg, rgba(255, 107, 53, 0.1) 0%, rgba(255, 140, 66, 0.05) 100%);
+        }
+
+        .round.final .round-header {
+            background: linear-gradient(135deg, rgba(255, 107, 53, 0.15) 0%, rgba(255, 140, 66, 0.1) 100%);
+            border-color: rgba(255, 107, 53, 0.3);
+        }
+
+        /* Legend */
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 40px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .legend-color {
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+        }
+
+        .legend-color.live {
+            background: rgba(255, 107, 53, 0.3);
+            border: 2px solid #ff6b35;
+        }
+
+        .legend-color.completed {
+            background: rgba(76, 175, 80, 0.3);
+            border: 2px solid #4CAF50;
+        }
+
+        .legend-color.upcoming {
+            background: rgba(255, 218, 119, 0.3);
+            border: 2px solid #FFDA77;
+        }
+
+        .legend-label {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        /* Champion Banner */
+        .champion-banner {
+            margin-top: 30px;
+            padding: 30px;
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.15) 0%, rgba(255, 107, 53, 0.1) 100%);
+            border-radius: 20px;
+            border: 2px solid rgba(255, 215, 0, 0.3);
+            text-align: center;
+        }
+
+        .champion-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+
+        .champion-title {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .champion-name {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #FFD700 0%, #ff6b35 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏆 Phases Finales - Tournoi des Frérots</h1>
+            <p>Proposition 1 - Bracket Vertical (Style Tennis)</p>
+        </div>
+
+        <div class="bracket">
+            <!-- QUARTS DE FINALE -->
+            <div class="round">
+                <div class="round-header">
+                    <div class="round-title">Quarts de finale</div>
+                    <div class="round-subtitle">8 équipes</div>
+                </div>
+                <div class="matches">
+                    <div class="match completed">
+                        <span class="match-status completed">Terminé</span>
+                        <div class="team winner">
+                            <span class="seed top">1</span>
+                            <span class="team-name">Les Smashers</span>
+                            <span class="score">3</span>
+                        </div>
+                        <div class="team">
+                            <span class="seed">8</span>
+                            <span class="team-name">Net Ninjas</span>
+                            <span class="score">1</span>
+                        </div>
+                    </div>
+
+                    <div class="match live">
+                        <span class="match-status live">En cours</span>
+                        <div class="team">
+                            <span class="seed">4</span>
+                            <span class="team-name">Court Kings</span>
+                            <span class="score">1</span>
+                        </div>
+                        <div class="team">
+                            <span class="seed">5</span>
+                            <span class="team-name">Ace Squad</span>
+                            <span class="score">1</span>
+                        </div>
+                    </div>
+
+                    <div class="match completed">
+                        <span class="match-status completed">Terminé</span>
+                        <div class="team winner">
+                            <span class="seed">2</span>
+                            <span class="team-name">Padel Warriors</span>
+                            <span class="score">3</span>
+                        </div>
+                        <div class="team">
+                            <span class="seed">7</span>
+                            <span class="team-name">Volley Vipers</span>
+                            <span class="score">0</span>
+                        </div>
+                    </div>
+
+                    <div class="match upcoming">
+                        <span class="match-status upcoming">À venir</span>
+                        <div class="team">
+                            <span class="seed">3</span>
+                            <span class="team-name">Baseline Bros</span>
+                            <span class="score">-</span>
+                        </div>
+                        <div class="team">
+                            <span class="seed">6</span>
+                            <span class="team-name">Power Players</span>
+                            <span class="score">-</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- DEMI-FINALES -->
+            <div class="round">
+                <div class="round-header">
+                    <div class="round-title">Demi-finales</div>
+                    <div class="round-subtitle">4 équipes</div>
+                </div>
+                <div class="matches">
+                    <div class="match completed" style="margin-top: 30px;">
+                        <span class="match-status completed">Terminé</span>
+                        <div class="team winner">
+                            <span class="seed top">1</span>
+                            <span class="team-name">Les Smashers</span>
+                            <span class="score">3</span>
+                        </div>
+                        <div class="team">
+                            <span class="seed">4</span>
+                            <span class="team-name">Court Kings</span>
+                            <span class="score">2</span>
+                        </div>
+                    </div>
+
+                    <div class="match" style="margin-top: 120px;">
+                        <div class="team">
+                            <span class="seed">2</span>
+                            <span class="team-name">Padel Warriors</span>
+                            <span class="score">-</span>
+                        </div>
+                        <div class="team">
+                            <span class="seed"></span>
+                            <span class="team-name placeholder">Gagnant Q4</span>
+                            <span class="score">-</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FINALE -->
+            <div class="round final">
+                <div class="round-header">
+                    <div class="round-title">🏆 Finale</div>
+                    <div class="round-subtitle">2 équipes</div>
+                </div>
+                <div class="matches">
+                    <div class="match" style="margin-top: 120px;">
+                        <div class="team">
+                            <span class="seed top">1</span>
+                            <span class="team-name">Les Smashers</span>
+                            <span class="score">-</span>
+                        </div>
+                        <div class="team">
+                            <span class="seed"></span>
+                            <span class="team-name placeholder">Gagnant DF2</span>
+                            <span class="score">-</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Legend -->
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-color live"></div>
+                <span class="legend-label">En cours</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color completed"></div>
+                <span class="legend-label">Terminé</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color upcoming"></div>
+                <span class="legend-label">À venir</span>
+            </div>
+        </div>
+
+        <!-- Champion Banner (si finale jouée) -->
+        <!-- <div class="champion-banner">
+            <div class="champion-icon">🏆</div>
+            <div class="champion-title">Champion du tournoi</div>
+            <div class="champion-name">Les Smashers</div>
+        </div> -->
+    </div>
+</body>
+</html>

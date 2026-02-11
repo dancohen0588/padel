@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import {
   checkIfTournamentStarted,
   getTournamentWithAllData,
+  getPlayoffBracketData,
+  getPlayoffMatchesWithTeams,
 } from "@/lib/queries";
 
 type RouteParams = {
@@ -19,10 +21,16 @@ export async function GET(request: Request, { params }: RouteParams) {
     return NextResponse.json({ error: "Tournoi introuvable" }, { status: 404 });
   }
 
-  const hasStarted = await checkIfTournamentStarted(tournamentId);
+  const [hasStarted, playoffMatches, playoffBracketData] = await Promise.all([
+    checkIfTournamentStarted(tournamentId),
+    getPlayoffMatchesWithTeams(tournamentId),
+    getPlayoffBracketData(tournamentId),
+  ]);
 
   return NextResponse.json({
     ...data,
     hasStarted,
+    playoffMatches,
+    playoffBracketData,
   });
 }

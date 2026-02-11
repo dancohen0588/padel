@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bracket Proposition 3 - Navigation par Rounds</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #1E1E2E;
+            color: white;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, #ff6b35 0%, #FFDA77 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 1rem;
+        }
+
+        /* Navigation Tabs */
+        .rounds-nav {
+            display: flex;
+            gap: 12px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 18px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 30px;
+            overflow-x: auto;
+        }
+
+        .round-tab {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+            white-space: nowrap;
+        }
+
+        .round-tab:hover {
+            border-color: rgba(255, 107, 53, 0.4);
+            background: rgba(255, 107, 53, 0.1);
+            color: white;
+        }
+
+        .round-tab.active {
+            background: linear-gradient(135deg, #ff6b35 0%, #ff8c42 100%);
+            color: white;
+            border-color: transparent;
+            box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
+        }
+
+        .round-icon {
+            font-size: 1.2rem;
+        }
+
+        .round-counter {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 4px 10px;
+            border-radius: 10px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .round-tab.active .round-counter {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Round Content */
+        .round-content {
+            display: none;
+        }
+
+        .round-content.active {
+            display: block;
+        }
+
+        .round-info {
+            background: rgba(255, 107, 53, 0.08);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 107, 53, 0.2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .round-info-left h2 {
+            font-size: 1.8rem;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, #ff6b35 0%, #FFDA77 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .round-info-left p {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.95rem;
+        }
+
+        .round-stats {
+            display: flex;
+            gap: 30px;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #ff6b35;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.5);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Matches Grid */
+        .matches-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+            gap: 20px;
+        }
+
+        /* Match Card */
+        .match-card {
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .match-card:hover {
+            border-color: rgba(255, 107, 53, 0.4);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(255, 107, 53, 0.2);
+        }
+
+        .match-card.completed {
+            border-color: rgba(76, 175, 80, 0.3);
+        }
+
+        .match-card.live {
+            border-color: rgba(255, 107, 53, 0.6);
+            background: rgba(255, 107, 53, 0.05);
+        }
+
+        /* Match Header */
+        .match-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            background: rgba(255, 255, 255, 0.02);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .match-number {
+            font-weight: 700;
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .match-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .match-status.live {
+            background: rgba(255, 107, 53, 0.2);
+            color: #ff6b35;
+        }
+
+        .match-status.completed {
+            background: rgba(76, 175, 80, 0.2);
+            color: #4CAF50;
+        }
+
+        .match-status.upcoming {
+            background: rgba(255, 218, 119, 0.2);
+            color: #FFDA77;
+        }
+
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: currentColor;
+        }
+
+        .match-status.live .status-dot {
+            animation: pulse-dot 2s infinite;
+        }
+
+        @keyframes pulse-dot {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.3;
+            }
+        }
+
+        /* Match Body */
+        .match-body {
+            padding: 20px;
+        }
+
+        .match-teams {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 15px;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .team-side {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .team-side.reverse {
+            flex-direction: row-reverse;
+        }
+
+        .team-avatar {
+            width: 45px;
+            height: 45px;
+            background: linear-gradient(135deg, #9D7AFA 0%, #7B5FD8 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+
+        .team-details {
+            flex: 1;
+        }
+
+        .team-details.align-right {
+            text-align: right;
+        }
+
+        .team-name {
+            font-weight: 700;
+            font-size: 1rem;
+            margin-bottom: 4px;
+        }
+
+        .team-seed {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .score-display {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .final-score {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .final-score.winner {
+            color: #4CAF50;
+        }
+
+        .vs-divider {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 0.85rem;
+        }
+
+        /* Sets Detail */
+        .sets-detail {
+            display: flex;
+            gap: 6px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .set-badge {
+            background: rgba(255, 255, 255, 0.06);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .set-badge.won {
+            background: rgba(76, 175, 80, 0.15);
+            color: #4CAF50;
+        }
+
+        .set-badge.lost {
+            color: rgba(255, 255, 255, 0.35);
+        }
+
+        /* Match Actions */
+        .match-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .btn {
+            flex: 1;
+            padding: 10px 16px;
+            border-radius: 10px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.85rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #ff6b35 0%, #ff8c42 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(255, 107, 53, 0.25);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(255, 107, 53, 0.35);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.08);
+            color: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.12);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏆 Phases Finales - Tournoi des Frérots</h1>
+            <p>Proposition 3 - Navigation par Rounds (Style Champions League)</p>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <div class="rounds-nav">
+            <button class="round-tab active">
+                <span class="round-icon">🎯</span>
+                <span>Quarts de finale</span>
+                <span class="round-counter">4</span>
+            </button>
+            <button class="round-tab">
+                <span class="round-icon">🔥</span>
+                <span>Demi-finales</span>
+                <span class="round-counter">2</span>
+            </button>
+            <button class="round-tab">
+                <span class="round-icon">🏆</span>
+                <span>Finale</span>
+                <span class="round-counter">1</span>
+            </button>
+        </div>
+
+        <!-- Quarts de finale Content -->
+        <div class="round-content active">
+            <div class="round-info">
+                <div class="round-info-left">
+                    <h2>⚔️ Quarts de finale</h2>
+                    <p>Les 8 meilleures équipes s'affrontent</p>
+                </div>
+                <div class="round-stats">
+                    <div class="stat">
+                        <div class="stat-value">4</div>
+                        <div class="stat-label">Matchs</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value">2</div>
+                        <div class="stat-label">Terminés</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value">1</div>
+                        <div class="stat-label">En cours</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="matches-grid">
+                <!-- Match 1 -->
+                <div class="match-card completed">
+                    <div class="match-header">
+                        <span class="match-number">Quart 1</span>
+                        <span class="match-status completed">
+                            <span class="status-dot"></span>
+                            <span>Terminé</span>
+                        </span>
+                    </div>
+                    <div class="match-body">
+                        <div class="match-teams">
+                            <div class="team-side">
+                                <div class="team-avatar">LS</div>
+                                <div class="team-details">
+                                    <div class="team-name">Les Smashers</div>
+                                    <div class="team-seed">Seed #1</div>
+                                </div>
+                            </div>
+
+                            <div class="score-display">
+                                <span class="final-score winner">3</span>
+                                <span class="vs-divider">-</span>
+                                <span class="final-score">1</span>
+                            </div>
+
+                            <div class="team-side reverse">
+                                <div class="team-avatar">NN</div>
+                                <div class="team-details align-right">
+                                    <div class="team-name">Net Ninjas</div>
+                                    <div class="team-seed">Seed #8</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="sets-detail">
+                            <div class="set-badge won">Set 1: 6-3</div>
+                            <div class="set-badge won">Set 2: 7-5</div>
+                            <div class="set-badge lost">Set 3: 5-7</div>
+                            <div class="set-badge won">Set 4: 6-4</div>
+                        </div>
+
+                        <div class="match-actions">
+                            <button class="btn btn-secondary">Voir détails</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Match 2 (Live) -->
+                <div class="match-card live">
+                    <div class="match-header">
+                        <span class="match-number">Quart 2</span>
+                        <span class="match-status live">
+                            <span class="status-dot"></span>
+                            <span>En direct</span>
+                        </span>
+                    </div>
+                    <div class="match-body">
+                        <div class="match-teams">
+                            <div class="team-side">
+                                <div class="team-avatar">CK</div>
+                                <div class="team-details">
+                                    <div class="team-name">Court Kings</div>
+                                    <div class="team-seed">Seed #4</div>
+                                </div>
+                            </div>
+
+                            <div class="score-display">
+                                <span class="final-score">1</span>
+                                <span class="vs-divider">-</span>
+                                <span class="final-score">1</span>
+                            </div>
+
+                            <div class="team-side reverse">
+                                <div class="team-avatar">AS</div>
+                                <div class="team-details align-right">
+                                    <div class="team-name">Ace Squad</div>
+                                    <div class="team-seed">Seed #5</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="sets-detail">
+                            <div class="set-badge won">Set 1: 6-4</div>
+                            <div class="set-badge lost">Set 2: 3-6</div>
+                            <div class="set-badge" style="color: #ff6b35; background: rgba(255, 107, 53, 0.15);">Set 3: 3-2</div>
+                        </div>
+
+                        <div class="match-actions">
+                            <button class="btn btn-primary">Mettre à jour le score</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Match 3 -->
+                <div class="match-card completed">
+                    <div class="match-header">
+                        <span class="match-number">Quart 3</span>
+                        <span class="match-status completed">
+                            <span class="status-dot"></span>
+                            <span>Terminé</span>
+                        </span>
+                    </div>
+                    <div class="match-body">
+                        <div class="match-teams">
+                            <div class="team-side">
+                                <div class="team-avatar">PW</div>
+                                <div class="team-details">
+                                    <div class="team-name">Padel Warriors</div>
+                                    <div class="team-seed">Seed #2</div>
+                                </div>
+                            </div>
+
+                            <div class="score-display">
+                                <span class="final-score winner">3</span>
+                                <span class="vs-divider">-</span>
+                                <span class="final-score">0</span>
+                            </div>
+
+                            <div class="team-side reverse">
+                                <div class="team-avatar">VV</div>
+                                <div class="team-details align-right">
+                                    <div class="team-name">Volley Vipers</div>
+                                    <div class="team-seed">Seed #7</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="sets-detail">
+                            <div class="set-badge won">Set 1: 6-2</div>
+                            <div class="set-badge won">Set 2: 6-3</div>
+                            <div class="set-badge won">Set 3: 6-4</div>
+                        </div>
+
+                        <div class="match-actions">
+                            <button class="btn btn-secondary">Voir détails</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Match 4 (Upcoming) -->
+                <div class="match-card">
+                    <div class="match-header">
+                        <span class="match-number">Quart 4 • 15:30</span>
+                        <span class="match-status upcoming">
+                            <span class="status-dot"></span>
+                            <span>À venir</span>
+                        </span>
+                    </div>
+                    <div class="match-body">
+                        <div class="match-teams">
+                            <div class="team-side">
+                                <div class="team-avatar">BB</div>
+                                <div class="team-details">
+                                    <div class="team-name">Baseline Bros</div>
+                                    <div class="team-seed">Seed #3</div>
+                                </div>
+                            </div>
+
+                            <div class="vs-divider">VS</div>
+
+                            <div class="team-side reverse">
+                                <div class="team-avatar">PP</div>
+                                <div class="team-details align-right">
+                                    <div class="team-name">Power Players</div>
+                                    <div class="team-seed">Seed #6</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="match-actions">
+                            <button class="btn btn-primary">Saisir le score</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Tab switching functionality
+        document.querySelectorAll('.round-tab').forEach((tab, index) => {
+            tab.addEventListener('click', () => {
+                // Remove active class from all tabs and contents
+                document.querySelectorAll('.round-tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.round-content').forEach(c => c.classList.remove('active'));
+
+                // Add active class to clicked tab and corresponding content
+                tab.classList.add('active');
+                document.querySelectorAll('.round-content')[index].classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>

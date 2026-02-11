@@ -6,6 +6,8 @@ import { assertAdminToken } from "@/lib/admin";
 import {
   countRegistrations,
   getMatchesWithTeamsByPool,
+  getPlayoffMatchesWithTeams,
+  getPlayoffBracketData,
   getPoolStandings,
   getRegistrationsByStatus,
   getTournaments,
@@ -18,6 +20,7 @@ import {
   TournamentConfigContent,
 } from "@/components/tournaments/admin/TournamentConfigAdmin";
 import { MatchesAdminTab } from "@/components/tournaments/admin/MatchesAdminTab";
+import { PlayoffsAdminTab } from "@/components/tournaments/admin/PlayoffsAdminTab";
 import { UsersApprovalTab } from "@/components/admin/tabs/UsersApprovalTab";
 import { UsersValidatedTab } from "@/components/admin/tabs/UsersValidatedTab";
 
@@ -62,11 +65,17 @@ export default async function TournamentAdminPage({
     }))
   );
 
+  const [playoffMatches, playoffBracketData] = await Promise.all([
+    getPlayoffMatchesWithTeams(tournament.id),
+    getPlayoffBracketData(tournament.id),
+  ]);
+
   const pendingCount = counts.pending ?? 0;
   const approvedCount = counts.approved ?? 0;
   const teamsCount = teams.length;
   const poolsCount = pools.length;
   const matchesCount = poolData.reduce((total, item) => total + item.matches.length, 0);
+  const playoffMatchesCount = playoffMatches.length;
 
   return (
     <div className="min-h-screen bg-[#1E1E2E] text-white">
@@ -148,6 +157,16 @@ export default async function TournamentAdminPage({
                 {matchesCount}
               </span>
             </TabsTrigger>
+            <TabsTrigger
+              value="playoffs"
+              className="group inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-xs font-semibold text-white/70 transition hover:border-orange-400/40 hover:bg-orange-500/10 hover:text-white data-[state=active]:border-transparent data-[state=active]:bg-gradient-to-br data-[state=active]:from-orange-400 data-[state=active]:to-orange-500 data-[state=active]:text-white data-[state=active]:shadow-md"
+            >
+              <span>🏆</span>
+              <span>Phases finales</span>
+              <span className="rounded-full bg-white/20 px-2 py-0.5 text-[10px] font-semibold text-white/90 group-data-[state=active]:bg-white/30">
+                {playoffMatchesCount}
+              </span>
+            </TabsTrigger>
           </TabsList>
           <TabsContent value="pending" className="mt-6">
             <UsersApprovalTab
@@ -193,6 +212,14 @@ export default async function TournamentAdminPage({
               pools={pools}
               poolData={poolData}
               adminToken={adminToken}
+            />
+          </TabsContent>
+          <TabsContent value="playoffs" className="mt-6">
+            <PlayoffsAdminTab
+              tournamentId={tournament.id}
+              adminToken={adminToken}
+              playoffMatches={playoffMatches}
+              playoffBracketData={playoffBracketData}
             />
           </TabsContent>
         </Tabs>
