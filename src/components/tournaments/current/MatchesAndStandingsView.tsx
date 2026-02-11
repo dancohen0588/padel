@@ -258,7 +258,7 @@ export function MatchesAndStandingsView({
                     </div>
                     <div className="text-lg font-semibold">Matchs</div>
                   </div>
-                  <div className="mt-4 space-y-4">
+                  <div className="mt-4 max-h-[520px] space-y-4 overflow-y-auto pr-2">
                     {poolItem.poolMatches.length === 0 ? (
                       <div className="text-sm text-white/60">
                         Aucun match généré pour cette poule.
