@@ -23,12 +23,18 @@ const statusLabel: Record<Tournament["status"], string> = {
   draft: "Brouillon",
   published: "Publié",
   archived: "Archivé",
+  upcoming: "À venir",
+  registration: "Inscriptions ouvertes",
+  ongoing: "En cours",
 };
 
 const statusClasses: Record<Tournament["status"], string> = {
   draft: "bg-amber-400/20 text-amber-200",
   published: "bg-emerald-500/20 text-emerald-200",
   archived: "bg-white/10 text-white/50",
+  upcoming: "bg-yellow-500/20 text-yellow-200",
+  registration: "bg-green-500/20 text-green-200",
+  ongoing: "bg-orange-500/20 text-orange-200",
 };
 
 export function TournamentSelector({ tournaments, value, onChange }: TournamentSelectorProps) {
@@ -44,7 +50,7 @@ export function TournamentSelector({ tournaments, value, onChange }: TournamentS
         <div>
           <p className="text-sm font-semibold text-white">Sélectionner un tournoi</p>
           <p className="text-xs text-white/60">
-            Affichage des tournois publiés par date décroissante.
+            Affichage des tournois publiés et en cours par date décroissante.
           </p>
         </div>
         <span

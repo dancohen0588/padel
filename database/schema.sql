@@ -7,7 +7,7 @@ create table if not exists public.tournaments (
   date date not null,
   location text,
   description text,
-  status text not null default 'draft' check (status in ('draft','published','archived')),
+  status text not null default 'draft' check (status in ('draft','published','archived','upcoming','registration','ongoing')),
   max_players int,
   image_path text,
   config jsonb not null default '{}'::jsonb,
@@ -18,7 +18,8 @@ create table if not exists public.players (
   id uuid primary key default uuid_generate_v4(),
   first_name text not null,
   last_name text not null,
-  email text not null unique,
+  email text not null,
+  level text,
   phone text,
   created_at timestamptz not null default now()
 );
@@ -31,6 +32,12 @@ create table if not exists public.registrations (
   registered_at timestamptz not null default now(),
   unique (tournament_id, player_id)
 );
+
+create unique index if not exists idx_players_email_unique
+on public.players (lower(email));
+
+create unique index if not exists idx_registrations_unique
+on public.registrations (tournament_id, player_id);
 
 create view public.player_stats as
 select

@@ -3,14 +3,11 @@ import { Footer } from "@/components/layout/footer";
 import Link from "next/link";
 import { HomeHero } from "@/components/home/HomeHero";
 import { HomeGallery } from "@/components/home/HomeGallery";
+import { UpcomingTournaments } from "@/components/home/UpcomingTournaments";
+import { ContactModule } from "@/components/home/ContactModule";
 import { getHomeConfig } from "@/lib/queries";
-
-const heroStats = [
-  { label: "Tournois", value: "24" },
-  { label: "Matchs joués", value: "486" },
-  { label: "Joueurs actifs", value: "64" },
-  { label: "Sets", value: "1 458" },
-];
+import { getDatabaseClient } from "@/lib/database";
+import type { TournamentStatus } from "@/lib/types";
 
 const podiumTeams = [
   {
@@ -151,7 +148,84 @@ const funFacts = [
 ];
 
 export default async function Home() {
-  const homeConfig = await getHomeConfig();
+  const database = getDatabaseClient();
+  const [homeConfig, statsRows, upcomingRows] = await Promise.all([
+    getHomeConfig(),
+    database<
+      Array<{
+        tournaments: number;
+        matches: number;
+        players: number;
+        sets: number;
+      }>
+    >`
+      select
+        (select count(*)::int from tournaments) as tournaments,
+        (select count(*)::int from matches where status = 'finished') as matches,
+        (
+          select count(distinct player_id)::int
+          from registrations
+          where status = 'approved'
+        ) as players,
+        (select count(*)::int from match_sets) as sets
+    `,
+    database<
+      Array<{
+        id: string;
+        slug: string | null;
+        name: string;
+        date: string;
+        location: string | null;
+        status: TournamentStatus;
+        max_participants: number | null;
+        current_participants: string;
+      }>
+    >`
+      select
+        t.id,
+        t.slug,
+        t.name,
+        t.date::text as date,
+        t.location,
+        t.status,
+        t.max_players as max_participants,
+        count(r.id)::text as current_participants
+      from tournaments t
+      left join registrations r on r.tournament_id = t.id
+      where t.status in ('upcoming', 'registration', 'ongoing')
+      group by t.id, t.slug, t.name, t.date, t.location, t.status, t.max_players
+      order by t.date asc
+      limit 3
+    `,
+  ]);
+
+  const stats = statsRows[0] ?? {
+    tournaments: 0,
+    matches: 0,
+    players: 0,
+    sets: 0,
+  };
+
+  const formatNumber = (value: number) =>
+    new Intl.NumberFormat("fr-FR").format(value);
+
+  const heroStats = [
+    { label: "Tournois", value: formatNumber(stats.tournaments) },
+    { label: "Matchs joués", value: formatNumber(stats.matches) },
+    { label: "Joueurs actifs", value: formatNumber(stats.players) },
+    { label: "Sets", value: formatNumber(stats.sets) },
+  ];
+
+  const upcomingTournaments = upcomingRows.map((row) => ({
+    id: row.id,
+    slug: row.slug,
+    name: row.name,
+    date: row.date,
+    location: row.location,
+    status: row.status,
+    max_participants: row.max_participants,
+    current_participants: Number.parseInt(row.current_participants, 10) || 0,
+  }));
 
   return (
     <div className="min-h-screen bg-[#1E1E2E] text-white">
@@ -354,52 +428,9 @@ export default async function Home() {
           </div>
 
           <aside className="flex flex-col gap-6">
-            <section className="rounded-xl border border-white/10 bg-white/5 p-4">
-              <div className="mb-3 flex items-center gap-2 text-sm font-semibold">
-                <span>📅</span>
-                <span>Prochains tournois</span>
-              </div>
-              <div className="flex flex-col gap-3">
-                {upcomingTournaments.map((tournament) => (
-                  <div
-                    key={tournament.name}
-                    className="rounded-lg border border-white/10 bg-white/5 p-3"
-                  >
-                    <div className="mb-2 flex items-center justify-between">
-                      <span className="text-sm font-semibold">
-                        {tournament.name}
-                      </span>
-                      <span
-                        className={`rounded px-2 py-1 text-[10px] font-semibold uppercase tracking-wide ${
-                          tournament.statusStyle === "live"
-                            ? "bg-[#ff6b35]/20 text-[#ff6b35]"
-                            : "bg-[#9d7afa]/20 text-[#9d7afa]"
-                        }`}
-                      >
-                        {tournament.status}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2 text-xs text-white/60">
-                      <span>{tournament.icon}</span>
-                      <span>{tournament.details}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </section>
+            <UpcomingTournaments tournaments={upcomingTournaments} />
 
-            <section className="rounded-xl bg-gradient-to-br from-[#ff6b35] to-[#ff8c42] p-5 text-center">
-              <div className="text-lg font-bold">On se rejoint ?</div>
-              <p className="mt-2 text-sm text-white/90">
-                Inscris-toi au prochain tournoi et viens défier les meilleurs.
-              </p>
-              <Link
-                href="/inscription"
-                className="mt-4 inline-flex w-full items-center justify-center rounded-lg bg-white px-4 py-2 text-sm font-semibold text-[#ff6b35] transition hover:-translate-y-0.5"
-              >
-                S&apos;inscrire
-              </Link>
-            </section>
+            <ContactModule />
 
             <section className="rounded-xl border border-white/10 bg-white/5 p-4">
               <div className="mb-3 flex items-center gap-2 text-sm font-semibold">

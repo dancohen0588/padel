@@ -19,6 +19,9 @@ const statusLabel: Record<TournamentStatus, string> = {
   draft: "Brouillon",
   published: "Publié",
   archived: "Archivé",
+  upcoming: "À venir",
+  registration: "Inscriptions ouvertes",
+  ongoing: "En cours",
 };
 
 export function TournamentsTab({ tournaments, adminToken }: TournamentsTabProps) {
@@ -571,7 +574,16 @@ export function TournamentsTab({ tournaments, adminToken }: TournamentsTabProps)
               Statut
               <input type="hidden" name="status" value={status} />
               <div className="grid grid-cols-3 gap-2">
-                {(["draft", "published", "archived"] as TournamentStatus[]).map(
+                {(
+                  [
+                    "draft",
+                    "upcoming",
+                    "registration",
+                    "ongoing",
+                    "published",
+                    "archived",
+                  ] as TournamentStatus[]
+                ).map(
                   (value) => (
                     <button
                       key={value}

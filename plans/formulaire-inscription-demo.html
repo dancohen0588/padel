@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Formulaire d'Inscription - Tournoi des Frérots</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #1E1E2E 0%, #2A2A3E 100%);
+      min-height: 100vh;
+      padding: 40px 20px;
+      color: #fff;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .header h1 {
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, #ff6b35 0%, #ff8c42 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .header p {
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 16px;
+    }
+
+    .form-card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 32px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Toggle Switch */
+    .toggle-section {
+      margin-bottom: 32px;
+      padding: 20px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+    }
+
+    .toggle-label {
+      display: block;
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      color: rgba(255, 255, 255, 0.9);
+    }
+
+    .toggle-container {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .toggle-switch {
+      position: relative;
+      width: 60px;
+      height: 32px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 16px;
+      cursor: pointer;
+      transition: background 0.3s;
+      border: 2px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .toggle-switch.active {
+      background: linear-gradient(135deg, #ff6b35 0%, #ff8c42 100%);
+      border-color: #ff6b35;
+    }
+
+    .toggle-slider {
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 24px;
+      height: 24px;
+      background: white;
+      border-radius: 50%;
+      transition: transform 0.3s;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .toggle-switch.active .toggle-slider {
+      transform: translateX(28px);
+    }
+
+    .toggle-text {
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.6);
+    }
+
+    .toggle-text.active {
+      color: #ff6b35;
+      font-weight: 600;
+    }
+
+    /* Info Message */
+    .info-message {
+      display: none;
+      margin-top: 16px;
+      padding: 12px 16px;
+      background: rgba(76, 175, 80, 0.1);
+      border: 1px solid rgba(76, 175, 80, 0.3);
+      border-radius: 8px;
+      color: #4CAF50;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .info-message.show {
+      display: block;
+      animation: slideDown 0.3s ease;
+    }
+
+    .info-message::before {
+      content: "ℹ️ ";
+      margin-right: 8px;
+    }
+
+    /* Form Fields */
+    .form-group {
+      margin-bottom: 24px;
+      transition: all 0.3s;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .form-group.hidden {
+      display: none;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 8px;
+      color: rgba(255, 255, 255, 0.8);
+    }
+
+    .form-label .required {
+      color: #ff6b35;
+      margin-left: 4px;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 12px 16px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+      color: white;
+      font-size: 16px;
+      transition: all 0.2s;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: #ff6b35;
+      background: rgba(255, 255, 255, 0.08);
+      box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
+    }
+
+    .form-input::placeholder {
+      color: rgba(255, 255, 255, 0.4);
+    }
+
+    .form-input.error {
+      border-color: #f44336;
+    }
+
+    .form-input.success {
+      border-color: #4CAF50;
+    }
+
+    .form-input.highlighted {
+      border-color: #ff6b35;
+      background: rgba(255, 107, 53, 0.1);
+      font-size: 18px;
+      padding: 16px;
+    }
+
+    /* Success/Error Messages */
+    .message {
+      display: none;
+      margin-top: 12px;
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      line-height: 1.5;
+      animation: slideDown 0.3s ease;
+    }
+
+    .message.show {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .message.success {
+      background: rgba(76, 175, 80, 0.1);
+      border: 1px solid rgba(76, 175, 80, 0.3);
+      color: #4CAF50;
+    }
+
+    .message.error {
+      background: rgba(244, 67, 54, 0.1);
+      border: 1px solid rgba(244, 67, 54, 0.3);
+      color: #f44336;
+    }
+
+    /* Photo Dropzone */
+    .photo-dropzone {
+      position: relative;
+      aspect-ratio: 1 / 1;
+      max-width: 200px;
+      margin: 0 auto;
+      border: 2px dashed rgba(255, 255, 255, 0.3);
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.03);
+      cursor: pointer;
+      transition: all 0.3s;
+      overflow: hidden;
+    }
+
+    .photo-dropzone:hover {
+      border-color: #ff6b35;
+      background: rgba(255, 107, 53, 0.1);
+    }
+
+    .photo-dropzone.dragover {
+      border-color: #ff6b35;
+      background: rgba(255, 107, 53, 0.15);
+      transform: scale(1.02);
+    }
+
+    .photo-dropzone.has-image {
+      border-style: solid;
+      border-color: rgba(76, 175, 80, 0.5);
+    }
+
+    .dropzone-content {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .dropzone-icon {
+      width: 48px;
+      height: 48px;
+      margin-bottom: 12px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #ff6b35 0%, #ff8c42 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+    }
+
+    .dropzone-text {
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.8);
+      margin-bottom: 4px;
+    }
+
+    .dropzone-hint {
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    .photo-preview {
+      position: absolute;
+      inset: 0;
+      display: none;
+    }
+
+    .photo-preview.show {
+      display: block;
+    }
+
+    .photo-preview img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .photo-preview-remove {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: rgba(0, 0, 0, 0.7);
+      border: none;
+      color: white;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      transition: all 0.2s;
+    }
+
+    .photo-preview-remove:hover {
+      background: rgba(244, 67, 54, 0.9);
+      transform: scale(1.1);
+    }
+
+    .photo-dropzone input[type="file"] {
+      display: none;
+    }
+
+    /* User Preview Card */
+    .user-preview {
+      display: none;
+      margin-top: 24px;
+      padding: 20px;
+      background: rgba(76, 175, 80, 0.1);
+      border: 2px solid rgba(76, 175, 80, 0.3);
+      border-radius: 12px;
+      animation: slideDown 0.3s ease;
+    }
+
+    .user-preview.show {
+      display: block;
+    }
+
+    .user-preview-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .user-avatar {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #ff6b35 0%, #ff8c42 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      font-weight: 700;
+      color: white;
+      border: 3px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .user-info {
+      flex: 1;
+    }
+
+    .user-name {
+      font-size: 20px;
+      font-weight: 700;
+      color: white;
+      margin-bottom: 4px;
+    }
+
+    .user-email {
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.6);
+    }
+
+    .user-details {
+      padding-top: 16px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .user-detail-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      font-size: 14px;
+    }
+
+    .user-detail-label {
+      color: rgba(255, 255, 255, 0.6);
+    }
+
+    .user-detail-value {
+      color: white;
+      font-weight: 600;
+    }
+
+    /* Buttons */
+    .button-group {
+      display: flex;
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    .button {
+      flex: 1;
+      padding: 14px 24px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .button-primary {
+      background: linear-gradient(135deg, #ff6b35 0%, #ff8c42 100%);
+      color: white;
+    }
+
+    .button-primary:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 16px rgba(255, 107, 53, 0.3);
+    }
+
+    .button-secondary {
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .button-secondary:hover:not(:disabled) {
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    .button-text {
+      background: transparent;
+      color: #ff6b35;
+      text-decoration: underline;
+      border: none;
+      padding: 8px;
+    }
+
+    .button-text:hover {
+      color: #ff8c42;
+    }
+
+    /* Loading Spinner */
+    .spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    /* Animations */
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* Responsive */
+    @media (max-width: 640px) {
+      .container {
+        padding: 0;
+      }
+
+      .form-card {
+        padding: 24px;
+      }
+
+      .button-group {
+        flex-direction: column;
+      }
+
+      .button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Inscription au Tournoi</h1>
+      <p>Tournoi des Frérots - Édition Été 2026</p>
+    </div>
+
+    <div class="form-card">
+      <!-- Toggle Section -->
+      <div class="toggle-section">
+        <label class="toggle-label">Avez-vous déjà participé à un tournoi ?</label>
+        <div class="toggle-container">
+          <span class="toggle-text active" id="toggle-no">Non, première fois</span>
+          <div class="toggle-switch" id="toggle-switch">
+            <div class="toggle-slider"></div>
+          </div>
+          <span class="toggle-text" id="toggle-yes">Oui, j'ai déjà joué</span>
+        </div>
+        <div class="info-message" id="info-message">
+          Utilisez l'adresse email de votre première inscription pour retrouver votre compte et compiler vos statistiques.
+        </div>
+      </div>
+
+      <!-- Form -->
+      <form id="registration-form">
+        <!-- Email Field (always visible in existing mode) -->
+        <div class="form-group" id="email-group">
+          <label class="form-label">
+            Email <span class="required">*</span>
+          </label>
+          <input
+            type="email"
+            class="form-input"
+            id="email-input"
+            placeholder="votre@email.com"
+            required
+          />
+          <div class="message" id="email-message"></div>
+        </div>
+
+        <!-- User Preview (shown when email is verified) -->
+        <div class="user-preview" id="user-preview">
+          <div class="user-preview-header">
+            <div class="user-avatar" id="user-avatar">JD</div>
+            <div class="user-info">
+              <div class="user-name" id="user-name">John Doe</div>
+              <div class="user-email" id="user-email">john.doe@example.com</div>
+            </div>
+          </div>
+          <div class="user-details">
+            <div class="user-detail-item">
+              <span class="user-detail-label">Niveau</span>
+              <span class="user-detail-value" id="user-level">Intermédiaire</span>
+            </div>
+            <div class="user-detail-item">
+              <span class="user-detail-label">Tournois précédents</span>
+              <span class="user-detail-value" id="user-tournaments">3 participations</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Other Fields (hidden in existing mode) -->
+        <div class="form-group" id="firstname-group">
+          <label class="form-label">
+            Prénom <span class="required">*</span>
+          </label>
+          <input
+            type="text"
+            class="form-input"
+            id="firstname-input"
+            placeholder="John"
+            required
+          />
+        </div>
+
+        <div class="form-group" id="lastname-group">
+          <label class="form-label">
+            Nom <span class="required">*</span>
+          </label>
+          <input
+            type="text"
+            class="form-input"
+            id="lastname-input"
+            placeholder="Doe"
+            required
+          />
+        </div>
+
+        <div class="form-group" id="phone-group">
+          <label class="form-label">
+            Téléphone
+          </label>
+          <input
+            type="tel"
+            class="form-input"
+            id="phone-input"
+            placeholder="+33 6 12 34 56 78"
+          />
+        </div>
+
+        <div class="form-group" id="photo-group">
+          <label class="form-label">
+            Photo de profil
+          </label>
+          <div class="photo-dropzone" id="photo-dropzone">
+            <input type="file" id="photo-input" accept="image/jpeg,image/jpg,image/png,image/webp" />
+            <div class="dropzone-content">
+              <div class="dropzone-icon">📸</div>
+              <div class="dropzone-text">Glissez votre photo ici</div>
+              <div class="dropzone-hint">ou cliquez pour sélectionner</div>
+              <div class="dropzone-hint" style="margin-top: 8px;">JPG, PNG • Max 5MB</div>
+            </div>
+            <div class="photo-preview" id="photo-preview">
+              <img id="preview-image" src="" alt="Preview" />
+              <button type="button" class="photo-preview-remove" id="remove-photo">×</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group" id="level-group">
+          <label class="form-label">
+            Niveau <span class="required">*</span>
+          </label>
+          <select class="form-input" id="level-input" required>
+            <option value="">Sélectionnez votre niveau</option>
+            <option value="beginner">Débutant</option>
+            <option value="intermediate">Intermédiaire</option>
+            <option value="advanced">Avancé</option>
+            <option value="expert">Expert</option>
+          </select>
+        </div>
+
+        <!-- Buttons -->
+        <div class="button-group" id="button-group-new">
+          <button type="submit" class="button button-primary" style="flex: none; width: 100%;">
+            S'inscrire au tournoi
+          </button>
+        </div>
+
+        <div class="button-group hidden" id="button-group-verify">
+          <button type="button" class="button button-primary" id="verify-button" style="flex: none; width: 100%;">
+            <span id="verify-text">Vérifier mon compte</span>
+            <span class="spinner hidden" id="verify-spinner"></span>
+          </button>
+        </div>
+
+        <div class="button-group hidden" id="button-group-confirm">
+          <button type="button" class="button button-primary" id="confirm-button">
+            Confirmer l'inscription
+          </button>
+          <button type="button" class="button button-secondary" id="not-me-button">
+            Ce n'est pas moi
+          </button>
+        </div>
+
+        <div class="button-group hidden" id="button-group-error">
+          <button type="button" class="button button-primary" id="retry-button">
+            Réessayer
+          </button>
+          <button type="button" class="button button-text" id="new-participant-button">
+            M'inscrire comme nouveau participant
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // State
+    let mode = 'new'; // 'new' or 'existing'
+    let emailVerified = false;
+    let userData = null;
+
+    // Elements
+    const toggleSwitch = document.getElementById('toggle-switch');
+    const toggleNo = document.getElementById('toggle-no');
+    const toggleYes = document.getElementById('toggle-yes');
+    const infoMessage = document.getElementById('info-message');
+    const emailInput = document.getElementById('email-input');
+    const emailMessage = document.getElementById('email-message');
+    const emailGroup = document.getElementById('email-group');
+    const userPreview = document.getElementById('user-preview');
+
+    // Form groups
+    const firstnameGroup = document.getElementById('firstname-group');
+    const lastnameGroup = document.getElementById('lastname-group');
+    const phoneGroup = document.getElementById('phone-group');
+    const photoGroup = document.getElementById('photo-group');
+    const levelGroup = document.getElementById('level-group');
+
+    // Button groups
+    const buttonGroupNew = document.getElementById('button-group-new');
+    const buttonGroupVerify = document.getElementById('button-group-verify');
+    const buttonGroupConfirm = document.getElementById('button-group-confirm');
+    const buttonGroupError = document.getElementById('button-group-error');
+
+    // Buttons
+    const verifyButton = document.getElementById('verify-button');
+    const verifyText = document.getElementById('verify-text');
+    const verifySpinner = document.getElementById('verify-spinner');
+    const confirmButton = document.getElementById('confirm-button');
+    const notMeButton = document.getElementById('not-me-button');
+    const retryButton = document.getElementById('retry-button');
+    const newParticipantButton = document.getElementById('new-participant-button');
+
+    // Toggle Switch
+    toggleSwitch.addEventListener('click', () => {
+      if (mode === 'new') {
+        setMode('existing');
+      } else {
+        setMode('new');
+      }
+    });
+
+    function setMode(newMode) {
+      mode = newMode;
+      emailVerified = false;
+      userData = null;
+
+      // Update toggle UI
+      if (mode === 'existing') {
+        toggleSwitch.classList.add('active');
+        toggleNo.classList.remove('active');
+        toggleYes.classList.add('active');
+        infoMessage.classList.add('show');
+
+        // Highlight email field
+        emailInput.classList.add('highlighted');
+
+        // Hide other fields
+        firstnameGroup.classList.add('hidden');
+        lastnameGroup.classList.add('hidden');
+        phoneGroup.classList.add('hidden');
+        photoGroup.classList.add('hidden');
+        levelGroup.classList.add('hidden');
+
+        // Show verify button
+        buttonGroupNew.classList.add('hidden');
+        buttonGroupVerify.classList.remove('hidden');
+        buttonGroupConfirm.classList.add('hidden');
+        buttonGroupError.classList.add('hidden');
+
+        // Hide preview
+        userPreview.classList.remove('show');
+        emailMessage.classList.remove('show');
+
+        // Reset email input
+        emailInput.value = '';
+        emailInput.classList.remove('error', 'success');
+      } else {
+        toggleSwitch.classList.remove('active');
+        toggleNo.classList.add('active');
+        toggleYes.classList.remove('active');
+        infoMessage.classList.remove('show');
+
+        // Remove highlight
+        emailInput.classList.remove('highlighted');
+
+        // Show all fields
+        firstnameGroup.classList.remove('hidden');
+        lastnameGroup.classList.remove('hidden');
+        phoneGroup.classList.remove('hidden');
+        photoGroup.classList.remove('hidden');
+        levelGroup.classList.remove('hidden');
+
+        // Show submit button
+        buttonGroupNew.classList.remove('hidden');
+        buttonGroupVerify.classList.add('hidden');
+        buttonGroupConfirm.classList.add('hidden');
+        buttonGroupError.classList.add('hidden');
+
+        // Hide preview
+        userPreview.classList.remove('show');
+        emailMessage.classList.remove('show');
+
+        // Reset email input
+        emailInput.classList.remove('error', 'success');
+      }
+    }
+
+    // Verify Email
+    verifyButton.addEventListener('click', async () => {
+      const email = emailInput.value.trim();
+
+      if (!email) {
+        showMessage(emailMessage, 'error', '✗ Veuillez entrer une adresse email');
+        emailInput.classList.add('error');
+        return;
+      }
+
+      // Show loading
+      verifyButton.disabled = true;
+      verifyText.textContent = 'Vérification...';
+      verifySpinner.classList.remove('hidden');
+
+      // Simulate API call
+      setTimeout(() => {
+        // Simulate random success/failure
+        const found = Math.random() > 0.3; // 70% success rate
+
+        verifyButton.disabled = false;
+        verifyText.textContent = 'Vérifier mon compte';
+        verifySpinner.classList.add('hidden');
+
+        if (found) {
+          // Success - email found
+          emailVerified = true;
+          userData = {
+            firstName: 'John',
+            lastName: 'Doe',
+            email: email,
+            level: 'Intermédiaire',
+            previousTournaments: 3
+          };
+
+          showMessage(emailMessage, 'success', `✓ Compte trouvé : ${userData.firstName} ${userData.lastName}`);
+          emailInput.classList.remove('error');
+          emailInput.classList.add('success');
+
+          // Show user preview
+          showUserPreview(userData);
+
+          // Show confirm buttons
+          buttonGroupVerify.classList.add('hidden');
+          buttonGroupConfirm.classList.remove('hidden');
+
+        } else {
+          // Error - email not found
+          emailVerified = false;
+          showMessage(emailMessage, 'error', '✗ Aucun compte trouvé avec cet email. Vérifiez votre adresse ou inscrivez-vous comme nouveau participant.');
+          emailInput.classList.add('error');
+          emailInput.classList.remove('success');
+
+          // Show error buttons
+          buttonGroupVerify.classList.add('hidden');
+          buttonGroupError.classList.remove('hidden');
+        }
+      }, 1500);
+    });
+
+    // Show Message
+    function showMessage(element, type, text) {
+      element.textContent = text;
+      element.className = `message ${type} show`;
+    }
+
+    // Show User Preview
+    function showUserPreview(user) {
+      const initials = user.firstName[0] + user.lastName[0];
+      document.getElementById('user-avatar').textContent = initials;
+      document.getElementById('user-name').textContent = `${user.firstName} ${user.lastName}`;
+      document.getElementById('user-email').textContent = user.email;
+      document.getElementById('user-level').textContent = user.level;
+      document.getElementById('user-tournaments').textContent = `${user.previousTournaments} participations`;
+      userPreview.classList.add('show');
+    }
+
+    // Confirm Button
+    confirmButton.addEventListener('click', () => {
+      alert('✓ Inscription confirmée ! Votre compte a été rattaché à ce tournoi.');
+      // Reset form
+      setMode('new');
+    });
+
+    // Not Me Button
+    notMeButton.addEventListener('click', () => {
+      // Reset to verify state
+      emailVerified = false;
+      userData = null;
+      userPreview.classList.remove('show');
+      emailMessage.classList.remove('show');
+      emailInput.value = '';
+      emailInput.classList.remove('error', 'success');
+      buttonGroupConfirm.classList.add('hidden');
+      buttonGroupVerify.classList.remove('hidden');
+    });
+
+    // Retry Button
+    retryButton.addEventListener('click', () => {
+      // Reset to verify state
+      emailMessage.classList.remove('show');
+      emailInput.value = '';
+      emailInput.classList.remove('error', 'success');
+      buttonGroupError.classList.add('hidden');
+      buttonGroupVerify.classList.remove('hidden');
+    });
+
+    // New Participant Button
+    newParticipantButton.addEventListener('click', () => {
+      setMode('new');
+    });
+
+    // Form Submit (new participant)
+    document.getElementById('registration-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      if (mode === 'new') {
+        const hasPhoto = selectedPhoto ? 'avec photo' : 'sans photo';
+        alert(`✓ Inscription réussie ${hasPhoto} ! Votre demande est en attente de validation.`);
+        // Reset form
+        e.target.reset();
+        clearPhotoPreview();
+      }
+    });
+
+    // Photo Upload Management
+    let selectedPhoto = null;
+    const photoDropzone = document.getElementById('photo-dropzone');
+    const photoInput = document.getElementById('photo-input');
+    const photoPreview = document.getElementById('photo-preview');
+    const previewImage = document.getElementById('preview-image');
+    const removePhotoBtn = document.getElementById('remove-photo');
+
+    // Click to select file
+    photoDropzone.addEventListener('click', (e) => {
+      if (!e.target.classList.contains('photo-preview-remove')) {
+        photoInput.click();
+      }
+    });
+
+    // File input change
+    photoInput.addEventListener('change', (e) => {
+      const file = e.target.files?.[0];
+      if (file) {
+        handlePhotoFile(file);
+      }
+    });
+
+    // Drag and drop
+    photoDropzone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      photoDropzone.classList.add('dragover');
+    });
+
+    photoDropzone.addEventListener('dragleave', () => {
+      photoDropzone.classList.remove('dragover');
+    });
+
+    photoDropzone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      photoDropzone.classList.remove('dragover');
+
+      const file = e.dataTransfer?.files?.[0];
+      if (file && file.type.startsWith('image/')) {
+        handlePhotoFile(file);
+      } else {
+        alert('⚠️ Veuillez déposer une image (JPG, PNG, WebP)');
+      }
+    });
+
+    // Handle photo file
+    function handlePhotoFile(file) {
+      // Validate file
+      const maxSize = 5 * 1024 * 1024; // 5MB
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+
+      if (!allowedTypes.includes(file.type)) {
+        alert('⚠️ Format non supporté. Utilisez JPG, PNG ou WebP.');
+        return;
+      }
+
+      if (file.size > maxSize) {
+        alert('⚠️ Image trop volumineuse. Maximum 5MB.');
+        return;
+      }
+
+      // Store file
+      selectedPhoto = file;
+
+      // Create preview
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        previewImage.src = e.target.result;
+        photoPreview.classList.add('show');
+        photoDropzone.classList.add('has-image');
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // Remove photo
+    removePhotoBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      clearPhotoPreview();
+    });
+
+    function clearPhotoPreview() {
+      selectedPhoto = null;
+      photoInput.value = '';
+      previewImage.src = '';
+      photoPreview.classList.remove('show');
+      photoDropzone.classList.remove('has-image');
+    }
+  </script>
+</body>
+</html>

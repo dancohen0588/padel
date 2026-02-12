@@ -11,63 +11,41 @@ type RegistrationResult =
   | { status: "ok"; message: string }
   | { status: "error"; message: string };
 
+type RegistrationMode = "new" | "existing";
+
 type TournamentIdentifier =
   | { id: string }
   | { slug: string };
 
-const insertOrUpdatePlayer = async (
+const normalizeEmail = (value: string) => value.trim().toLowerCase();
+
+const createPlayer = async (
   database: Sql,
   {
     firstName,
     lastName,
     email,
     phone,
+    level,
   }: {
     firstName: string;
     lastName: string;
     email: string;
     phone: string;
+    level: string;
   }
 ): Promise<string> => {
-  let playerId: string | null = null;
-  const existingPlayers = await database<Array<{ id: string }>>`
-    select id
-    from players
-    where email = ${email}
-    limit 1
+  const createdPlayers = await database<Array<{ id: string }>>`
+    insert into players (email, first_name, last_name, phone, level)
+    values (${email}, ${firstName}, ${lastName}, ${phone || null}, ${level})
+    returning id
   `;
 
-  if (existingPlayers[0]?.id) {
-    const updatedPlayers = await database<Array<{ id: string }>>`
-      update players
-      set
-        first_name = ${firstName},
-        last_name = ${lastName},
-        phone = ${phone || null}
-      where id = ${existingPlayers[0].id}
-      returning id
-    `;
-
-    if (!updatedPlayers[0]?.id) {
-      throw new Error("Mise à jour joueur échouée.");
-    }
-
-    playerId = updatedPlayers[0].id;
-  } else {
-    const createdPlayers = await database<Array<{ id: string }>>`
-      insert into players (email, first_name, last_name, phone)
-      values (${email}, ${firstName}, ${lastName}, ${phone || null})
-      returning id
-    `;
-
-    if (!createdPlayers[0]?.id) {
-      throw new Error("Création joueur échouée.");
-    }
-
-    playerId = createdPlayers[0].id;
+  if (!createdPlayers[0]?.id) {
+    throw new Error("Création joueur échouée.");
   }
 
-  return playerId;
+  return createdPlayers[0].id;
 };
 
 const ensureRegistration = async (
@@ -83,13 +61,100 @@ const ensureRegistration = async (
   `;
 
   if (existingRegistrations.length > 0) {
-    throw new Error("Vous êtes déjà inscrit pour ce tournoi.");
+    throw new Error("Vous êtes déjà inscrit à ce tournoi");
   }
 
   await database`
     insert into registrations (tournament_id, player_id, status)
     values (${tournamentId}, ${playerId}, 'pending')
   `;
+};
+
+const registerForTournament = async (
+  database: Sql,
+  tournamentId: string,
+  formData: FormData
+): Promise<RegistrationResult> => {
+  const mode = String(formData.get("mode") ?? "new") as RegistrationMode;
+  const email = normalizeEmail(String(formData.get("email") ?? ""));
+
+  if (!email) {
+    return { status: "error", message: "Veuillez entrer une adresse email valide" };
+  }
+
+  if (mode === "existing") {
+    const playerId = String(formData.get("playerId") ?? "").trim();
+
+    if (!playerId) {
+      return { status: "error", message: "Joueur non trouvé." };
+    }
+
+    const [player] = await database<Array<{ id: string; email: string }>>`
+      select id, email
+      from players
+      where id = ${playerId}
+      limit 1
+    `;
+
+    if (!player || normalizeEmail(player.email) !== email) {
+      return { status: "error", message: "Joueur non trouvé." };
+    }
+
+    await ensureRegistration(database, tournamentId, playerId);
+
+    return {
+      status: "ok",
+      message:
+        "✓ Inscription réussie ! Votre compte a été rattaché à ce tournoi. Votre demande est en attente de validation.",
+    };
+  }
+
+  const firstName = String(formData.get("firstName") ?? "").trim();
+  const lastName = String(formData.get("lastName") ?? "").trim();
+  const phone = String(formData.get("phone") ?? "").trim();
+  const level = String(formData.get("level") ?? "").trim();
+
+  if (!firstName || !lastName || !email || !level) {
+    return { status: "error", message: "Champs requis manquants." };
+  }
+
+  const existingPlayers = await database<Array<{ id: string }>>`
+    select id
+    from players
+    where lower(email) = ${email}
+    limit 1
+  `;
+
+  if (existingPlayers[0]?.id) {
+    return {
+      status: "error",
+      message:
+        "Cet email est déjà utilisé. Veuillez utiliser le mode 'Participant existant' pour vous rattacher à votre compte.",
+    };
+  }
+
+  const playerId = await createPlayer(database, {
+    firstName,
+    lastName,
+    email,
+    phone,
+    level,
+  });
+
+  const playerPhoto = formData.get("player_photo") as File | null;
+  if (playerPhoto && playerPhoto.size > 0) {
+    const photoData = new FormData();
+    photoData.set("player_photo", playerPhoto);
+    await updatePlayerPhoto(playerId, photoData);
+  }
+
+  await ensureRegistration(database, tournamentId, playerId);
+
+  return {
+    status: "ok",
+    message:
+      "✓ Inscription réussie ! Votre demande est en attente de validation par l'administrateur.",
+  };
 };
 
 const resolveTournamentId = async (
@@ -103,7 +168,7 @@ const resolveTournamentId = async (
   const rows = await database<Array<{ id: string }>>`
     select id
     from tournaments
-    where slug = ${identifier.slug} and status = 'published'
+    where slug = ${identifier.slug} and status in ('published', 'registration')
     limit 1
   `;
 
@@ -117,20 +182,12 @@ export async function registerPlayer(
   try {
     console.info("[db-debug] registerPlayer invoked");
     const database = getDatabaseClient();
-    const firstName = String(formData.get("firstName") ?? "").trim();
-    const lastName = String(formData.get("lastName") ?? "").trim();
-    const email = String(formData.get("email") ?? "").trim().toLowerCase();
-    const phone = String(formData.get("phone") ?? "").trim();
-
-    if (!firstName || !lastName || !email) {
-      return { status: "error", message: "Champs requis manquants." };
-    }
 
     const tournaments = await database<Array<{ id: string }>>`
       select id
       from tournaments
-      where status = 'published'
-      order by created_at desc
+      where status in ('published', 'registration')
+      order by date desc, created_at desc
       limit 1
     `;
 
@@ -143,26 +200,7 @@ export async function registerPlayer(
       };
     }
 
-    const playerId = await insertOrUpdatePlayer(database, {
-      firstName,
-      lastName,
-      email,
-      phone,
-    });
-
-    const playerPhoto = formData.get("player_photo") as File | null;
-    if (playerPhoto && playerPhoto.size > 0) {
-      const photoData = new FormData();
-      photoData.set("player_photo", playerPhoto);
-      await updatePlayerPhoto(playerId, photoData);
-    }
-
-    await ensureRegistration(database, tournament.id, playerId);
-
-    return {
-      status: "ok",
-      message: "Inscription reçue. Validation en cours.",
-    };
+    return await registerForTournament(database, tournament.id, formData);
   } catch (error) {
     return {
       status: "error",
@@ -177,15 +215,7 @@ export async function registerPlayerForTournament(
 ): Promise<RegistrationResult> {
   try {
     const database = getDatabaseClient();
-    const firstName = String(formData.get("firstName") ?? "").trim();
-    const lastName = String(formData.get("lastName") ?? "").trim();
-    const email = String(formData.get("email") ?? "").trim().toLowerCase();
-    const phone = String(formData.get("phone") ?? "").trim();
     const slug = String(formData.get("slug") ?? "").trim();
-
-    if (!firstName || !lastName || !email) {
-      return { status: "error", message: "Champs requis manquants." };
-    }
 
     if (!slug) {
       return {
@@ -203,26 +233,7 @@ export async function registerPlayerForTournament(
       };
     }
 
-    const playerId = await insertOrUpdatePlayer(database, {
-      firstName,
-      lastName,
-      email,
-      phone,
-    });
-
-    const playerPhoto = formData.get("player_photo") as File | null;
-    if (playerPhoto && playerPhoto.size > 0) {
-      const photoData = new FormData();
-      photoData.set("player_photo", playerPhoto);
-      await updatePlayerPhoto(playerId, photoData);
-    }
-
-    await ensureRegistration(database, tournamentId, playerId);
-
-    return {
-      status: "ok",
-      message: "Inscription reçue. Validation en cours.",
-    };
+    return await registerForTournament(database, tournamentId, formData);
   } catch (error) {
     return {
       status: "error",

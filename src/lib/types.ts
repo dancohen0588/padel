@@ -1,6 +1,12 @@
 export type RegistrationStatus = "pending" | "approved" | "rejected";
 
-export type TournamentStatus = "draft" | "published" | "archived";
+export type TournamentStatus =
+  | "draft"
+  | "published"
+  | "archived"
+  | "upcoming"
+  | "registration"
+  | "ongoing";
 
 export type TournamentConfig = {
   pairing_mode: "manual" | "random" | "balanced";
@@ -32,6 +38,7 @@ export type Player = {
   first_name: string;
   last_name: string;
   email: string;
+  level: string | null;
   phone: string | null;
   created_at: string;
 };

@@ -40,8 +40,8 @@ export const getActiveTournament = async (): Promise<Tournament | null> => {
       config,
       created_at::text as created_at
     from tournaments
-    where status = 'published'
-    order by created_at desc
+    where status in ('published', 'ongoing')
+    order by date desc, created_at desc
     limit 1
   `;
 
@@ -50,6 +50,29 @@ export const getActiveTournament = async (): Promise<Tournament | null> => {
 
 export const getPublishedTournaments = async (): Promise<Tournament[]> => {
   return getTournaments("published");
+};
+
+export const getActiveDisplayTournaments = async (): Promise<Tournament[]> => {
+  const database = getDatabaseClient();
+  const rows = await database<Tournament[]>`
+    select
+      id,
+      slug,
+      name,
+      date::text as date,
+      location,
+      description,
+      status,
+      max_players,
+      image_path,
+      config,
+      created_at::text as created_at
+    from tournaments
+    where status in ('published', 'ongoing')
+    order by date desc, created_at desc
+  `;
+
+  return rows;
 };
 
 export const getTournamentWithAllData = async (tournamentId: string) => {
@@ -105,8 +128,8 @@ export const getActiveTournamentId = async (): Promise<string | null> => {
   const rows = await database<Array<{ id: string }>>`
     select id
     from tournaments
-    where status = 'published'
-    order by created_at desc
+    where status in ('published', 'ongoing')
+    order by date desc, created_at desc
     limit 1
   `;
 
@@ -254,6 +277,7 @@ export const getRegistrationsByStatus = async (
     player_first_name: string;
     player_last_name: string;
     player_email: string;
+    player_level: string | null;
     player_phone: string | null;
     player_created_at: string;
   };
@@ -269,6 +293,7 @@ export const getRegistrationsByStatus = async (
       p.first_name as player_first_name,
       p.last_name as player_last_name,
       p.email as player_email,
+      p.level as player_level,
       p.phone as player_phone,
       p.created_at::text as player_created_at
     from registrations r
@@ -297,6 +322,7 @@ export const getRegistrationsByStatus = async (
       first_name: row.player_first_name,
       last_name: row.player_last_name,
       email: row.player_email,
+      level: row.player_level,
       phone: row.player_phone,
       created_at: row.player_created_at,
     },
