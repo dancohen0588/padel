@@ -17,8 +17,10 @@ Ce script génère des données réalistes pour tester l'application "Le Tournoi
 ### 1. Installer les Dépendances
 
 ```bash
-npm install --save-dev tsx @neondatabase/serverless postgres ws @types/ws
+npm install --save-dev tsx
 ```
+
+Note : `postgres` est déjà installé dans le projet.
 
 ### 2. Configurer les Variables d'Environnement
 

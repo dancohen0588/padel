@@ -1,19 +1,19 @@
 #!/bin/bash
 
-echo "🎾 Le Tournoi des Frérots - Script de Seed"
+echo "🎾 Le Tournoi des Frérots - Script de Seed v2"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
-
-# Vérifier que DATABASE_URL existe
-if [ -z "$DATABASE_URL" ] && [ ! -f .env.local ]; then
-  echo "❌ Erreur : DATABASE_URL non trouvée"
-  echo "   Créez un fichier .env.local avec DATABASE_URL=..."
-  exit 1
-fi
 
 # Charger les variables d'environnement depuis .env.local
 if [ -f .env.local ]; then
   export $(cat .env.local | xargs)
+fi
+
+# Vérifier que DATABASE_URL existe
+if [ -z "$DATABASE_URL" ]; then
+  echo "❌ Erreur : DATABASE_URL non trouvée"
+  echo "   Créez un fichier .env.local avec DATABASE_URL=..."
+  exit 1
 fi
 
 # Vérifier les dépendances
@@ -33,26 +33,44 @@ echo "   - 10 tournois"
 echo "   - ~200-250 équipes"
 echo "   - ~1500-2000 matchs"
 echo ""
-read -p "Continuer ? (y/N) " -n 1 -r
+echo "📋 Options :"
+echo "   1. Nettoyer la base ET générer de nouvelles données"
+echo "   2. Générer des données sans nettoyer (ajoute aux données existantes)"
+echo "   3. Annuler"
+echo ""
+read -p "Votre choix (1/2/3) : " -n 1 -r
 echo ""
 
-if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+if [[ $REPLY == "3" ]] || [[ ! $REPLY =~ ^[12]$ ]]; then
   echo "❌ Annulé"
   exit 0
+fi
+
+if [[ $REPLY == "1" ]]; then
+  echo ""
+  echo "🧹 Nettoyage de la base de données..."
+  npx tsx clean-database.ts
+
+  if [ $? -ne 0 ]; then
+    echo "❌ Erreur lors du nettoyage"
+    exit 1
+  fi
+
+  echo "✅ Base nettoyée"
 fi
 
 echo ""
 echo "🚀 Lancement du seed..."
 echo ""
 
-npx tsx seed-database.ts
+npx tsx seed-database-v2.ts
 
 if [ $? -eq 0 ]; then
   echo ""
   echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
   echo "✅ Seed terminé avec succès !"
   echo ""
-  echo "🎉 Votre base de données est maintenant remplie avec :"
+  echo "🎉 Votre base de données contient maintenant :"
   echo "   • 100 joueurs avec noms français réels"
   echo "   • 10 tournois sur 2 ans"
   echo "   • Des centaines de matchs avec résultats réalistes"
