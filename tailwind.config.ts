@@ -78,6 +78,15 @@ const config: Config = {
         card: "0 10px 30px -18px rgba(30, 30, 46, 0.25)",
         glow: "0 12px 24px -12px rgba(255, 107, 53, 0.45)",
       },
+      keyframes: {
+        float: {
+          "0%, 100%": { transform: "translateY(0px)" },
+          "50%": { transform: "translateY(-10px)" },
+        },
+      },
+      animation: {
+        float: "float 3s ease-in-out infinite",
+      },
     },
   },
   plugins: [require("tailwindcss-animate")],

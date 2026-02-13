@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Home V3 - Minimaliste Cartes | Le Tournoi des Frérots</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+
+    .gradient-orange {
+      background: linear-gradient(135deg, #ff6b35 0%, #ff8c42 100%);
+    }
+
+    .gradient-violet {
+      background: linear-gradient(135deg, #9D7AFA 0%, #B39DFF 100%);
+    }
+
+    .glass-card {
+      background: rgba(30, 30, 46, 0.6);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .glass-card:hover {
+      background: rgba(30, 30, 46, 0.8);
+      border-color: rgba(255, 107, 53, 0.3);
+      transition: all 0.3s ease;
+    }
+
+    .section-divider {
+      height: 2px;
+      background: linear-gradient(90deg, transparent, rgba(255, 107, 53, 0.5), transparent);
+    }
+
+    .stat-number {
+      font-variant-numeric: tabular-nums;
+    }
+
+    .rank-badge {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      border-radius: 8px;
+    }
+
+    .rank-1 { background: linear-gradient(135deg, #FFD700, #FFA500); color: #000; }
+    .rank-2 { background: linear-gradient(135deg, #C0C0C0, #808080); color: #000; }
+    .rank-3 { background: linear-gradient(135deg, #CD7F32, #8B4513); color: #fff; }
+    .rank-other { background: rgba(255, 255, 255, 0.1); color: #999; }
+  </style>
+</head>
+<body class="bg-gradient-to-b from-[#0a0a14] via-[#1E1E2E] to-[#0a0a14] min-h-screen">
+  <div class="max-w-4xl mx-auto px-4 py-12">
+
+    <!-- Header Simple et Épuré -->
+    <header class="text-center mb-16">
+      <h1 class="text-6xl font-black text-white mb-4">
+        Le Tournoi des <span class="gradient-orange bg-clip-text text-transparent">Frérots</span>
+      </h1>
+      <p class="text-gray-400 text-lg">Tableau de bord • Classements • Statistiques</p>
+    </header>
+
+    <!-- Stats horizontales minimalistes -->
+    <div class="glass-card rounded-3xl p-8 mb-12">
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-8">
+        <div class="text-center">
+          <div class="stat-number text-5xl font-black gradient-orange bg-clip-text text-transparent mb-2">24</div>
+          <div class="text-sm text-gray-400 uppercase tracking-widest">Tournois</div>
+        </div>
+        <div class="text-center">
+          <div class="stat-number text-5xl font-black text-white mb-2">486</div>
+          <div class="text-sm text-gray-400 uppercase tracking-widest">Matchs</div>
+        </div>
+        <div class="text-center">
+          <div class="stat-number text-5xl font-black gradient-violet bg-clip-text text-transparent mb-2">64</div>
+          <div class="text-sm text-gray-400 uppercase tracking-widest">Joueurs</div>
+        </div>
+        <div class="text-center">
+          <div class="stat-number text-5xl font-black text-white mb-2">1,458</div>
+          <div class="text-sm text-gray-400 uppercase tracking-widest">Sets</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section: Derniers Vainqueurs -->
+    <section class="mb-12">
+      <div class="flex items-center gap-4 mb-6">
+        <div class="gradient-orange p-3 rounded-xl">
+          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/>
+          </svg>
+        </div>
+        <h2 class="text-3xl font-black text-white">Derniers Vainqueurs</h2>
+      </div>
+
+      <div class="space-y-4">
+        <!-- Vainqueur 1 -->
+        <div class="glass-card rounded-2xl p-6 border-l-4 border-yellow-500">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-4">
+              <div class="text-4xl">🥇</div>
+              <div>
+                <h3 class="text-xl font-bold text-white mb-1">Tournoi de Mars 2025</h3>
+                <p class="text-sm text-gray-400 mb-3">15 mars 2025 • Club des Frérots</p>
+                <div class="flex items-center gap-3">
+                  <div class="flex -space-x-3">
+                    <div class="w-14 h-14 rounded-full bg-gradient-to-br from-[#ff6b35] to-[#ff8c42] flex items-center justify-center text-white font-bold text-lg border-4 border-[#1E1E2E]">JB</div>
+                    <div class="w-14 h-14 rounded-full bg-gradient-to-br from-[#9D7AFA] to-[#B39DFF] flex items-center justify-center text-white font-bold text-lg border-4 border-[#1E1E2E]">MD</div>
+                  </div>
+                  <div>
+                    <p class="text-white font-bold">Jean BASTION</p>
+                    <p class="text-white font-bold">Marc DUPONT</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="text-right">
+              <div class="px-4 py-2 bg-yellow-500/20 rounded-xl border border-yellow-500/40">
+                <span class="text-yellow-400 font-black text-lg">CHAMPIONS</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Vainqueur 2 -->
+        <div class="glass-card rounded-2xl p-6 border-l-4 border-gray-400">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-4">
+              <div class="text-4xl">🥈</div>
+              <div>
+                <h3 class="text-lg font-bold text-white mb-1">Tournoi de Janvier 2025</h3>
+                <p class="text-sm text-gray-400 mb-3">12 janvier 2025</p>
+                <div class="flex items-center gap-3">
+                  <div class="flex -space-x-3">
+                    <div class="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-bold border-3 border-[#1E1E2E]">PL</div>
+                    <div class="w-12 h-12 rounded-full bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center text-white font-bold border-3 border-[#1E1E2E]">SM</div>
+                  </div>
+                  <div>
+                    <p class="text-white font-semibold text-sm">Pierre LAURENT & Sophie MARTIN</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Vainqueur 3 -->
+        <div class="glass-card rounded-2xl p-6 border-l-4 border-orange-700">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-4">
+              <div class="text-4xl">🥉</div>
+              <div>
+                <h3 class="text-lg font-bold text-white mb-1">Tournoi de Novembre 2024</h3>
+                <p class="text-sm text-gray-400 mb-3">18 novembre 2024</p>
+                <div class="flex items-center gap-3">
+                  <div class="flex -space-x-3">
+                    <div class="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center text-white font-bold border-3 border-[#1E1E2E]">AR</div>
+                    <div class="w-12 h-12 rounded-full bg-gradient-to-br from-pink-500 to-pink-600 flex items-center justify-center text-white font-bold border-3 border-[#1E1E2E]">CB</div>
+                  </div>
+                  <div>
+                    <p class="text-white font-semibold text-sm">Antoine ROBERT & Claire BERNARD</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="section-divider mb-12"></div>
+
+    <!-- Section: Match le plus serré -->
+    <section class="mb-12">
+      <div class="flex items-center gap-4 mb-6">
+        <div class="gradient-violet p-3 rounded-xl">
+          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+          </svg>
+        </div>
+        <div>
+          <h2 class="text-3xl font-black text-white">Match le plus serré</h2>
+          <p class="text-sm text-gray-400">Dernier tournoi</p>
+        </div>
+      </div>
+
+      <div class="glass-card rounded-2xl p-8">
+        <div class="grid grid-cols-3 gap-6 items-center mb-6">
+          <!-- Équipe A -->
+          <div class="text-center">
+            <div class="flex justify-center gap-2 mb-3">
+              <div class="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-bold text-lg">LM</div>
+              <div class="w-16 h-16 rounded-full bg-gradient-to-br from-cyan-500 to-cyan-600 flex items-center justify-center text-white font-bold text-lg">TN</div>
+            </div>
+            <p class="text-white font-bold">Lucas MOREAU</p>
+            <p class="text-white font-bold">Thomas NOIR</p>
+          </div>
+
+          <!-- Score -->
+          <div class="text-center">
+            <div class="flex items-center justify-center gap-4 mb-4">
+              <div class="text-6xl font-black gradient-orange bg-clip-text text-transparent">2</div>
+              <div class="text-3xl text-gray-600">-</div>
+              <div class="text-6xl font-black gradient-violet bg-clip-text text-transparent">2</div>
+            </div>
+            <div class="inline-flex items-center gap-2 px-4 py-2 bg-red-500/20 rounded-full border border-red-500/40">
+              <span class="text-red-400 font-black text-sm">🔥 MATCH SERRÉ</span>
+            </div>
+          </div>
+
+          <!-- Équipe B -->
+          <div class="text-center">
+            <div class="flex justify-center gap-2 mb-3">
+              <div class="w-16 h-16 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center text-white font-bold text-lg">FB</div>
+              <div class="w-16 h-16 rounded-full bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center text-white font-bold text-lg">VG</div>
+            </div>
+            <p class="text-white font-bold">François BLANC</p>
+            <p class="text-white font-bold">Vincent GRIS</p>
+          </div>
+        </div>
+
+        <!-- Détails sets -->
+        <div class="border-t border-white/10 pt-6">
+          <div class="flex justify-center items-center gap-3">
+            <span class="text-sm text-gray-400">Détail des sets :</span>
+            <span class="px-4 py-2 bg-white/5 rounded-lg text-white font-semibold">6-4</span>
+            <span class="px-4 py-2 bg-white/5 rounded-lg text-white font-semibold">4-6</span>
+            <span class="px-4 py-2 bg-white/5 rounded-lg text-white font-semibold">7-5</span>
+            <span class="px-3 py-1 bg-orange-500/20 rounded-lg text-orange-400 text-sm font-bold">3 sets joués</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="section-divider mb-12"></div>
+
+    <!-- Sections: Top Paires et Top Joueurs en grille -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+
+      <!-- Top Paires -->
+      <section>
+        <div class="flex items-center gap-3 mb-6">
+          <div class="gradient-orange p-2.5 rounded-xl">
+            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+            </svg>
+          </div>
+          <h2 class="text-2xl font-black text-white">Top Paires</h2>
+        </div>
+
+        <div class="space-y-3">
+          <!-- Rang 1 -->
+          <div class="glass-card rounded-xl p-4">
+            <div class="flex items-center gap-4">
+              <div class="rank-badge rank-1">1</div>
+              <div class="flex -space-x-2">
+                <div class="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white text-sm font-bold border-3 border-[#1E1E2E]">JB</div>
+                <div class="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center text-white text-sm font-bold border-3 border-[#1E1E2E]">MD</div>
+              </div>
+              <div class="flex-1">
+                <p class="text-white font-bold text-sm">J. BASTION & M. DUPONT</p>
+                <p class="text-xs text-gray-500">8 tournois joués</p>
+              </div>
+              <div class="text-right">
+                <div class="text-2xl font-black gradient-orange bg-clip-text text-transparent">42</div>
+                <div class="text-xs text-gray-500">victoires</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Rang 2 -->
+          <div class="glass-card rounded-xl p-4">
+            <div class="flex items-center gap-4">
+              <div class="rank-badge rank-2">2</div>
+              <div class="flex -space-x-2">
+                <div class="w-10 h-10 rounded-full bg-purple-500 flex items-center justify-center text-white text-sm font-bold border-3 border-[#1E1E2E]">PL</div>
+                <div class="w-10 h-10 rounded-full bg-pink-500 flex items-center justify-center text-white text-sm font-bold border-3 border-[#1E1E2E]">SM</div>
+              </div>
+              <div class="flex-1">
+                <p class="text-white font-semibold text-sm">P. LAURENT & S. MARTIN</p>
+                <p class="text-xs text-gray-500">7 tournois joués</p>
+              </div>
+              <div class="text-right">
+                <div class="text-2xl font-bold text-white">38</div>
+                <div class="text-xs text-gray-500">victoires</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Rang 3 -->
+          <div class="glass-card rounded-xl p-4">
+            <div class="flex items-center gap-4">
+              <div class="rank-badge rank-3">3</div>
+              <div class="flex -space-x-2">
+                <div class="w-10 h-10 rounded-full bg-orange-500 flex items-center justify-center text-white text-sm font-bold border-3 border-[#1E1E2E]">AR</div>
+                <div class="w-10 h-10 rounded-full bg-red-500 flex items-center justify-center text-white text-sm font-bold border-3 border-[#1E1E2E]">CB</div>
+              </div>
+              <div class="flex-1">
+                <p class="text-white font-semibold text-sm">A. ROBERT & C. BERNARD</p>
+                <p class="text-xs text-gray-500">6 tournois joués</p>
+              </div>
+              <div class="text-right">
+                <div class="text-2xl font-bold text-white">35</div>
+                <div class="text-xs text-gray-500">victoires</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Rang 4 -->
+          <div class="glass-card rounded-xl p-4">
+            <div class="flex items-center gap-4">
+              <div class="rank-badge rank-other">4</div>
+              <div class="flex -space-x-2">
+                <div class="w-10 h-10 rounded-full bg-cyan-500 flex items-center justify-center text-white text-sm font-bold border-3 border-[#1E1E2E]">LM</div>
+                <div class="w-10 h-10 rounded-full bg-teal-500 flex items-center justify-center text-white text-sm font-bold border-3 border-[#1E1E2E]">TN</div>
+              </div>
+              <div class="flex-1">
+                <p class="text-white font-medium text-sm">L. MOREAU & T. NOIR</p>
+                <p class="text-xs text-gray-500">6 tournois joués</p>
+              </div>
+              <div class="text-right">
+                <div class="text-xl font-bold text-white">31</div>
+                <div class="text-xs text-gray-500">victoires</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Rang 5 -->
+          <div class="glass-card rounded-xl p-4">
+            <div class="flex items-center gap-4">
+              <div class="rank-badge rank-other">5</div>
+              <div class="flex -space-x-2">
+                <div class="w-10 h-10 rounded-full bg-indigo-500 flex items-center justify-center text-white text-sm font-bold border-3 border-[#1E1E2E]">FB</div>
+                <div class="w-10 h-10 rounded-full bg-violet-500 flex items-center justify-center text-white text-sm font-bold border-3 border-[#1E1E2E]">VG</div>
+              </div>
+              <div class="flex-1">
+                <p class="text-white font-medium text-sm">F. BLANC & V. GRIS</p>
+                <p class="text-xs text-gray-500">5 tournois joués</p>
+              </div>
+              <div class="text-right">
+                <div class="text-xl font-bold text-white">28</div>
+                <div class="text-xs text-gray-500">victoires</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Top Joueurs -->
+      <section>
+        <div class="flex items-center gap-3 mb-6">
+          <div class="gradient-violet p-2.5 rounded-xl">
+            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+            </svg>
+          </div>
+          <h2 class="text-2xl font-black text-white">Top Joueurs</h2>
+        </div>
+
+        <div class="space-y-3">
+          <!-- Rang 1 -->
+          <div class="glass-card rounded-xl p-4">
+            <div class="flex items-center gap-4">
+              <div class="rank-badge rank-1">1</div>
+              <div class="w-12 h-12 rounded-full bg-gradient-to-br from-[#ff6b35] to-[#ff8c42] flex items-center justify-center text-white font-bold text-lg">JB</div>
+              <div class="flex-1">
+                <p class="text-white font-bold text-sm">Jean BASTION</p>
+                <p class="text-xs text-gray-500">9 tournois joués</p>
+              </div>
+              <div class="text-right">
+                <div class="text-2xl font-black gradient-violet bg-clip-text text-transparent">45</div>
+                <div class="text-xs text-gray-500">victoires</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Rang 2 -->
+          <div class="glass-card rounded-xl p-4">
+            <div class="flex items-center gap-4">
+              <div class="rank-badge rank-2">2</div>
+              <div class="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-bold text-lg">MD</div>
+              <div class="flex-1">
+                <p class="text-white font-semibold text-sm">Marc DUPONT</p>
+                <p class="text-xs text-gray-500">8 tournois joués</p>
+              </div>
+              <div class="text-right">
+                <div class="text-2xl font-bold text-white">42</div>
+                <div class="text-xs text-gray-500">victoires</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Rang 3 -->
+          <div class="glass-card rounded-xl p-4">
+            <div class="flex items-center gap-4">
+              <div class="rank-badge rank-3">3</div>
+              <div class="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg">PL</div>
+              <div class="flex-1">
+                <p class="text-white font-semibold text-sm">Pierre LAURENT</p>
+                <p class="text-xs text-gray-500">8 tournois joués</p>
+              </div>
+              <div class="text-right">
+                <div class="text-2xl font-bold text-white">40</div>
+                <div class="text-xs text-gray-500">victoires</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Rang 4 -->
+          <div class="glass-card rounded-xl p-4">
+            <div class="flex items-center gap-4">
+              <div class="rank-badge rank-other">4</div>
+              <div class="w-12 h-12 rounded-full bg-gradient-to-br from-pink-500 to-pink-600 flex items-center justify-center text-white font-bold text-lg">SM</div>
+              <div class="flex-1">
+                <p class="text-white font-medium text-sm">Sophie MARTIN</p>
+                <p class="text-xs text-gray-500">7 tournois joués</p>
+              </div>
+              <div class="text-right">
+                <div class="text-xl font-bold text-white">38</div>
+                <div class="text-xs text-gray-500">victoires</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Rang 5 -->
+          <div class="glass-card rounded-xl p-4">
+            <div class="flex items-center gap-4">
+              <div class="rank-badge rank-other">5</div>
+              <div class="w-12 h-12 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center text-white font-bold text-lg">AR</div>
+              <div class="flex-1">
+                <p class="text-white font-medium text-sm">Antoine ROBERT</p>
+                <p class="text-xs text-gray-500">7 tournois joués</p>
+              </div>
+              <div class="text-right">
+                <div class="text-xl font-bold text-white">36</div>
+                <div class="text-xs text-gray-500">victoires</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- CTA Prochain Tournoi -->
+    <section class="mb-12">
+      <div class="glass-card rounded-3xl overflow-hidden">
+        <div class="bg-gradient-to-r from-[#ff6b35] to-[#ff8c42] p-8">
+          <div class="flex items-center justify-between">
+            <div>
+              <div class="flex items-center gap-2 mb-3">
+                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                </svg>
+                <span class="text-white/90 text-sm font-semibold uppercase tracking-wider">Prochain événement</span>
+              </div>
+              <h2 class="text-4xl font-black text-white mb-3">Tournoi d'Avril 2025</h2>
+              <p class="text-white/90 text-lg mb-1">📍 Club des Frérots</p>
+              <p class="text-white/90 text-lg">📅 Samedi 20 avril 2025 à 14h00</p>
+            </div>
+            <div class="flex flex-col gap-3">
+              <button class="bg-white text-[#ff6b35] font-black py-4 px-8 rounded-2xl hover:bg-gray-100 transition shadow-2xl text-lg">
+                S'INSCRIRE
+              </button>
+              <button class="bg-white/20 backdrop-blur-sm text-white font-bold py-3 px-8 rounded-2xl hover:bg-white/30 transition">
+                En savoir plus
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</body>
+</html>
