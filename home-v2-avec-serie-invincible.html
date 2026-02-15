@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Home V2 avec Série Invincible | Le Tournoi des Frérots</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+
+    .gradient-orange {
+      background: linear-gradient(135deg, #ff6b35 0%, #ff8c42 100%);
+    }
+
+    .gradient-violet {
+      background: linear-gradient(135deg, #9D7AFA 0%, #B39DFF 100%);
+    }
+
+    .gradient-green {
+      background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+    }
+
+    .hero-section {
+      position: relative;
+      background-image: url('https://images.unsplash.com/photo-1554068865-24cecd4e34b8?q=80&w=2000&auto=format&fit=crop');
+      background-size: cover;
+      background-position: center;
+      min-height: 400px;
+    }
+
+    .hero-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(30, 30, 46, 0.95) 0%, rgba(30, 30, 46, 0.85) 50%, rgba(157, 122, 250, 0.3) 100%);
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 10;
+    }
+
+    .card-float {
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .card-float:hover {
+      transform: translateY(-8px) scale(1.02);
+      box-shadow: 0 25px 50px rgba(157, 122, 250, 0.25);
+    }
+
+    .trophy-glow {
+      filter: drop-shadow(0 0 20px rgba(255,107,53,0.6));
+    }
+
+    .fire-glow {
+      filter: drop-shadow(0 0 20px rgba(16,185,129,0.6));
+    }
+
+    .podium-step {
+      transition: all 0.3s ease;
+    }
+
+    .podium-step:hover {
+      transform: scale(1.05);
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+    }
+
+    @keyframes pulse-glow {
+      0%, 100% { box-shadow: 0 0 20px rgba(16, 185, 129, 0.5); }
+      50% { box-shadow: 0 0 40px rgba(16, 185, 129, 0.8); }
+    }
+
+    .float-animation {
+      animation: float 3s ease-in-out infinite;
+    }
+
+    .pulse-glow-animation {
+      animation: pulse-glow 2s ease-in-out infinite;
+    }
+
+    .stat-card-hero {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      transition: all 0.3s ease;
+    }
+
+    .stat-card-hero:hover {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: rgba(255, 107, 53, 0.5);
+      transform: translateY(-4px);
+    }
+
+    .streak-counter {
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -0.05em;
+    }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-[#0a0a14] via-[#1E1E2E] to-[#0f0f1a] min-h-screen">
+
+  <!-- Hero Section avec Image de Fond -->
+  <section class="hero-section">
+    <div class="hero-overlay"></div>
+    <div class="hero-content container mx-auto px-4 py-16 max-w-7xl">
+
+      <!-- Titre principal -->
+      <div class="text-center mb-12">
+        <h1 class="text-5xl lg:text-7xl font-black text-white mb-4 drop-shadow-2xl">
+          Le Tournoi des <span class="gradient-orange bg-clip-text text-transparent">Frérots</span>
+        </h1>
+        <p class="text-gray-200 text-xl drop-shadow-lg">Vivez la passion du padel en temps réel</p>
+      </div>
+
+      <!-- Stats Cards sur le Hero -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 max-w-5xl mx-auto">
+        <div class="stat-card-hero rounded-2xl p-6 text-center">
+          <div class="text-4xl lg:text-5xl font-black gradient-orange bg-clip-text text-transparent mb-2">24</div>
+          <div class="text-sm text-gray-200 uppercase tracking-wider font-semibold">Tournois</div>
+        </div>
+        <div class="stat-card-hero rounded-2xl p-6 text-center">
+          <div class="text-4xl lg:text-5xl font-black text-white mb-2">486</div>
+          <div class="text-sm text-gray-200 uppercase tracking-wider font-semibold">Matchs joués</div>
+        </div>
+        <div class="stat-card-hero rounded-2xl p-6 text-center">
+          <div class="text-4xl lg:text-5xl font-black gradient-violet bg-clip-text text-transparent mb-2">64</div>
+          <div class="text-sm text-gray-200 uppercase tracking-wider font-semibold">Joueurs actifs</div>
+        </div>
+        <div class="stat-card-hero rounded-2xl p-6 text-center">
+          <div class="text-4xl lg:text-5xl font-black text-white mb-2">1,458</div>
+          <div class="text-sm text-gray-200 uppercase tracking-wider font-semibold">Sets disputés</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Contenu Principal -->
+  <div class="container mx-auto px-4 py-12 max-w-7xl">
+
+    <!-- Layout Asymétrique -->
+    <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
+
+      <!-- Colonne gauche principale (3/5) -->
+      <div class="lg:col-span-3 space-y-6">
+
+        <!-- NOUVEAU KPI : Série Invincible -->
+        <div class="bg-gradient-to-br from-[#1E1E2E] via-[#1e2e2a] to-[#1E1E2E] rounded-3xl p-8 border-2 border-green-500/30 shadow-2xl card-float relative overflow-hidden pulse-glow-animation">
+
+          <!-- Background decorations -->
+          <div class="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-green-500/20 to-transparent rounded-full blur-3xl"></div>
+          <div class="absolute bottom-0 left-0 w-64 h-64 bg-gradient-to-tr from-emerald-500/10 to-transparent rounded-full blur-3xl"></div>
+
+          <div class="relative z-10">
+            <!-- Header -->
+            <div class="flex items-center justify-between mb-6">
+              <div class="flex items-center gap-3">
+                <div class="gradient-green p-3 rounded-2xl fire-glow">
+                  <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.879 16.121A3 3 0 1012.015 11L11 14H9c0 .768.293 1.536.879 2.121z"/>
+                  </svg>
+                </div>
+                <div>
+                  <h2 class="text-3xl font-black text-white">Série Invincible 🔥</h2>
+                  <p class="text-sm text-gray-400">Plus longue série sans défaite</p>
+                </div>
+              </div>
+              <div class="text-right">
+                <div class="inline-flex items-center gap-2 px-4 py-2 bg-green-500/20 rounded-xl border border-green-500/40">
+                  <span class="text-green-400 font-black text-sm">EN FEU</span>
+                  <span class="text-2xl">🔥</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Contenu principal de la série -->
+            <div class="bg-gradient-to-r from-green-500/10 via-emerald-500/5 to-transparent rounded-2xl p-8 border border-green-500/20">
+              <div class="flex items-center justify-between">
+
+                <!-- Compteur de série -->
+                <div class="text-center flex-shrink-0">
+                  <div class="relative inline-block">
+                    <div class="absolute inset-0 bg-green-500/20 rounded-full blur-2xl"></div>
+                    <div class="relative bg-gradient-to-br from-green-500 to-emerald-600 text-white rounded-full w-32 h-32 flex items-center justify-center border-4 border-green-400/50 shadow-2xl">
+                      <div class="text-center">
+                        <div class="text-5xl font-black streak-counter leading-none">18</div>
+                        <div class="text-xs uppercase font-bold tracking-wider mt-1">matchs</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="mt-4">
+                    <div class="text-green-400 text-xs font-semibold uppercase tracking-wider mb-1">Record actif</div>
+                    <div class="flex justify-center gap-1">
+                      <span class="text-2xl">🔥</span>
+                      <span class="text-2xl">🔥</span>
+                      <span class="text-2xl">🔥</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Séparateur vertical -->
+                <div class="hidden lg:block w-px h-32 bg-gradient-to-b from-transparent via-green-500/50 to-transparent mx-8"></div>
+
+                <!-- Informations de la paire -->
+                <div class="flex-1">
+                  <div class="mb-4">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 bg-yellow-500/20 rounded-lg border border-yellow-500/30 mb-3">
+                      <span class="text-xl">👑</span>
+                      <span class="text-yellow-400 text-sm font-bold">Paire dominante</span>
+                    </div>
+                  </div>
+
+                  <!-- Paire de joueurs -->
+                  <div class="flex items-center gap-4 mb-4">
+                    <div class="flex -space-x-4">
+                      <div class="w-20 h-20 rounded-full bg-gradient-to-br from-[#ff6b35] to-[#ff8c42] flex items-center justify-center text-white font-bold text-2xl border-4 border-[#1E1E2E] shadow-xl">JB</div>
+                      <div class="w-20 h-20 rounded-full bg-gradient-to-br from-[#9D7AFA] to-[#B39DFF] flex items-center justify-center text-white font-bold text-2xl border-4 border-[#1E1E2E] shadow-xl">MD</div>
+                    </div>
+                    <div>
+                      <p class="text-2xl font-black text-white">Jean BASTION</p>
+                      <p class="text-2xl font-black text-white">Marc DUPONT</p>
+                      <p class="text-sm text-gray-400 mt-2">8 tournois • 42 victoires totales</p>
+                    </div>
+                  </div>
+
+                  <!-- Statistiques de la série -->
+                  <div class="grid grid-cols-3 gap-3">
+                    <div class="bg-white/5 rounded-lg p-3 text-center">
+                      <div class="text-2xl font-bold text-green-400">18</div>
+                      <div class="text-xs text-gray-400">Matchs sans défaite</div>
+                    </div>
+                    <div class="bg-white/5 rounded-lg p-3 text-center">
+                      <div class="text-2xl font-bold text-white">0</div>
+                      <div class="text-xs text-gray-400">Défaites</div>
+                    </div>
+                    <div class="bg-white/5 rounded-lg p-3 text-center">
+                      <div class="text-2xl font-bold text-white">100%</div>
+                      <div class="text-xs text-gray-400">Sans défaite</div>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
+              <!-- Période de la série -->
+              <div class="mt-6 pt-6 border-t border-green-500/20">
+                <div class="flex items-center justify-between text-sm">
+                  <div>
+                    <span class="text-gray-400">Début de série :</span>
+                    <span class="text-white font-semibold ml-2">12 janvier 2025</span>
+                  </div>
+                  <div>
+                    <span class="text-gray-400">Dernier match :</span>
+                    <span class="text-green-400 font-semibold ml-2">15 mars 2025</span>
+                  </div>
+                  <div>
+                    <span class="text-gray-400">Durée :</span>
+                    <span class="text-white font-semibold ml-2">63 jours</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Note historique -->
+            <div class="mt-4 flex items-center gap-2 text-sm text-gray-400">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+              <span>Record historique du club : 23 victoires consécutives (Antoine ROBERT & Claire BERNARD, 2024)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Derniers Vainqueurs (reste inchangé) -->
+        <div class="bg-gradient-to-br from-[#1E1E2E] via-[#252538] to-[#1E1E2E] rounded-3xl p-8 border border-white/10 shadow-2xl card-float relative overflow-hidden">
+          <div class="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-[#ff6b35]/10 to-transparent rounded-full blur-3xl"></div>
+          <div class="absolute bottom-0 left-0 w-64 h-64 bg-gradient-to-tr from-[#9D7AFA]/10 to-transparent rounded-full blur-3xl"></div>
+
+          <div class="relative z-10">
+            <div class="flex items-center gap-3 mb-8">
+              <div class="gradient-orange p-3 rounded-2xl trophy-glow">
+                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/>
+                </svg>
+              </div>
+              <div>
+                <h2 class="text-3xl font-black text-white">Derniers Champions</h2>
+                <p class="text-sm text-gray-400">Les 3 derniers vainqueurs de tournois</p>
+              </div>
+            </div>
+
+            <!-- Podium (reste inchangé - code déjà présent dans v2) -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <!-- ... contenu du podium ... -->
+              <div class="text-center text-gray-400 text-sm py-8">
+                [Podium des 3 derniers champions - voir version complète]
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Match le plus serré (reste inchangé) -->
+        <div class="text-center text-gray-400 text-sm py-8 bg-[#1E1E2E]/50 rounded-2xl">
+          [Match le plus serré - voir version complète]
+        </div>
+
+      </div>
+
+      <!-- Colonne droite (2/5) - reste inchangée -->
+      <div class="lg:col-span-2 space-y-6">
+        <div class="text-center text-gray-400 text-sm py-8 bg-[#1E1E2E]/50 rounded-2xl">
+          [Top Paires - voir version complète]
+        </div>
+        <div class="text-center text-gray-400 text-sm py-8 bg-[#1E1E2E]/50 rounded-2xl">
+          [Top Joueurs - voir version complète]
+        </div>
+        <div class="text-center text-gray-400 text-sm py-8 bg-[#1E1E2E]/50 rounded-2xl">
+          [Prochain Tournoi - voir version complète]
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</body>
+</html>
