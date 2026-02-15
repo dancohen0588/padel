@@ -23,6 +23,17 @@ export function UsersValidatedTab({
   const [search, setSearch] = useState("");
   const router = useRouter();
 
+
+  const LEVEL_LABELS: Record<string, string> = {
+    "1": "1 - Débutant",
+    "2": "2 - Débutant confirmé",
+    "3": "3 - Intermédiaire",
+    "4": "4 - Intermédiaire confirmé",
+    "5": "5 - Confirmé",
+    "6": "6 - Avancé",
+    "7": "7 - Expert",
+  };
+
   const approved = useMemo(
     () =>
       registrations.filter((registration) => {
@@ -30,13 +41,15 @@ export function UsersValidatedTab({
         if (!search) return true;
         const term = search.toLowerCase();
         const fullName = `${registration.player.first_name} ${registration.player.last_name}`.toLowerCase();
+        const email = registration.player.email?.toLowerCase() ?? "";
         return (
           fullName.includes(term) ||
-          registration.player.email.toLowerCase().includes(term)
+          email.includes(term)
         );
       }),
     [registrations, search]
   );
+
 
   const totalCount = registrations.length;
   const approvedCount = statusCounts.approved;
@@ -97,11 +110,15 @@ export function UsersValidatedTab({
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         {approved.length ? (
-          approved.map((registration) => (
-            <Card
-              key={registration.id}
-              className="rounded-2xl border border-white/10 bg-white/5 p-5 text-white shadow-card"
-            >
+          approved.map((registration) => {
+            const rankingValue = registration.player.ranking?.toString().trim();
+            const playPreferenceValue = registration.player.play_preference?.toString().trim();
+
+            return (
+              <Card
+                key={registration.id}
+                className="rounded-2xl border border-white/10 bg-white/5 p-5 text-white shadow-card"
+              >
               <div className="flex items-start gap-4">
                 <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/10 text-sm font-semibold text-white">
                   {buildInitials(
@@ -122,7 +139,7 @@ export function UsersValidatedTab({
                   <div className="space-y-2 text-sm text-white/70">
                     <div className="flex items-center gap-2">
                       <span>✉️</span>
-                      <span>{registration.player.email}</span>
+                      <span>{registration.player.email ?? "N/A"}</span>
                     </div>
                     {registration.player.phone ? (
                       <div className="flex items-center gap-2">
@@ -130,6 +147,24 @@ export function UsersValidatedTab({
                         <span>{registration.player.phone}</span>
                       </div>
                     ) : null}
+                    <div className="flex flex-wrap items-center gap-2 text-[11px] text-white/60">
+                      <span>
+                        Niveau :{" "}
+                        {registration.player.level
+                          ? LEVEL_LABELS[registration.player.level] ?? registration.player.level
+                          : "N/A"}
+                      </span>
+                      <span>•</span>
+                      <span>
+                        Classement :{" "}
+                        {rankingValue || "N/A"}
+                      </span>
+                      <span>•</span>
+                      <span>
+                        Côté préféré :{" "}
+                        {playPreferenceValue || "N/A"}
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -157,7 +192,8 @@ export function UsersValidatedTab({
                 </form>
               </div>
             </Card>
-          ))
+            );
+          })
         ) : (
           <div className="rounded-2xl border border-dashed border-white/20 bg-white/5 p-10 text-center text-sm text-white/60">
             Aucun joueur validé.

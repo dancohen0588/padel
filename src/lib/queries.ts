@@ -580,6 +580,9 @@ export const getRegistrationsByStatus = async (
     player_email: string;
     player_level: string | null;
     player_phone: string | null;
+    player_is_ranked: boolean | null;
+    player_ranking: string | null;
+    player_play_preference: "droite" | "gauche" | "aucune" | null;
     player_created_at: string;
   };
 
@@ -596,6 +599,9 @@ export const getRegistrationsByStatus = async (
       p.email as player_email,
       p.level as player_level,
       p.phone as player_phone,
+      p.is_ranked as player_is_ranked,
+      p.ranking as player_ranking,
+      p.play_preference as player_play_preference,
       p.created_at::text as player_created_at
     from registrations r
     join players p on p.id = r.player_id
@@ -612,6 +618,19 @@ export const getRegistrationsByStatus = async (
     order by r.registered_at desc
   `;
 
+  console.info("[admin-debug] registrationsByStatus", {
+    tournamentId,
+    status: status ?? "all",
+    total: rows.length,
+    sample: rows.slice(0, 5).map((row) => ({
+      player_id: row.player_id_join,
+      player_name: `${row.player_first_name} ${row.player_last_name}`,
+      is_ranked: row.player_is_ranked,
+      ranking: row.player_ranking,
+      play_preference: row.player_play_preference,
+    })),
+  });
+
   return rows.map((row) => ({
     id: row.id,
     tournament_id: row.tournament_id,
@@ -625,6 +644,9 @@ export const getRegistrationsByStatus = async (
       email: row.player_email,
       level: row.player_level,
       phone: row.player_phone,
+      is_ranked: row.player_is_ranked,
+      ranking: row.player_ranking,
+      play_preference: row.player_play_preference,
       created_at: row.player_created_at,
     },
   }));

@@ -37,8 +37,11 @@ export type Player = {
   id: string;
   first_name: string;
   last_name: string;
-  email: string;
+  email: string | null;
   level: string | null;
+  is_ranked?: boolean | null;
+  ranking?: string | null;
+  play_preference?: "droite" | "gauche" | "aucune" | null;
   phone: string | null;
   created_at: string;
 };

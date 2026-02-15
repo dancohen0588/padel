@@ -26,6 +26,16 @@ export function UsersApprovalTab({
   const totalApproved = statusCounts.approved ?? 0;
   const totalRejected = statusCounts.rejected ?? 0;
 
+  const LEVEL_LABELS: Record<string, string> = {
+    "1": "1 - Débutant",
+    "2": "2 - Débutant confirmé",
+    "3": "3 - Intermédiaire",
+    "4": "4 - Intermédiaire confirmé",
+    "5": "5 - Confirmé",
+    "6": "6 - Avancé",
+    "7": "7 - Expert",
+  };
+
   const pending = useMemo(
     () =>
       registrations.filter((registration) => {
@@ -33,9 +43,10 @@ export function UsersApprovalTab({
         if (!search) return true;
         const term = search.toLowerCase();
         const fullName = `${registration.player.first_name} ${registration.player.last_name}`.toLowerCase();
+        const email = registration.player.email?.toLowerCase() ?? "";
         return (
           fullName.includes(term) ||
-          registration.player.email.toLowerCase().includes(term)
+          email.includes(term)
         );
       }),
     [registrations, search]
@@ -81,6 +92,8 @@ export function UsersApprovalTab({
             const initials = `${registration.player.first_name?.[0] ?? ""}${
               registration.player.last_name?.[0] ?? ""
             }`.toUpperCase();
+            const rankingValue = registration.player.ranking?.toString().trim();
+            const playPreferenceValue = registration.player.play_preference?.toString().trim();
             return (
               <Card
                 key={registration.id}
@@ -96,18 +109,36 @@ export function UsersApprovalTab({
                         {registration.player.first_name} {registration.player.last_name}
                       </div>
                     </div>
-                    <div className="ml-14 space-y-1 text-sm text-white/50">
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs">✉️</span>
-                        <span>{registration.player.email}</span>
-                      </div>
-                      {registration.player.phone ? (
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs">📱</span>
-                          <span>{registration.player.phone}</span>
-                        </div>
-                      ) : null}
+                  <div className="ml-14 space-y-1 text-sm text-white/50">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs">✉️</span>
+                      <span>{registration.player.email ?? "N/A"}</span>
                     </div>
+                    {registration.player.phone ? (
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs">📱</span>
+                        <span>{registration.player.phone}</span>
+                      </div>
+                    ) : null}
+                    <div className="flex flex-wrap items-center gap-2 text-[11px] text-white/60">
+                      <span>
+                        Niveau :{" "}
+                        {registration.player.level
+                          ? LEVEL_LABELS[registration.player.level] ?? registration.player.level
+                          : "N/A"}
+                      </span>
+                      <span>•</span>
+                      <span>
+                        Classement :{" "}
+                        {rankingValue || "N/A"}
+                      </span>
+                      <span>•</span>
+                      <span>
+                        Côté préféré :{" "}
+                        {playPreferenceValue || "N/A"}
+                      </span>
+                    </div>
+                  </div>
                   </div>
                   <div className="flex flex-wrap items-center gap-3">
                     <StatusBadge status={registration.status} />
