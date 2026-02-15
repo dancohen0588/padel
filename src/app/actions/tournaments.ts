@@ -46,6 +46,8 @@ export async function upsertTournamentAction(
   const status = String(getValue(formData, "status") ?? "draft") as TournamentStatus;
   const maxPlayers = Number(getValue(formData, "maxPlayers") ?? 0);
   const imagePath = String(getValue(formData, "imagePath") ?? "").trim();
+  const price = getValue(formData, "price");
+  const priceValue = price !== null && price !== "" ? Number(price) : null;
   const pairingMode = String(
     getValue(formData, "pairingMode") ?? "balanced"
   ) as TournamentConfig["pairing_mode"];
@@ -103,6 +105,7 @@ export async function upsertTournamentAction(
         status = ${status},
         max_players = ${maxPlayers || null},
         image_path = ${imagePath || null},
+        price = ${priceValue},
         config = ${database.json(config)}
       where id = ${tournamentId}
     `;
@@ -112,7 +115,7 @@ export async function upsertTournamentAction(
     }
   } else {
     const created = await database<Array<{ id: string }>>`
-      insert into tournaments (slug, name, date, location, description, status, max_players, image_path, config)
+      insert into tournaments (slug, name, date, location, description, status, max_players, image_path, price, config)
       values (
         ${slug || null},
         ${name},
@@ -122,6 +125,7 @@ export async function upsertTournamentAction(
         ${status},
         ${maxPlayers || null},
         ${imagePath || null},
+        ${priceValue},
         ${database.json(config || DEFAULT_CONFIG)}
       )
       returning id

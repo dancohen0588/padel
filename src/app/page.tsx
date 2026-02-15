@@ -56,6 +56,7 @@ export default async function Home() {
         status: TournamentStatus;
         max_participants: number | null;
         current_participants: string;
+        price: number | null;
       }>
     >`
       select
@@ -66,11 +67,12 @@ export default async function Home() {
         t.location,
         t.status,
         t.max_players as max_participants,
+        t.price,
         count(r.id)::text as current_participants
       from tournaments t
       left join registrations r on r.tournament_id = t.id
       where t.status in ('upcoming', 'registration', 'ongoing')
-      group by t.id, t.slug, t.name, t.date, t.location, t.status, t.max_players
+      group by t.id, t.slug, t.name, t.date, t.location, t.status, t.max_players, t.price
       order by t.date asc
       limit 3
     `,
@@ -106,6 +108,7 @@ export default async function Home() {
     status: row.status,
     max_participants: row.max_participants,
     current_participants: Number.parseInt(row.current_participants, 10) || 0,
+    price: row.price,
   }));
 
   return (

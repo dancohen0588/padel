@@ -31,6 +31,7 @@ export type Tournament = {
   image_path: string | null;
   config: TournamentConfig;
   created_at: string;
+  price: number | null;
 };
 
 export type Player = {

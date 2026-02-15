@@ -36,6 +36,7 @@ export function TournamentsTab({ tournaments, adminToken }: TournamentsTabProps)
   const [poolsCount, setPoolsCount] = useState(0);
   const [teamsQualified, setTeamsQualified] = useState(0);
   const [slugValue, setSlugValue] = useState("");
+  const [priceValue, setPriceValue] = useState<string>("");
   const [imagePath, setImagePath] = useState<string | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -76,6 +77,9 @@ export function TournamentsTab({ tournaments, adminToken }: TournamentsTabProps)
     setSlugValue(selected?.slug ?? "");
     setImagePath(selected?.image_path ?? null);
     setImagePreview(selected?.image_path ?? null);
+    setPriceValue(
+      selected?.price !== null && selected?.price !== undefined ? String(selected.price) : ""
+    );
     setUploadError(null);
   }, [selected]);
 
@@ -387,16 +391,31 @@ export function TournamentsTab({ tournaments, adminToken }: TournamentsTabProps)
               defaultValue={selected?.location ?? ""}
             />
           </label>
-            <label className="flex flex-col gap-2 text-sm font-semibold text-brand-charcoal">
-              Nombre d&apos;équipes
-              <Input
-                name="maxPlayers"
-                type="number"
-                placeholder="Max joueurs"
-                defaultValue={selected?.max_players ?? ""}
-                onChange={(event) => setMaxPlayers(Number(event.target.value || 0))}
-              />
-            </label>
+          <label className="flex flex-col gap-2 text-sm font-semibold text-brand-charcoal">
+            Prix d&apos;inscription (€)
+            <Input
+              name="price"
+              type="number"
+              step="0.01"
+              min="0"
+              placeholder="Ex: 25.00"
+              value={priceValue}
+              onChange={(event) => setPriceValue(event.target.value)}
+            />
+            <span className="text-xs text-muted-foreground">
+              Laissez vide pour un tournoi gratuit ou sans prix défini
+            </span>
+          </label>
+          <label className="flex flex-col gap-2 text-sm font-semibold text-brand-charcoal">
+            Nombre d&apos;équipes
+            <Input
+              name="maxPlayers"
+              type="number"
+              placeholder="Max joueurs"
+              defaultValue={selected?.max_players ?? ""}
+              onChange={(event) => setMaxPlayers(Number(event.target.value || 0))}
+            />
+          </label>
           <div className="flex flex-col gap-2 text-sm font-semibold text-brand-charcoal">
             Photo du tournoi
             <input

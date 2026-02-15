@@ -12,6 +12,7 @@ type UpcomingTournament = {
   status: TournamentStatus;
   max_participants: number | null;
   current_participants: number;
+  price: number | null;
 };
 
 type UpcomingTournamentsProps = {
@@ -87,6 +88,25 @@ export function UpcomingTournaments({ tournaments }: UpcomingTournamentsProps) {
                       <span className="ml-2 font-semibold text-white">• Complet</span>
                     )}
                   </span>
+                </div>
+              )}
+              {tournament.price !== null && tournament.price > 0 && (
+                <div className="mt-1 flex items-center gap-2 text-xs text-white/80">
+                  <span>💰</span>
+                  <span className="font-semibold">
+                    {new Intl.NumberFormat("fr-FR", {
+                      style: "currency",
+                      currency: "EUR",
+                      minimumFractionDigits: 0,
+                      maximumFractionDigits: 2,
+                    }).format(tournament.price)}
+                  </span>
+                </div>
+              )}
+              {tournament.price === 0 && (
+                <div className="mt-1 flex items-center gap-2 text-xs text-white/80">
+                  <span>🎁</span>
+                  <span className="font-semibold">Gratuit</span>
                 </div>
               )}
               <div className="mt-3 flex gap-2">
