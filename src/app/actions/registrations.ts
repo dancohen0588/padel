@@ -6,6 +6,7 @@ import type { RegistrationStatus } from "@/lib/types";
 import type { Sql } from "postgres";
 import { revalidatePath } from "next/cache";
 import { updatePlayerPhoto } from "@/app/actions/photo-actions";
+import { normalizePhoneNumber } from "@/lib/phone-utils";
 
 type RegistrationResult =
   | { status: "ok"; message: string }
@@ -17,7 +18,7 @@ type TournamentIdentifier =
   | { id: string }
   | { slug: string };
 
-const normalizeEmail = (value: string) => value.trim().toLowerCase();
+const normalizePhone = (value: string): string | null => normalizePhoneNumber(value);
 
 const createPlayer = async (
   database: Sql,
@@ -27,17 +28,41 @@ const createPlayer = async (
     email,
     phone,
     level,
+    isRanked,
+    ranking,
+    playPreference,
   }: {
     firstName: string;
     lastName: string;
-    email: string;
+    email: string | null;
     phone: string;
     level: string;
+    isRanked: boolean;
+    ranking: string | null;
+    playPreference: string;
   }
 ): Promise<string> => {
   const createdPlayers = await database<Array<{ id: string }>>`
-    insert into players (email, first_name, last_name, phone, level)
-    values (${email}, ${firstName}, ${lastName}, ${phone || null}, ${level})
+    insert into players (
+      email,
+      first_name,
+      last_name,
+      phone,
+      level,
+      is_ranked,
+      ranking,
+      play_preference
+    )
+    values (
+      ${email || null},
+      ${firstName},
+      ${lastName},
+      ${phone},
+      ${level},
+      ${isRanked},
+      ${ranking || null},
+      ${playPreference}
+    )
     returning id
   `;
 
@@ -76,10 +101,11 @@ const registerForTournament = async (
   formData: FormData
 ): Promise<RegistrationResult> => {
   const mode = String(formData.get("mode") ?? "new") as RegistrationMode;
-  const email = normalizeEmail(String(formData.get("email") ?? ""));
+  const rawPhone = String(formData.get("phone") ?? "").trim();
+  const phone = normalizePhone(rawPhone);
 
-  if (!email) {
-    return { status: "error", message: "Veuillez entrer une adresse email valide" };
+  if (!phone) {
+    return { status: "error", message: "Veuillez entrer un numéro de téléphone valide" };
   }
 
   if (mode === "existing") {
@@ -89,14 +115,14 @@ const registerForTournament = async (
       return { status: "error", message: "Joueur non trouvé." };
     }
 
-    const [player] = await database<Array<{ id: string; email: string }>>`
-      select id, email
+    const [player] = await database<Array<{ id: string; phone: string }>>`
+      select id, phone
       from players
       where id = ${playerId}
       limit 1
     `;
 
-    if (!player || normalizeEmail(player.email) !== email) {
+    if (!player || normalizePhone(player.phone) !== phone) {
       return { status: "error", message: "Joueur non trouvé." };
     }
 
@@ -111,17 +137,24 @@ const registerForTournament = async (
 
   const firstName = String(formData.get("firstName") ?? "").trim();
   const lastName = String(formData.get("lastName") ?? "").trim();
-  const phone = String(formData.get("phone") ?? "").trim();
+  const email = String(formData.get("email") ?? "").trim() || null;
   const level = String(formData.get("level") ?? "").trim();
+  const isRankedValue = String(formData.get("isRanked") ?? "non");
+  const isRanked = isRankedValue === "oui";
+  const ranking = isRanked ? String(formData.get("ranking") ?? "").trim() : null;
+  const playPreference = String(formData.get("playPreference") ?? "aucune").trim();
 
-  if (!firstName || !lastName || !email || !level) {
+  if (!firstName || !lastName || !phone || !level) {
     return { status: "error", message: "Champs requis manquants." };
   }
 
   const existingPlayers = await database<Array<{ id: string }>>`
     select id
     from players
-    where lower(email) = ${email}
+    where CASE
+      WHEN phone ~ '^\\+33' THEN '0' || regexp_replace(substring(phone from 4), '[^0-9]', '', 'g')
+      ELSE regexp_replace(phone, '[^0-9]', '', 'g')
+    END = ${phone.replace(/^\+33/, "0").replace(/\D/g, "")}
     limit 1
   `;
 
@@ -129,7 +162,7 @@ const registerForTournament = async (
     return {
       status: "error",
       message:
-        "Cet email est déjà utilisé. Veuillez utiliser le mode 'Participant existant' pour vous rattacher à votre compte.",
+        "Ce numéro de téléphone est déjà utilisé. Veuillez utiliser le mode 'Participant existant' pour vous rattacher à votre compte.",
     };
   }
 
@@ -139,6 +172,9 @@ const registerForTournament = async (
     email,
     phone,
     level,
+    isRanked,
+    ranking,
+    playPreference,
   });
 
   const playerPhoto = formData.get("player_photo") as File | null;
