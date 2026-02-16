@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { GradientButton } from "@/components/ui/gradient-button";
 import { Badge } from "@/components/ui/badge";
 import { upsertTournamentAction, deleteTournamentAction } from "@/app/actions/tournaments";
+import { useNavigationOverlay } from "@/components/ui/navigation-overlay";
 
 type TournamentsTabProps = {
   tournaments: Tournament[];
@@ -51,6 +52,7 @@ export function TournamentsTab({
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const tempPreviewRef = useRef<string | null>(null);
   const router = useRouter();
+  const { startNavigation } = useNavigationOverlay();
   const adminQuery = `?token=${adminToken}`;
 
   const selected = useMemo(
@@ -323,9 +325,10 @@ export function TournamentsTab({
                         type="button"
                         variant="outline"
                         className="bg-brand-violet text-white hover:bg-brand-violet/90 hover:text-white"
-                        onClick={() =>
-                          router.push(`/tournaments/${tournament.slug}/admin${adminQuery}`)
-                        }
+                        onClick={() => {
+                          startNavigation();
+                          router.push(`/tournaments/${tournament.slug}/admin${adminQuery}`);
+                        }}
                       >
                         Configurer
                       </Button>
