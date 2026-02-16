@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Joueurs avec Paiement</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background: #1E1E2E;
+            min-height: 100vh;
+        }
+        .whatsapp-pulse {
+            animation: subtlePulse 2s ease-in-out infinite;
+        }
+        @keyframes subtlePulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+    </style>
+</head>
+<body class="font-sans antialiased">
+    <!-- Header simulé -->
+    <div class="border-b border-white/10 bg-white/5 backdrop-blur">
+        <div class="container mx-auto max-w-6xl px-6 py-4">
+            <div class="flex items-center gap-3">
+                <div class="text-2xl">🎾</div>
+                <div class="text-lg font-semibold text-white">Padel Club</div>
+            </div>
+        </div>
+    </div>
+
+    <main class="container mx-auto max-w-6xl space-y-10 px-6 py-12">
+        <!-- Tournament Header -->
+        <div class="rounded-3xl border border-orange-400/30 bg-gradient-to-br from-orange-500/10 via-orange-500/5 to-transparent p-6 shadow-lg">
+            <div class="flex flex-wrap items-center gap-4">
+                <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-orange-400 to-orange-500 text-xl shadow-md">
+                    🏆
+                </div>
+                <div class="min-w-0 flex-1">
+                    <h1 class="bg-gradient-to-br from-orange-400 to-amber-200 bg-clip-text text-2xl font-semibold text-transparent">
+                        Configurer le tournoi
+                    </h1>
+                    <div class="mt-1 flex flex-wrap items-center gap-2 text-sm text-white/60">
+                        <span class="font-semibold text-white/80">Superligue - 15 Mars</span>
+                        <span class="text-white/30">•</span>
+                        <span>📅 15 mars 2024, 14h00</span>
+                        <span class="text-white/30">•</span>
+                        <span>📍 Padel Club Paris</span>
+                    </div>
+                </div>
+                <div class="inline-flex items-center gap-2 rounded-full border border-emerald-400/30 bg-emerald-500/15 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-emerald-300">
+                    <span class="h-2 w-2 rounded-full bg-emerald-300 animate-pulse" />
+                    Upcoming
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabs simulés -->
+        <div class="flex h-auto w-full flex-wrap gap-3 rounded-2xl border border-white/10 bg-white/5 p-3 shadow-lg">
+            <button class="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-xs font-semibold text-white/70 transition">
+                <span>📋</span>
+                <span>À valider</span>
+                <span class="rounded-full bg-white/20 px-2 py-0.5 text-[10px] font-semibold text-white/90">8</span>
+            </button>
+            <button class="inline-flex items-center gap-2 rounded-xl border-transparent bg-gradient-to-br from-orange-400 to-orange-500 px-4 py-2 text-xs font-semibold text-white shadow-md">
+                <span>✓</span>
+                <span>Joueurs</span>
+                <span class="rounded-full bg-white/30 px-2 py-0.5 text-[10px] font-semibold text-white/90">24</span>
+            </button>
+            <button class="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-xs font-semibold text-white/70 transition">
+                <span>👥</span>
+                <span>Équipes</span>
+                <span class="rounded-full bg-white/20 px-2 py-0.5 text-[10px] font-semibold text-white/90">12</span>
+            </button>
+        </div>
+
+        <!-- Content -->
+        <div class="space-y-6">
+            <!-- Header -->
+            <div class="space-y-2">
+                <p class="text-2xl font-semibold text-white">Joueurs validés</p>
+                <p class="text-sm text-white/60">24 joueurs confirmés pour le tournoi</p>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="rounded-2xl border border-white/10 bg-white/5 p-6 text-white shadow-lg">
+                <div class="grid gap-4 md:grid-cols-5">
+                    <div class="space-y-1 rounded-2xl border border-white/10 bg-white/5 p-4">
+                        <p class="text-2xl font-semibold">24</p>
+                        <p class="text-xs uppercase tracking-wide text-white/60">Joueurs validés</p>
+                    </div>
+                    <div class="space-y-1 rounded-2xl border border-white/10 bg-white/5 p-4">
+                        <p class="text-2xl font-semibold">12</p>
+                        <p class="text-xs uppercase tracking-wide text-white/60">Équipes formées</p>
+                    </div>
+                    <div class="space-y-1 rounded-2xl border border-white/10 bg-white/5 p-4">
+                        <p class="text-2xl font-semibold">80%</p>
+                        <p class="text-xs uppercase tracking-wide text-white/60">Taux de validation</p>
+                    </div>
+                    <div class="space-y-1 rounded-2xl border border-green-500/20 bg-gradient-to-br from-green-500/10 to-transparent p-4">
+                        <div class="flex items-center gap-2">
+                            <p class="text-2xl font-semibold">16</p>
+                            <svg class="h-5 w-5 text-green-400 whatsapp-pulse" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+                            </svg>
+                        </div>
+                        <p class="text-xs uppercase tracking-wide text-green-300/80">Sur WhatsApp</p>
+                    </div>
+                    <!-- NOUVELLE STAT - Paiements -->
+                    <div class="space-y-1 rounded-2xl border border-emerald-500/20 bg-gradient-to-br from-emerald-500/10 to-transparent p-4">
+                        <div class="flex items-center gap-2">
+                            <p class="text-2xl font-semibold">18</p>
+                            <svg class="h-5 w-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
+                            </svg>
+                        </div>
+                        <p class="text-xs uppercase tracking-wide text-emerald-300/80">Ont payé</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Search Bar -->
+            <div class="rounded-2xl border border-white/10 bg-white/5 p-6 text-white shadow-lg">
+                <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                    <div>
+                        <p class="text-lg font-semibold">Liste des participants</p>
+                        <p class="text-sm text-white/60">24 joueurs validés pour le tournoi</p>
+                    </div>
+                    <input
+                        type="text"
+                        placeholder="🔍 Rechercher un joueur..."
+                        class="rounded-xl border border-white/20 bg-white/10 px-4 py-2 text-sm text-white placeholder:text-white/40 focus:border-orange-400/50 focus:outline-none focus:ring-2 focus:ring-orange-400/20 md:max-w-sm"
+                    />
+                </div>
+            </div>
+
+            <!-- Players Grid -->
+            <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                <!-- Player 1 - Payé avec Lydia -->
+                <div class="rounded-2xl border border-white/10 bg-white/5 p-5 text-white shadow-lg">
+                    <div class="flex items-start gap-4">
+                        <div class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-white/10 text-sm font-semibold text-white">
+                            MD
+                        </div>
+                        <div class="flex-1 space-y-3">
+                            <div class="space-y-1">
+                                <p class="text-base font-semibold">Marc Dupont</p>
+                                <div class="flex items-center gap-2 text-[11px] uppercase tracking-wide text-emerald-200">
+                                    <span class="h-2 w-2 rounded-full bg-emerald-400"></span>
+                                    <span>Validé</span>
+                                </div>
+                            </div>
+                            <div class="space-y-2 text-sm text-white/70">
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <div class="flex items-center gap-2">
+                                        <span>✉️</span>
+                                        <span>marc.dupont@email.com</span>
+                                    </div>
+                                    <span class="inline-flex items-center gap-1 rounded-full border border-green-400/30 bg-green-500/15 px-2.5 py-1 text-[11px] font-semibold text-green-300 cursor-pointer whatsapp-pulse">
+                                        <svg class="h-3 w-3" fill="currentColor" viewBox="0 0 24 24">
+                                            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+                                        </svg>
+                                        <span>WhatsApp</span>
+                                    </span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span>📱</span>
+                                    <span>06 12 34 56 78</span>
+                                </div>
+                                <div class="flex flex-wrap items-center gap-2 text-[11px] text-white/60">
+                                    <span>Niveau : 6 - Avancé</span>
+                                    <span>•</span>
+                                    <span>Classement : P1000</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SECTION PAIEMENT - NOUVEAU -->
+                    <div class="mt-4 space-y-3">
+                        <div class="flex items-center justify-between gap-3">
+                            <!-- Badge Payé -->
+                            <span class="inline-flex items-center gap-1 rounded-full border border-emerald-400/30 bg-emerald-500/15 px-2.5 py-1 text-[11px] font-semibold text-emerald-300">
+                                <svg class="h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                </svg>
+                                <span>Payé</span>
+                            </span>
+
+                            <!-- Dropdown moyen de paiement -->
+                            <select class="rounded-lg border border-white/20 bg-white/10 px-3 py-1.5 text-xs text-white focus:border-orange-400/50 focus:outline-none focus:ring-2 focus:ring-orange-400/20">
+                                <option value="" class="bg-[#1E1E2E] text-white/50">Moyen de paiement</option>
+                                <option value="lydia" selected class="bg-[#1E1E2E] text-white">💜 Lydia</option>
+                                <option value="virement" class="bg-[#1E1E2E] text-white">🏦 Virement bancaire</option>
+                                <option value="revolut" class="bg-[#1E1E2E] text-white">💳 Revolut</option>
+                                <option value="paypal" class="bg-[#1E1E2E] text-white">💰 PayPal</option>
+                                <option value="especes" class="bg-[#1E1E2E] text-white">💵 Espèces</option>
+                            </select>
+                        </div>
+
+                        <button class="w-full rounded-xl border border-transparent bg-white/10 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/15">
+                            ↶ Repasser en attente
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Player 2 - Non payé -->
+                <div class="rounded-2xl border border-white/10 bg-white/5 p-5 text-white shadow-lg">
+                    <div class="flex items-start gap-4">
+                        <div class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-white/10 text-sm font-semibold text-white">
+                            SM
+                        </div>
+                        <div class="flex-1 space-y-3">
+                            <div class="space-y-1">
+                                <p class="text-base font-semibold">Sophie Martin</p>
+                                <div class="flex items-center gap-2 text-[11px] uppercase tracking-wide text-emerald-200">
+                                    <span class="h-2 w-2 rounded-full bg-emerald-400"></span>
+                                    <span>Validé</span>
+                                </div>
+                            </div>
+                            <div class="space-y-2 text-sm text-white/70">
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <div class="flex items-center gap-2">
+                                        <span>✉️</span>
+                                        <span>sophie.m@email.com</span>
+                                    </div>
+                                    <span class="inline-flex items-center gap-1 rounded-full border border-white/20 bg-white/10 px-2.5 py-1 text-[11px] font-semibold text-white/50">
+                                        <svg class="h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                                        </svg>
+                                        <span>Pas sur WhatsApp</span>
+                                    </span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span>📱</span>
+                                    <span>06 23 45 67 89</span>
+                                </div>
+                                <div class="flex flex-wrap items-center gap-2 text-[11px] text-white/60">
+                                    <span>Niveau : 5 - Confirmé</span>
+                                    <span>•</span>
+                                    <span>Classement : P500</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SECTION PAIEMENT - Non payé -->
+                    <div class="mt-4 space-y-3">
+                        <div class="flex items-center justify-between gap-3">
+                            <!-- Badge Non payé -->
+                            <span class="inline-flex items-center gap-1 rounded-full border border-rose-400/30 bg-rose-500/15 px-2.5 py-1 text-[11px] font-semibold text-rose-300">
+                                <svg class="h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                                </svg>
+                                <span>Non payé</span>
+                            </span>
+
+                            <!-- Dropdown moyen de paiement (disabled si non payé) -->
+                            <select class="rounded-lg border border-white/20 bg-white/5 px-3 py-1.5 text-xs text-white/40 cursor-not-allowed" disabled>
+                                <option value="" class="bg-[#1E1E2E]">Moyen de paiement</option>
+                            </select>
+                        </div>
+
+                        <button class="w-full rounded-xl border border-transparent bg-white/10 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/15">
+                            ↶ Repasser en attente
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Player 3 - Payé avec Virement -->
+                <div class="rounded-2xl border border-white/10 bg-white/5 p-5 text-white shadow-lg">
+                    <div class="flex items-start gap-4">
+                        <div class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-white/10 text-sm font-semibold text-white">
+                            PL
+                        </div>
+                        <div class="flex-1 space-y-3">
+                            <div class="space-y-1">
+                                <p class="text-base font-semibold">Pierre Leroy</p>
+                                <div class="flex items-center gap-2 text-[11px] uppercase tracking-wide text-emerald-200">
+                                    <span class="h-2 w-2 rounded-full bg-emerald-400"></span>
+                                    <span>Validé</span>
+                                </div>
+                            </div>
+                            <div class="space-y-2 text-sm text-white/70">
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <div class="flex items-center gap-2">
+                                        <span>✉️</span>
+                                        <span>p.leroy@email.com</span>
+                                    </div>
+                                    <span class="inline-flex items-center gap-1 rounded-full border border-green-400/30 bg-green-500/15 px-2.5 py-1 text-[11px] font-semibold text-green-300 cursor-pointer whatsapp-pulse">
+                                        <svg class="h-3 w-3" fill="currentColor" viewBox="0 0 24 24">
+                                            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+                                        </svg>
+                                        <span>WhatsApp</span>
+                                    </span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span>📱</span>
+                                    <span>06 34 56 78 90</span>
+                                </div>
+                                <div class="flex flex-wrap items-center gap-2 text-[11px] text-white/60">
+                                    <span>Niveau : 4 - Intermédiaire confirmé</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SECTION PAIEMENT - Payé -->
+                    <div class="mt-4 space-y-3">
+                        <div class="flex items-center justify-between gap-3">
+                            <!-- Badge Payé -->
+                            <span class="inline-flex items-center gap-1 rounded-full border border-emerald-400/30 bg-emerald-500/15 px-2.5 py-1 text-[11px] font-semibold text-emerald-300">
+                                <svg class="h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                </svg>
+                                <span>Payé</span>
+                            </span>
+
+                            <!-- Dropdown moyen de paiement -->
+                            <select class="rounded-lg border border-white/20 bg-white/10 px-3 py-1.5 text-xs text-white focus:border-orange-400/50 focus:outline-none focus:ring-2 focus:ring-orange-400/20">
+                                <option value="" class="bg-[#1E1E2E] text-white/50">Moyen de paiement</option>
+                                <option value="lydia" class="bg-[#1E1E2E] text-white">💜 Lydia</option>
+                                <option value="virement" selected class="bg-[#1E1E2E] text-white">🏦 Virement bancaire</option>
+                                <option value="revolut" class="bg-[#1E1E2E] text-white">💳 Revolut</option>
+                                <option value="paypal" class="bg-[#1E1E2E] text-white">💰 PayPal</option>
+                                <option value="especes" class="bg-[#1E1E2E] text-white">💵 Espèces</option>
+                            </select>
+                        </div>
+
+                        <button class="w-full rounded-xl border border-transparent bg-white/10 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/15">
+                            ↶ Repasser en attente
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- LISTE D'ATTENTE SECTION -->
+            <div class="space-y-4 mt-12">
+                <!-- Separator with title -->
+                <div class="flex items-center gap-4">
+                    <div class="h-px flex-1 bg-gradient-to-r from-transparent via-amber-500/30 to-transparent"></div>
+                    <div class="flex items-center gap-2 text-amber-300">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <span class="text-lg font-semibold">Liste d'attente</span>
+                    </div>
+                    <div class="h-px flex-1 bg-gradient-to-r from-transparent via-amber-500/30 to-transparent"></div>
+                </div>
+
+                <!-- Waitlist info -->
+                <div class="rounded-2xl border border-amber-400/20 bg-gradient-to-br from-amber-500/10 to-transparent p-4">
+                    <div class="flex items-start gap-3">
+                        <svg class="mt-0.5 h-5 w-5 flex-shrink-0 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                        </svg>
+                        <div class="flex-1">
+                            <p class="text-sm font-semibold text-amber-300">2 joueurs en liste d'attente</p>
+                            <p class="mt-1 text-xs text-white/70">
+                                Ces joueurs pourront être validés manuellement dès qu'une place se libère.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Waitlist Players Grid -->
+                <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                    <!-- Waitlist Player 1 -->
+                    <div class="rounded-2xl border border-amber-400/30 bg-amber-500/5 p-5 text-white shadow-lg">
+                        <div class="flex items-start gap-4">
+                            <div class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-amber-500/20 text-sm font-semibold text-amber-300">
+                                LB
+                            </div>
+                            <div class="flex-1 space-y-3">
+                                <div class="space-y-1">
+                                    <p class="text-base font-semibold">Laura Bernard</p>
+                                    <div class="flex items-center gap-2 text-[11px] uppercase tracking-wide text-amber-200">
+                                        <span class="h-2 w-2 rounded-full bg-amber-400 animate-pulse"></span>
+                                        <span>Liste d'attente</span>
+                                    </div>
+                                </div>
+                                <div class="space-y-2 text-sm text-white/70">
+                                    <div class="flex items-center gap-2">
+                                        <span>📱</span>
+                                        <span>06 45 67 89 01</span>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <span>✉️</span>
+                                        <span>laura.b@email.com</span>
+                                    </div>
+                                    <div class="flex flex-wrap items-center gap-2 text-[11px] text-white/60">
+                                        <span>Niveau : 3 - Intermédiaire</span>
+                                        <span>•</span>
+                                        <span>Position : #1</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-4 flex items-center gap-2">
+                            <button class="flex-1 rounded-xl border border-transparent bg-gradient-to-br from-emerald-400 to-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-md transition hover:from-emerald-500 hover:to-emerald-700">
+                                ✓ Valider maintenant
+                            </button>
+                            <button class="rounded-xl border border-white/20 bg-white/10 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/15">
+                                ↶ Attente
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Waitlist Player 2 -->
+                    <div class="rounded-2xl border border-amber-400/30 bg-amber-500/5 p-5 text-white shadow-lg">
+                        <div class="flex items-start gap-4">
+                            <div class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-amber-500/20 text-sm font-semibold text-amber-300">
+                                TD
+                            </div>
+                            <div class="flex-1 space-y-3">
+                                <div class="space-y-1">
+                                    <p class="text-base font-semibold">Thomas Dubois</p>
+                                    <div class="flex items-center gap-2 text-[11px] uppercase tracking-wide text-amber-200">
+                                        <span class="h-2 w-2 rounded-full bg-amber-400 animate-pulse"></span>
+                                        <span>Liste d'attente</span>
+                                    </div>
+                                </div>
+                                <div class="space-y-2 text-sm text-white/70">
+                                    <div class="flex items-center gap-2">
+                                        <span>📱</span>
+                                        <span>06 56 78 90 12</span>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <span>✉️</span>
+                                        <span>t.dubois@email.com</span>
+                                    </div>
+                                    <div class="flex flex-wrap items-center gap-2 text-[11px] text-white/60">
+                                        <span>Niveau : 7 - Expert</span>
+                                        <span>•</span>
+                                        <span>Position : #2</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-4 flex items-center gap-2">
+                            <button class="flex-1 rounded-xl border border-transparent bg-gradient-to-br from-emerald-400 to-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-md transition hover:from-emerald-500 hover:to-emerald-700">
+                                ✓ Valider maintenant
+                            </button>
+                            <button class="rounded-xl border border-white/20 bg-white/10 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/15">
+                                ↶ Attente
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Info Notice Paiement -->
+            <div class="rounded-2xl border border-blue-400/20 bg-gradient-to-br from-blue-500/10 to-transparent p-4">
+                <div class="flex items-start gap-3">
+                    <svg class="mt-0.5 h-5 w-5 flex-shrink-0 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                    </svg>
+                    <div class="flex-1">
+                        <p class="text-sm font-semibold text-blue-300">Suivi des paiements</p>
+                        <p class="mt-1 text-xs text-white/70">
+                            Le badge
+                            <span class="mx-1 inline-flex items-center gap-1 rounded-full border border-emerald-400/30 bg-emerald-500/15 px-2 py-0.5 text-[11px] font-semibold text-emerald-300">
+                                <svg class="h-2.5 w-2.5" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                </svg>
+                                Payé
+                            </span>
+                            indique que le joueur a réglé son inscription. Sélectionnez le moyen de paiement utilisé dans la liste déroulante. Les moyens de paiement sont configurables dans l'onglet "Paiements" de l'admin.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

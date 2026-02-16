@@ -4,6 +4,7 @@ import type {
   MatchSet,
   MatchStatus,
   MatchWithTeams,
+  PaymentMethodKey,
   PaymentConfig,
   Pool,
   PoolStanding,
@@ -668,6 +669,9 @@ export const getRegistrationsByStatus = async (
     status: RegistrationStatus;
     registered_at: string;
     waitlist_added_at: string | null;
+    payment_status: boolean | null;
+    payment_method: string | null;
+    payment_date: string | null;
     player_id_join: string;
     player_first_name: string;
     player_last_name: string;
@@ -689,6 +693,9 @@ export const getRegistrationsByStatus = async (
       r.status,
       r.registered_at::text as registered_at,
       r.waitlist_added_at::text as waitlist_added_at,
+      r.payment_status,
+      r.payment_method,
+      r.payment_date::text as payment_date,
       p.id as player_id_join,
       p.first_name as player_first_name,
       p.last_name as player_last_name,
@@ -744,6 +751,9 @@ export const getRegistrationsByStatus = async (
       status: row.status,
       registered_at: row.registered_at,
       waitlist_added_at: row.waitlist_added_at,
+      payment_status: row.payment_status ?? false,
+      payment_method: (row.payment_method as PaymentMethodKey) ?? null,
+      payment_date: row.payment_date,
       hasJoinedWhatsApp: Boolean(whatsappJoin),
       whatsappJoinDate: whatsappJoin?.joinedAt ?? null,
       player: {

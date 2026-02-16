@@ -10,6 +10,7 @@ import {
   getPlayoffBracketData,
   getPoolStandings,
   getRegistrationsByStatus,
+  getGlobalPaymentConfig,
   getTournaments,
   getTeamsByTournament,
   getTeamPlayersByTournament,
@@ -47,7 +48,7 @@ export default async function TournamentAdminPage({
     redirect("/");
   }
 
-  const [registrations, counts, teams, teamPlayers, pools, poolTeams] =
+  const [registrations, counts, teams, teamPlayers, pools, poolTeams, paymentConfig] =
     await Promise.all([
       getRegistrationsByStatus(tournament.id),
       countRegistrations(tournament.id),
@@ -55,6 +56,7 @@ export default async function TournamentAdminPage({
       getTeamPlayersByTournament(tournament.id),
       getPoolsByTournament(tournament.id),
       getPoolTeamsByTournament(tournament.id),
+      getGlobalPaymentConfig(),
     ]);
 
   const poolData = await Promise.all(
@@ -180,6 +182,7 @@ export default async function TournamentAdminPage({
               registrations={registrations}
               statusCounts={counts}
               adminToken={adminToken}
+              paymentConfig={paymentConfig}
             />
           </TabsContent>
           <TabsContent value="teams" className="mt-6">

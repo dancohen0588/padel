@@ -45,6 +45,8 @@ export type PaymentMethodCash = {
   enabled: boolean;
 };
 
+export type PaymentMethodKey = "bank" | "lydia" | "revolut" | "wero" | "cash";
+
 export type PaymentConfig = {
   enabled: boolean;
   methods: {
@@ -56,6 +58,20 @@ export type PaymentConfig = {
   };
   confirmationEmail: string | null;
   paymentDeadlineHours: number;
+};
+
+export const getEnabledPaymentMethods = (
+  config: PaymentConfig
+): Array<{ key: PaymentMethodKey; label: string; icon: string }> => {
+  const allMethods = [
+    { key: "bank" as const, label: "Virement bancaire", icon: "🏦" },
+    { key: "lydia" as const, label: "Lydia", icon: "💜" },
+    { key: "revolut" as const, label: "Revolut", icon: "💳" },
+    { key: "wero" as const, label: "Wero", icon: "💰" },
+    { key: "cash" as const, label: "Paiement sur place", icon: "💵" },
+  ];
+
+  return allMethods.filter((method) => config.methods[method.key]?.enabled);
 };
 
 export type WhatsAppJoin = {
@@ -101,6 +117,9 @@ export type Registration = {
   status: RegistrationStatus;
   registered_at: string;
   waitlist_added_at?: string | null;
+  payment_status?: boolean;
+  payment_method?: PaymentMethodKey | null;
+  payment_date?: string | null;
 };
 
 export type RegistrationWithPlayer = Registration & {

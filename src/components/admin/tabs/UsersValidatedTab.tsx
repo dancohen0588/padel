@@ -2,28 +2,39 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import type { RegistrationStatus, RegistrationWithPlayer } from "@/lib/types";
+import type {
+  PaymentConfig,
+  RegistrationStatus,
+  RegistrationWithPlayer,
+} from "@/lib/types";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { GradientButton } from "@/components/ui/gradient-button";
 import { WhatsAppBadge } from "@/components/admin/WhatsAppBadge";
+import { PaymentBadge } from "@/components/admin/PaymentBadge";
+import { PaymentMethodSelect } from "@/components/admin/PaymentMethodSelect";
 import { updateRegistrationStatusAction } from "@/app/actions/registrations";
 
 type UsersValidatedTabProps = {
   registrations: RegistrationWithPlayer[];
   statusCounts: Record<RegistrationStatus, number>;
   adminToken: string;
+  paymentConfig: PaymentConfig;
 };
 
 export function UsersValidatedTab({
   registrations,
   statusCounts,
   adminToken,
+  paymentConfig,
 }: UsersValidatedTabProps) {
   const [search, setSearch] = useState("");
   const [whatsAppFilter, setWhatsAppFilter] = useState<
     "all" | "joined" | "not_joined"
+  >("all");
+  const [paymentFilter, setPaymentFilter] = useState<
+    "all" | "paid" | "unpaid"
   >("all");
   const router = useRouter();
 
@@ -48,6 +59,13 @@ export function UsersValidatedTab({
         if (whatsAppFilter === "not_joined" && registration.hasJoinedWhatsApp) {
           return false;
         }
+        const hasPaid = Boolean(registration.payment_method);
+        if (paymentFilter === "paid" && !hasPaid) {
+          return false;
+        }
+        if (paymentFilter === "unpaid" && hasPaid) {
+          return false;
+        }
         if (!search) return true;
         const term = search.toLowerCase();
         const fullName = `${registration.player.first_name} ${registration.player.last_name}`.toLowerCase();
@@ -57,7 +75,7 @@ export function UsersValidatedTab({
           email.includes(term)
         );
       }),
-    [registrations, search, whatsAppFilter]
+    [registrations, search, whatsAppFilter, paymentFilter]
   );
 
   const waitlist = useMemo(
@@ -82,6 +100,7 @@ export function UsersValidatedTab({
   const teamsFormed = Math.floor(approvedCount / 2);
   const approvalRate = totalCount > 0 ? Math.round((approvedCount / totalCount) * 100) : 0;
   const onWhatsAppCount = registrations.filter((reg) => reg.hasJoinedWhatsApp).length;
+  const paidCount = registrations.filter((reg) => reg.payment_method).length;
 
   const buildInitials = (firstName: string, lastName: string) =>
     `${firstName?.[0] ?? ""}${lastName?.[0] ?? ""}`.toUpperCase();
@@ -96,7 +115,7 @@ export function UsersValidatedTab({
       </div>
 
       <Card className="rounded-2xl border border-white/10 bg-white/5 p-6 text-white shadow-card">
-        <div className="grid gap-4 md:grid-cols-4">
+        <div className="grid gap-4 md:grid-cols-5">
           <div className="space-y-1 rounded-2xl border border-white/10 bg-white/5 p-4">
             <p className="text-2xl font-semibold">{approvedCount}</p>
             <p className="text-xs uppercase tracking-wide text-white/60">
@@ -131,6 +150,27 @@ export function UsersValidatedTab({
               Sur WhatsApp
             </p>
           </div>
+          <div className="space-y-1 rounded-2xl border border-emerald-500/20 bg-gradient-to-br from-emerald-500/10 to-transparent p-4">
+            <div className="flex items-center gap-2">
+              <p className="text-2xl font-semibold">{paidCount}</p>
+              <svg
+                className="h-5 w-5 text-emerald-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"
+                />
+              </svg>
+            </div>
+            <p className="text-xs uppercase tracking-wide text-emerald-300/80">
+              Ont payé
+            </p>
+          </div>
         </div>
       </Card>
 
@@ -152,7 +192,10 @@ export function UsersValidatedTab({
         <div className="mt-4 flex flex-wrap gap-2">
           <button
             type="button"
-            onClick={() => setWhatsAppFilter("all")}
+            onClick={() => {
+              setWhatsAppFilter("all");
+              setPaymentFilter("all");
+            }}
             className={`rounded-full px-3 py-1 text-xs font-semibold transition ${
               whatsAppFilter === "all"
                 ? "bg-white/15 text-white"
@@ -182,6 +225,28 @@ export function UsersValidatedTab({
             }`}
           >
             Pas sur WhatsApp
+          </button>
+          <button
+            type="button"
+            onClick={() => setPaymentFilter("paid")}
+            className={`rounded-full px-3 py-1 text-xs font-semibold transition ${
+              paymentFilter === "paid"
+                ? "bg-emerald-500/20 text-emerald-200"
+                : "bg-white/5 text-white/60 hover:bg-white/10"
+            }`}
+          >
+            Payé
+          </button>
+          <button
+            type="button"
+            onClick={() => setPaymentFilter("unpaid")}
+            className={`rounded-full px-3 py-1 text-xs font-semibold transition ${
+              paymentFilter === "unpaid"
+                ? "bg-rose-500/20 text-rose-200"
+                : "bg-white/5 text-white/60 hover:bg-white/10"
+            }`}
+          >
+            Non payé
           </button>
         </div>
       </Card>
@@ -252,8 +317,18 @@ export function UsersValidatedTab({
                   </div>
                 </div>
               </div>
-              <div className="mt-4 flex items-center justify-between gap-3">
-                <StatusBadge status={registration.status} />
+              <div className="mt-4 space-y-3">
+                <div className="flex items-center justify-between gap-3">
+                  <StatusBadge status={registration.status} />
+                  <PaymentBadge isPaid={Boolean(registration.payment_method)} />
+                </div>
+                <PaymentMethodSelect
+                  registrationId={registration.id}
+                  currentMethod={registration.payment_method}
+                  isPaid={Boolean(registration.payment_method)}
+                  paymentConfig={paymentConfig}
+                  adminToken={adminToken}
+                />
                 <form
                   action={async (formData) => {
                     await updateRegistrationStatusAction(formData);
@@ -269,7 +344,7 @@ export function UsersValidatedTab({
                   <input type="hidden" name="adminToken" value={adminToken} />
                   <GradientButton
                     type="submit"
-                    className="bg-white/10 text-white"
+                    className="w-full bg-white/10 text-white"
                   >
                     ↶ Repasser en attente
                   </GradientButton>
@@ -445,6 +520,31 @@ export function UsersValidatedTab({
           </div>
         </div>
       ) : null}
+      <Card className="rounded-2xl border border-blue-400/20 bg-gradient-to-br from-blue-500/10 to-transparent p-4">
+        <div className="flex items-start gap-3">
+          <svg
+            className="mt-0.5 h-5 w-5 flex-shrink-0 text-blue-400"
+            fill="currentColor"
+            viewBox="0 0 20 20"
+          >
+            <path
+              fillRule="evenodd"
+              d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+              clipRule="evenodd"
+            />
+          </svg>
+          <div className="flex-1">
+            <p className="text-sm font-semibold text-blue-300">
+              Suivi des paiements
+            </p>
+            <p className="mt-1 text-xs text-white/70">
+              Le badge indique si le joueur a réglé son inscription. Sélectionnez le
+              moyen de paiement utilisé dans la liste déroulante. Les moyens disponibles
+              sont configurés dans l'onglet "Paiements" de l'admin (/admin/inscriptions).
+            </p>
+          </div>
+        </div>
+      </Card>
       <div className="rounded-2xl border border-blue-400/20 bg-gradient-to-br from-blue-500/10 to-transparent p-4">
         <div className="flex items-start gap-3">
           <svg
