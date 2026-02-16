@@ -661,12 +661,13 @@ export const getRegistrationsByStatus = async (
   status?: RegistrationStatus
 ): Promise<RegistrationWithPlayer[]> => {
   const database = getDatabaseClient();
-type RegistrationRow = {
+  type RegistrationRow = {
     id: string;
     tournament_id: string;
     player_id: string;
     status: RegistrationStatus;
     registered_at: string;
+    waitlist_added_at: string | null;
     player_id_join: string;
     player_first_name: string;
     player_last_name: string;
@@ -687,6 +688,7 @@ type RegistrationRow = {
       r.player_id,
       r.status,
       r.registered_at::text as registered_at,
+      r.waitlist_added_at::text as waitlist_added_at,
       p.id as player_id_join,
       p.first_name as player_first_name,
       p.last_name as player_last_name,
@@ -710,7 +712,12 @@ type RegistrationRow = {
   const rows = await database<RegistrationRow[]>`
     ${baseSql}
     ${statusClause}
-    order by r.registered_at desc
+    order by
+      case
+        when r.status = 'waitlist' then r.waitlist_added_at
+        else r.registered_at
+      end asc,
+      r.registered_at asc
   `;
 
   console.info("[admin-debug] registrationsByStatus", {
@@ -736,6 +743,7 @@ type RegistrationRow = {
       player_id: row.player_id,
       status: row.status,
       registered_at: row.registered_at,
+      waitlist_added_at: row.waitlist_added_at,
       hasJoinedWhatsApp: Boolean(whatsappJoin),
       whatsappJoinDate: whatsappJoin?.joinedAt ?? null,
       player: {
@@ -768,6 +776,7 @@ export const countRegistrations = async (tournamentId: string) => {
     approved: 0,
     pending: 0,
     rejected: 0,
+    waitlist: 0,
   };
 
   rows.forEach((row) => {

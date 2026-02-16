@@ -60,6 +60,22 @@ export function UsersValidatedTab({
     [registrations, search, whatsAppFilter]
   );
 
+  const waitlist = useMemo(
+    () =>
+      registrations
+        .filter((registration) => registration.status === "waitlist")
+        .sort((a, b) => {
+          const dateA = a.waitlist_added_at
+            ? new Date(a.waitlist_added_at).getTime()
+            : 0;
+          const dateB = b.waitlist_added_at
+            ? new Date(b.waitlist_added_at).getTime()
+            : 0;
+          return dateA - dateB;
+        }),
+    [registrations]
+  );
+
 
   const totalCount = registrations.length;
   const approvedCount = statusCounts.approved;
@@ -268,6 +284,167 @@ export function UsersValidatedTab({
           </div>
         )}
       </div>
+      {waitlist.length > 0 ? (
+        <div className="mt-12 space-y-4">
+          <div className="flex items-center gap-4">
+            <div className="h-px flex-1 bg-gradient-to-r from-transparent via-amber-500/30 to-transparent" />
+            <div className="flex items-center gap-2 text-amber-300">
+              <svg
+                className="h-5 w-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+              <span className="text-lg font-semibold">Liste d'attente</span>
+            </div>
+            <div className="h-px flex-1 bg-gradient-to-r from-transparent via-amber-500/30 to-transparent" />
+          </div>
+
+          <Card className="rounded-2xl border border-amber-400/20 bg-gradient-to-br from-amber-500/10 to-transparent p-4">
+            <div className="flex items-start gap-3">
+              <svg
+                className="mt-0.5 h-5 w-5 flex-shrink-0 text-amber-400"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                  clipRule="evenodd"
+                />
+              </svg>
+              <div className="flex-1">
+                <p className="text-sm font-semibold text-amber-300">
+                  {waitlist.length} joueur{waitlist.length > 1 ? "s" : ""} en liste d'attente
+                </p>
+                <p className="mt-1 text-xs text-white/70">
+                  Ces joueurs pourront être validés manuellement dès qu'une place se libère.
+                </p>
+              </div>
+            </div>
+          </Card>
+
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {waitlist.map((registration, index) => {
+              const rankingValue = registration.player.ranking?.toString().trim();
+              const playPreferenceValue = registration.player.play_preference?.toString().trim();
+
+              return (
+                <Card
+                  key={registration.id}
+                  className="rounded-2xl border border-amber-400/30 bg-amber-500/5 p-5 text-white shadow-card"
+                >
+                  <div className="flex items-start gap-4">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-amber-500/20 text-sm font-semibold text-amber-300">
+                      {buildInitials(
+                        registration.player.first_name,
+                        registration.player.last_name
+                      )}
+                    </div>
+                    <div className="flex-1 space-y-3">
+                      <div className="space-y-1">
+                        <p className="text-base font-semibold">
+                          {registration.player.first_name} {registration.player.last_name}
+                        </p>
+                        <div className="flex items-center gap-2 text-[11px] uppercase tracking-wide text-amber-200">
+                          <span className="h-2 w-2 animate-pulse rounded-full bg-amber-400" />
+                          <span>Liste d'attente</span>
+                        </div>
+                      </div>
+                      <div className="space-y-2 text-sm text-white/70">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <div className="flex items-center gap-2">
+                            <span>✉️</span>
+                            <span>{registration.player.email ?? "N/A"}</span>
+                          </div>
+                          <WhatsAppBadge
+                            hasJoined={Boolean(registration.hasJoinedWhatsApp)}
+                            joinedAt={registration.whatsappJoinDate}
+                          />
+                        </div>
+                        {registration.player.phone ? (
+                          <div className="flex items-center gap-2">
+                            <span>📱</span>
+                            <span>{registration.player.phone}</span>
+                          </div>
+                        ) : null}
+                        <div className="flex flex-wrap items-center gap-2 text-[11px] text-white/60">
+                          <span>
+                            Niveau :{" "}
+                            {registration.player.level
+                              ? LEVEL_LABELS[registration.player.level] ??
+                                registration.player.level
+                              : "N/A"}
+                          </span>
+                          <span>•</span>
+                          <span>Classement : {rankingValue || "N/A"}</span>
+                          {playPreferenceValue ? (
+                            <>
+                              <span>•</span>
+                              <span>Côté préféré : {playPreferenceValue}</span>
+                            </>
+                          ) : null}
+                          <span>•</span>
+                          <span className="font-semibold text-amber-300">
+                            Position : #{index + 1}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="mt-4 flex items-center gap-2">
+                    <form
+                      className="flex-1"
+                      action={async (formData) => {
+                        await updateRegistrationStatusAction(formData);
+                        router.refresh();
+                      }}
+                    >
+                      <input
+                        type="hidden"
+                        name="registrationId"
+                        value={registration.id}
+                      />
+                      <input type="hidden" name="status" value="approved" />
+                      <input type="hidden" name="adminToken" value={adminToken} />
+                      <GradientButton type="submit" className="w-full">
+                        ✓ Valider maintenant
+                      </GradientButton>
+                    </form>
+                    <form
+                      action={async (formData) => {
+                        await updateRegistrationStatusAction(formData);
+                        router.refresh();
+                      }}
+                    >
+                      <input
+                        type="hidden"
+                        name="registrationId"
+                        value={registration.id}
+                      />
+                      <input type="hidden" name="status" value="pending" />
+                      <input type="hidden" name="adminToken" value={adminToken} />
+                      <GradientButton
+                        type="submit"
+                        className="bg-white/10 text-white hover:bg-white/15"
+                      >
+                        ↶ Attente
+                      </GradientButton>
+                    </form>
+                  </div>
+                </Card>
+              );
+            })}
+          </div>
+        </div>
+      ) : null}
       <div className="rounded-2xl border border-blue-400/20 bg-gradient-to-br from-blue-500/10 to-transparent p-4">
         <div className="flex items-start gap-3">
           <svg

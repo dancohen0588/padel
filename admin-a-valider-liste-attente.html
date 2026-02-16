@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - À valider avec Liste d'attente</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background: #1E1E2E;
+            min-height: 100vh;
+        }
+    </style>
+</head>
+<body class="font-sans antialiased">
+    <!-- Header simulé -->
+    <div class="border-b border-white/10 bg-white/5 backdrop-blur">
+        <div class="container mx-auto max-w-6xl px-6 py-4">
+            <div class="flex items-center gap-3">
+                <div class="text-2xl">🎾</div>
+                <div class="text-lg font-semibold text-white">Padel Club</div>
+            </div>
+        </div>
+    </div>
+
+    <main class="container mx-auto max-w-6xl space-y-10 px-6 py-12">
+        <!-- Tournament Header -->
+        <div class="rounded-3xl border border-orange-400/30 bg-gradient-to-br from-orange-500/10 via-orange-500/5 to-transparent p-6 shadow-lg">
+            <div class="flex flex-wrap items-center gap-4">
+                <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-orange-400 to-orange-500 text-xl shadow-md">
+                    🏆
+                </div>
+                <div class="min-w-0 flex-1">
+                    <h1 class="bg-gradient-to-br from-orange-400 to-amber-200 bg-clip-text text-2xl font-semibold text-transparent">
+                        Configurer le tournoi
+                    </h1>
+                    <div class="mt-1 flex flex-wrap items-center gap-2 text-sm text-white/60">
+                        <span class="font-semibold text-white/80">Superligue - 15 Mars</span>
+                        <span class="text-white/30">•</span>
+                        <span>📅 15 mars 2024, 14h00</span>
+                        <span class="text-white/30">•</span>
+                        <span>📍 Padel Club Paris</span>
+                    </div>
+                </div>
+                <div class="inline-flex items-center gap-2 rounded-full border border-emerald-400/30 bg-emerald-500/15 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-emerald-300">
+                    <span class="h-2 w-2 rounded-full bg-emerald-300 animate-pulse" />
+                    Upcoming
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabs simulés -->
+        <div class="flex h-auto w-full flex-wrap gap-3 rounded-2xl border border-white/10 bg-white/5 p-3 shadow-lg">
+            <button class="inline-flex items-center gap-2 rounded-xl border-transparent bg-gradient-to-br from-orange-400 to-orange-500 px-4 py-2 text-xs font-semibold text-white shadow-md">
+                <span>📋</span>
+                <span>À valider</span>
+                <span class="rounded-full bg-white/30 px-2 py-0.5 text-[10px] font-semibold text-white/90">8</span>
+            </button>
+            <button class="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-xs font-semibold text-white/70 transition">
+                <span>✓</span>
+                <span>Joueurs</span>
+                <span class="rounded-full bg-white/20 px-2 py-0.5 text-[10px] font-semibold text-white/90">24</span>
+            </button>
+            <button class="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-xs font-semibold text-white/70 transition">
+                <span>👥</span>
+                <span>Équipes</span>
+                <span class="rounded-full bg-white/20 px-2 py-0.5 text-[10px] font-semibold text-white/90">12</span>
+            </button>
+        </div>
+
+        <!-- Content -->
+        <div class="space-y-6">
+            <!-- Stats Cards -->
+            <div class="grid gap-4 md:grid-cols-3">
+                <div class="rounded-2xl border border-white/10 bg-white/5 p-5 text-white shadow-lg">
+                    <p class="text-xs font-semibold text-white/50">En attente</p>
+                    <p class="mt-2 text-3xl font-bold text-orange-300">8</p>
+                </div>
+                <div class="rounded-2xl border border-white/10 bg-white/5 p-5 text-white shadow-lg">
+                    <p class="text-xs font-semibold text-white/50">Validés</p>
+                    <p class="mt-2 text-3xl font-bold text-emerald-300">24</p>
+                </div>
+                <div class="rounded-2xl border border-white/10 bg-white/5 p-5 text-white shadow-lg">
+                    <p class="text-xs font-semibold text-white/50">Refusés</p>
+                    <p class="mt-2 text-3xl font-bold text-rose-300">3</p>
+                </div>
+            </div>
+
+            <!-- Search Bar -->
+            <div class="rounded-2xl border border-white/10 bg-white/5 p-6 text-white shadow-lg">
+                <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                    <div>
+                        <p class="text-lg font-semibold text-white">
+                            Joueurs en attente de validation
+                        </p>
+                        <p class="text-sm text-white/50">8 inscriptions à traiter</p>
+                    </div>
+                    <input
+                        type="text"
+                        placeholder="🔍 Rechercher un joueur..."
+                        class="w-full rounded-xl border border-white/20 bg-white/10 px-4 py-2 text-sm text-white placeholder:text-white/40 focus:border-orange-400/50 focus:outline-none focus:ring-2 focus:ring-orange-400/20 md:max-w-sm"
+                    />
+                </div>
+            </div>
+
+            <!-- Players List -->
+            <div class="space-y-3">
+                <!-- Player 1 -->
+                <div class="rounded-2xl border border-white/10 bg-white/5 p-5 text-white transition hover:border-orange-400/60 hover:bg-orange-500/5 shadow-lg">
+                    <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                        <div class="flex flex-1 flex-col gap-2">
+                            <div class="flex items-center gap-3">
+                                <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-violet-400 to-violet-600 text-sm font-bold text-white">
+                                    MD
+                                </div>
+                                <div class="text-base font-semibold text-white">
+                                    Marc Dupont
+                                </div>
+                            </div>
+                            <div class="ml-14 space-y-1 text-sm text-white/50">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-xs">✉️</span>
+                                    <span>marc.dupont@email.com</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-xs">📱</span>
+                                    <span>06 12 34 56 78</span>
+                                </div>
+                                <div class="flex flex-wrap items-center gap-2 text-[11px] text-white/60">
+                                    <span>Niveau : 6 - Avancé</span>
+                                    <span>•</span>
+                                    <span>Classement : P1000</span>
+                                    <span>•</span>
+                                    <span>Côté préféré : Droite</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-3">
+                            <!-- Status Badge -->
+                            <span class="inline-flex items-center gap-1 rounded-full border border-orange-400/30 bg-orange-500/15 px-2.5 py-1 text-[11px] font-semibold text-orange-300">
+                                <span class="h-2 w-2 rounded-full bg-orange-400 animate-pulse"></span>
+                                En attente
+                            </span>
+
+                            <!-- Valider Button -->
+                            <button class="inline-flex items-center gap-2 rounded-xl border border-transparent bg-gradient-to-br from-emerald-400 to-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-md transition hover:from-emerald-500 hover:to-emerald-700">
+                                ✓ Valider
+                            </button>
+
+                            <!-- Liste d'attente Button - NOUVEAU -->
+                            <button class="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-amber-500/20 px-4 py-2 text-sm font-semibold text-amber-200 transition hover:bg-amber-500/30">
+                                ⏳ Liste d'attente
+                            </button>
+
+                            <!-- Refuser Button -->
+                            <button class="inline-flex items-center gap-2 rounded-xl border border-transparent bg-rose-500/20 px-4 py-2 text-sm font-semibold text-rose-200 transition hover:bg-rose-500/30">
+                                ✕ Refuser
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Player 2 -->
+                <div class="rounded-2xl border border-white/10 bg-white/5 p-5 text-white transition hover:border-orange-400/60 hover:bg-orange-500/5 shadow-lg">
+                    <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                        <div class="flex flex-1 flex-col gap-2">
+                            <div class="flex items-center gap-3">
+                                <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-violet-400 to-violet-600 text-sm font-bold text-white">
+                                    SM
+                                </div>
+                                <div class="text-base font-semibold text-white">
+                                    Sophie Martin
+                                </div>
+                            </div>
+                            <div class="ml-14 space-y-1 text-sm text-white/50">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-xs">✉️</span>
+                                    <span>sophie.m@email.com</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-xs">📱</span>
+                                    <span>06 23 45 67 89</span>
+                                </div>
+                                <div class="flex flex-wrap items-center gap-2 text-[11px] text-white/60">
+                                    <span>Niveau : 5 - Confirmé</span>
+                                    <span>•</span>
+                                    <span>Classement : P500</span>
+                                    <span>•</span>
+                                    <span>Côté préféré : Gauche</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-3">
+                            <span class="inline-flex items-center gap-1 rounded-full border border-orange-400/30 bg-orange-500/15 px-2.5 py-1 text-[11px] font-semibold text-orange-300">
+                                <span class="h-2 w-2 rounded-full bg-orange-400 animate-pulse"></span>
+                                En attente
+                            </span>
+                            <button class="inline-flex items-center gap-2 rounded-xl border border-transparent bg-gradient-to-br from-emerald-400 to-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-md transition hover:from-emerald-500 hover:to-emerald-700">
+                                ✓ Valider
+                            </button>
+                            <button class="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-amber-500/20 px-4 py-2 text-sm font-semibold text-amber-200 transition hover:bg-amber-500/30">
+                                ⏳ Liste d'attente
+                            </button>
+                            <button class="inline-flex items-center gap-2 rounded-xl border border-transparent bg-rose-500/20 px-4 py-2 text-sm font-semibold text-rose-200 transition hover:bg-rose-500/30">
+                                ✕ Refuser
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Player 3 -->
+                <div class="rounded-2xl border border-white/10 bg-white/5 p-5 text-white transition hover:border-orange-400/60 hover:bg-orange-500/5 shadow-lg">
+                    <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                        <div class="flex flex-1 flex-col gap-2">
+                            <div class="flex items-center gap-3">
+                                <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-violet-400 to-violet-600 text-sm font-bold text-white">
+                                    PL
+                                </div>
+                                <div class="text-base font-semibold text-white">
+                                    Pierre Leroy
+                                </div>
+                            </div>
+                            <div class="ml-14 space-y-1 text-sm text-white/50">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-xs">✉️</span>
+                                    <span>p.leroy@email.com</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-xs">📱</span>
+                                    <span>06 34 56 78 90</span>
+                                </div>
+                                <div class="flex flex-wrap items-center gap-2 text-[11px] text-white/60">
+                                    <span>Niveau : 4 - Intermédiaire confirmé</span>
+                                    <span>•</span>
+                                    <span>Classement : P250</span>
+                                    <span>•</span>
+                                    <span>Côté préféré : N/A</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-3">
+                            <span class="inline-flex items-center gap-1 rounded-full border border-orange-400/30 bg-orange-500/15 px-2.5 py-1 text-[11px] font-semibold text-orange-300">
+                                <span class="h-2 w-2 rounded-full bg-orange-400 animate-pulse"></span>
+                                En attente
+                            </span>
+                            <button class="inline-flex items-center gap-2 rounded-xl border border-transparent bg-gradient-to-br from-emerald-400 to-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-md transition hover:from-emerald-500 hover:to-emerald-700">
+                                ✓ Valider
+                            </button>
+                            <button class="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-amber-500/20 px-4 py-2 text-sm font-semibold text-amber-200 transition hover:bg-amber-500/30">
+                                ⏳ Liste d'attente
+                            </button>
+                            <button class="inline-flex items-center gap-2 rounded-xl border border-transparent bg-rose-500/20 px-4 py-2 text-sm font-semibold text-rose-200 transition hover:bg-rose-500/30">
+                                ✕ Refuser
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Info Notice -->
+            <div class="rounded-2xl border border-amber-400/20 bg-gradient-to-br from-amber-500/10 to-transparent p-4">
+                <div class="flex items-start gap-3">
+                    <svg class="mt-0.5 h-5 w-5 flex-shrink-0 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                    </svg>
+                    <div class="flex-1">
+                        <p class="text-sm font-semibold text-amber-300">À propos de la liste d'attente</p>
+                        <p class="mt-1 text-xs text-white/70">
+                            Le bouton
+                            <span class="mx-1 inline-flex items-center gap-1 rounded-full border border-white/20 bg-amber-500/20 px-2 py-0.5 text-[11px] font-semibold text-amber-200">
+                                ⏳ Liste d'attente
+                            </span>
+                            permet de mettre un joueur en liste d'attente plutôt que de le valider ou le refuser immédiatement. Vous pourrez ensuite le valider depuis l'onglet "Joueurs" si des places se libèrent.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

@@ -6,12 +6,14 @@ const STATUS_LABELS: Record<RegistrationStatus, string> = {
   pending: "En attente",
   approved: "Validé",
   rejected: "Refusé",
+  waitlist: "Liste d'attente",
 };
 
 const STATUS_CLASSES: Record<RegistrationStatus, string> = {
   pending: "bg-status-pending text-brand-charcoal",
   approved: "bg-status-approved text-brand-charcoal",
   rejected: "bg-status-rejected text-brand-charcoal",
+  waitlist: "bg-amber-200 text-amber-900",
 };
 
 type StatusBadgeProps = {

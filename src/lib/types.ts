@@ -1,4 +1,4 @@
-export type RegistrationStatus = "pending" | "approved" | "rejected";
+export type RegistrationStatus = "pending" | "approved" | "rejected" | "waitlist";
 
 export type TournamentStatus =
   | "draft"
@@ -100,6 +100,7 @@ export type Registration = {
   player_id: string;
   status: RegistrationStatus;
   registered_at: string;
+  waitlist_added_at?: string | null;
 };
 
 export type RegistrationWithPlayer = Registration & {

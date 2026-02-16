@@ -168,6 +168,26 @@ export function UsersApprovalTab({
                         name="registrationId"
                         value={registration.id}
                       />
+                      <input type="hidden" name="status" value="waitlist" />
+                      <input type="hidden" name="adminToken" value={adminToken} />
+                      <GradientButton
+                        type="submit"
+                        className="border-white/20 bg-amber-500/20 text-amber-200 hover:bg-amber-500/30"
+                      >
+                        ⏳ Liste d'attente
+                      </GradientButton>
+                    </form>
+                    <form
+                      action={async (formData) => {
+                        await updateRegistrationStatusAction(formData);
+                        router.refresh();
+                      }}
+                    >
+                      <input
+                        type="hidden"
+                        name="registrationId"
+                        value={registration.id}
+                      />
                       <input type="hidden" name="status" value="rejected" />
                       <input type="hidden" name="adminToken" value={adminToken} />
                       <GradientButton

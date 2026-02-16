@@ -358,15 +358,22 @@ export async function updateRegistrationStatus(
   try {
     assertAdminToken(adminToken);
     const database = getDatabaseClient();
-    const updated = await database<Array<{ id: string }>>`
+    const updated = await database<Array<{ id: string; tournament_id: string }>>`
       update registrations
-      set status = ${status}
+      set
+        status = ${status},
+        waitlist_added_at = case when ${status} = 'waitlist' then now() else null end
       where id = ${registrationId}
-      returning id
+      returning id, tournament_id
     `;
 
     if (updated.length === 0) {
       return { status: "error", message: "Inscription introuvable." };
+    }
+
+    const tournamentId = updated[0]?.tournament_id;
+    if (tournamentId) {
+      revalidatePath(`/tournaments/${tournamentId}/admin`);
     }
 
     return { status: "ok", message: "Statut mis à jour." };
@@ -390,8 +397,6 @@ export async function updateRegistrationStatusAction(
   }
 
   await updateRegistrationStatus(registrationId, status, adminToken);
-
-  revalidatePath("/admin/inscriptions");
 }
 
 export async function deletePlayerAction(formData: FormData): Promise<void> {
