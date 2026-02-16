@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useFormState } from "react-dom";
+import { useFormState, useFormStatus } from "react-dom";
 import type {
   PaymentConfig,
   RegistrationStatus,
@@ -11,7 +11,7 @@ import type {
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { GradientButton } from "@/components/ui/gradient-button";
+import { PadelLoader } from "@/components/ui/padel-loader";
 import { WhatsAppBadge } from "@/components/admin/WhatsAppBadge";
 import { PaymentBadge } from "@/components/admin/PaymentBadge";
 import { PaymentMethodSelect } from "@/components/admin/PaymentMethodSelect";
@@ -69,6 +69,49 @@ export function UsersValidatedTab({
   paymentConfig,
   tournamentId,
 }: UsersValidatedTabProps) {
+  function AdminButton({
+    onClick,
+    variant = "primary",
+    children,
+    isLoading = false,
+    type = "button",
+  }: {
+    onClick?: () => void;
+    variant?: "primary" | "danger" | "success";
+    children: React.ReactNode;
+    isLoading?: boolean;
+    type?: "button" | "submit";
+  }) {
+    const { pending } = useFormStatus();
+    const showLoader = isLoading || pending;
+
+    const variantClasses = {
+      primary:
+        "bg-gradient-to-r from-orange-500 to-orange-400 text-white shadow-glow hover:shadow-[0_8px_16px_rgba(255,107,53,0.3)]",
+      danger:
+        "border border-red-500/40 bg-red-500/10 text-red-400 hover:bg-red-500/20",
+      success:
+        "border border-emerald-500/40 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20",
+    };
+
+    return (
+      <button
+        type={type}
+        onClick={onClick}
+        disabled={showLoader}
+        className={`inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-xs font-semibold transition disabled:cursor-not-allowed disabled:opacity-50 ${variantClasses[variant]}`}
+      >
+        {showLoader ? (
+          <>
+            <PadelLoader size="sm" />
+            <span>Chargement...</span>
+          </>
+        ) : (
+          children
+        )}
+      </button>
+    );
+  }
   const [search, setSearch] = useState("");
   const [whatsAppFilter, setWhatsAppFilter] = useState<
     "all" | "joined" | "not_joined"
@@ -85,6 +128,7 @@ export function UsersValidatedTab({
   const [phoneMessage, setPhoneMessage] = useState<string | null>(null);
   const [verifiedPlayer, setVerifiedPlayer] = useState<VerifiedPlayer | null>(null);
   const [isVerifying, setIsVerifying] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
   const [isRanked, setIsRanked] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const router = useRouter();
@@ -93,6 +137,7 @@ export function UsersValidatedTab({
     prevState: CreatePlayerResult | null,
     formData: FormData
   ) => {
+    setIsCreating(true);
     formData.set("mode", mode);
 
     if (mode === "existing" && verifiedPlayer) {
@@ -106,7 +151,11 @@ export function UsersValidatedTab({
       }
     }
 
-    return createPlayerByAdminAction(prevState, formData);
+    try {
+      return await createPlayerByAdminAction(prevState, formData);
+    } finally {
+      setIsCreating(false);
+    }
   };
 
   const [state, formAction] = useFormState(enhancedAction, initialCreateState);
@@ -278,12 +327,9 @@ export function UsersValidatedTab({
             {approvedCount} joueurs confirmés pour le tournoi
           </p>
         </div>
-        <button
-          onClick={() => setShowCreateModal(true)}
-          className="gradient-primary rounded-lg px-6 py-3 text-sm font-semibold text-white shadow-glow transition hover:-translate-y-0.5"
-        >
+        <AdminButton onClick={() => setShowCreateModal(true)} variant="primary">
           ➕ Créer un joueur
-        </button>
+        </AdminButton>
       </div>
 
       <Card className="rounded-2xl border border-white/10 bg-white/5 p-6 text-white shadow-card">
@@ -520,12 +566,9 @@ export function UsersValidatedTab({
                   />
                   <input type="hidden" name="status" value="pending" />
                   <input type="hidden" name="adminToken" value={adminToken} />
-                  <GradientButton
-                    type="submit"
-                    className="w-full bg-white/10 text-white"
-                  >
+                  <AdminButton type="submit" variant="primary">
                     ↶ Repasser en attente
-                  </GradientButton>
+                  </AdminButton>
                 </form>
               </div>
             </Card>
@@ -673,9 +716,9 @@ export function UsersValidatedTab({
                       />
                       <input type="hidden" name="status" value="approved" />
                       <input type="hidden" name="adminToken" value={adminToken} />
-                      <GradientButton type="submit" className="w-full">
+                      <AdminButton type="submit" variant="success">
                         ✓ Valider maintenant
-                      </GradientButton>
+                      </AdminButton>
                     </form>
                     <form
                       action={async (formData) => {
@@ -690,12 +733,9 @@ export function UsersValidatedTab({
                       />
                       <input type="hidden" name="status" value="pending" />
                       <input type="hidden" name="adminToken" value={adminToken} />
-                      <GradientButton
-                        type="submit"
-                        className="bg-white/10 text-white hover:bg-white/15"
-                      >
+                      <AdminButton type="submit" variant="primary">
                         ↶ Attente
-                      </GradientButton>
+                      </AdminButton>
                     </form>
                   </div>
                 </Card>
@@ -1094,37 +1134,36 @@ export function UsersValidatedTab({
                   >
                     Annuler
                   </button>
-                  <button
+                  <AdminButton
                     type="submit"
-                    className="flex-1 rounded-lg bg-gradient-to-r from-orange-500 to-orange-400 px-6 py-3 text-base font-semibold text-white transition hover:-translate-y-0.5 hover:shadow-[0_8px_16px_rgba(255,107,53,0.3)]"
-                    disabled={mode === "existing" && !verifiedPlayer}
+                    variant="primary"
+                    isLoading={isCreating}
                   >
                     Créer et valider
-                  </button>
+                  </AdminButton>
                 </div>
 
                 {mode === "existing" && !verifiedPlayer && phoneStatus !== "error" ? (
                   <div className="flex gap-3">
-                    <button
-                      type="button"
+                    <AdminButton
                       onClick={handleVerifyPhone}
-                      disabled={isVerifying}
-                      className="flex-1 rounded-lg bg-gradient-to-r from-orange-500 to-orange-400 px-6 py-3 text-base font-semibold text-white transition hover:-translate-y-0.5 hover:shadow-[0_8px_16px_rgba(255,107,53,0.3)] disabled:opacity-50"
+                      variant="primary"
+                      isLoading={isVerifying}
                     >
-                      {isVerifying ? "Vérification..." : "Vérifier"}
-                    </button>
+                      Vérifier
+                    </AdminButton>
                   </div>
                 ) : null}
 
                 {mode === "existing" && phoneStatus === "error" && !verifiedPlayer ? (
                   <div className="flex flex-col gap-2 text-sm">
-                    <button
-                      type="button"
+                    <AdminButton
                       onClick={handleVerifyPhone}
-                      className="w-full rounded-lg bg-gradient-to-r from-orange-500 to-orange-400 px-6 py-3 text-base font-semibold text-white transition hover:-translate-y-0.5 hover:shadow-[0_8px_16px_rgba(255,107,53,0.3)]"
+                      variant="primary"
+                      isLoading={isVerifying}
                     >
                       Réessayer
-                    </button>
+                    </AdminButton>
                     <button
                       type="button"
                       onClick={() => handleModeChange("new")}

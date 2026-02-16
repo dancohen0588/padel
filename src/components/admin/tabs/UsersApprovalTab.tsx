@@ -2,11 +2,12 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useFormStatus } from "react-dom";
 import type { RegistrationStatus, RegistrationWithPlayer } from "@/lib/types";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { GradientButton } from "@/components/ui/gradient-button";
+import { PadelLoader } from "@/components/ui/padel-loader";
 import { updateRegistrationStatusAction } from "@/app/actions/registrations";
 
 type UsersApprovalTabProps = {
@@ -20,6 +21,49 @@ export function UsersApprovalTab({
   statusCounts,
   adminToken,
 }: UsersApprovalTabProps) {
+  function AdminButton({
+    onClick,
+    variant = "primary",
+    children,
+    isLoading = false,
+    type = "button",
+  }: {
+    onClick?: () => void;
+    variant?: "primary" | "danger" | "success";
+    children: React.ReactNode;
+    isLoading?: boolean;
+    type?: "button" | "submit";
+  }) {
+    const { pending } = useFormStatus();
+    const showLoader = isLoading || pending;
+
+    const variantClasses = {
+      primary:
+        "bg-gradient-to-r from-orange-500 to-orange-400 text-white shadow-glow hover:shadow-[0_8px_16px_rgba(255,107,53,0.3)]",
+      danger:
+        "border border-red-500/40 bg-red-500/10 text-red-400 hover:bg-red-500/20",
+      success:
+        "border border-emerald-500/40 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20",
+    };
+
+    return (
+      <button
+        type={type}
+        onClick={onClick}
+        disabled={showLoader}
+        className={`inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-xs font-semibold transition disabled:cursor-not-allowed disabled:opacity-50 ${variantClasses[variant]}`}
+      >
+        {showLoader ? (
+          <>
+            <PadelLoader size="sm" />
+            <span>Chargement...</span>
+          </>
+        ) : (
+          children
+        )}
+      </button>
+    );
+  }
   const [search, setSearch] = useState("");
   const router = useRouter();
   const totalPending = statusCounts.pending ?? 0;
@@ -155,7 +199,9 @@ export function UsersApprovalTab({
                       />
                       <input type="hidden" name="status" value="approved" />
                       <input type="hidden" name="adminToken" value={adminToken} />
-                      <GradientButton type="submit">✓ Valider</GradientButton>
+                    <AdminButton type="submit" variant="success">
+                      ✓ Valider
+                    </AdminButton>
                     </form>
                     <form
                       action={async (formData) => {
@@ -170,12 +216,9 @@ export function UsersApprovalTab({
                       />
                       <input type="hidden" name="status" value="waitlist" />
                       <input type="hidden" name="adminToken" value={adminToken} />
-                      <GradientButton
-                        type="submit"
-                        className="border-white/20 bg-amber-500/20 text-amber-200 hover:bg-amber-500/30"
-                      >
-                        ⏳ Liste d'attente
-                      </GradientButton>
+                    <AdminButton type="submit" variant="primary">
+                      ⏳ Liste d'attente
+                    </AdminButton>
                     </form>
                     <form
                       action={async (formData) => {
@@ -190,12 +233,9 @@ export function UsersApprovalTab({
                       />
                       <input type="hidden" name="status" value="rejected" />
                       <input type="hidden" name="adminToken" value={adminToken} />
-                      <GradientButton
-                        type="submit"
-                        className="bg-rose-500/20 text-rose-200 hover:bg-rose-500/30"
-                      >
-                        ✕ Refuser
-                      </GradientButton>
+                    <AdminButton type="submit" variant="danger">
+                      ✕ Refuser
+                    </AdminButton>
                     </form>
                   </div>
                 </div>

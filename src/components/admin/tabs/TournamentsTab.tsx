@@ -649,9 +649,13 @@ export function TournamentsTab({
           </div>
 
           <div className="flex flex-wrap gap-3">
-            <GradientButton type="submit">
+            <button
+              type="submit"
+              form="tournament-form"
+              className="gradient-primary text-white hover:text-white shadow-glow rounded-[10px] px-4 py-2"
+            >
               {selected ? "Mettre à jour" : "Créer"}
-            </GradientButton>
+            </button>
             {selected ? (
               <Button
                 type="button"

@@ -360,8 +360,8 @@ export function PaymentsTab({
           ) : null}
 
           <div className="flex flex-wrap gap-3">
-            <GradientButton type="button" onClick={handleSave} disabled={isSaving}>
-              {isSaving ? "Sauvegarde..." : "Enregistrer"}
+            <GradientButton type="button" onClick={handleSave} isLoading={isSaving}>
+              Enregistrer
             </GradientButton>
           </div>
         </CardContent>

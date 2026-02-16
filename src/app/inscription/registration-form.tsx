@@ -2,9 +2,10 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { useFormState } from "react-dom";
+import { useFormState, useFormStatus } from "react-dom";
 import { registerPairAction, registerPlayer } from "@/app/actions/registrations";
 import { ImageDropzone } from "@/components/ui/image-dropzone";
+import { PadelLoader } from "@/components/ui/padel-loader";
 import { StorageImage } from "@/components/ui/StorageImage";
 import { PaymentInfoBlock } from "@/components/payments/PaymentInfoBlock";
 import { WhatsAppGroupSection } from "@/components/registration/WhatsAppGroupSection";
@@ -58,6 +59,68 @@ export function RegistrationForm({
   price = null,
   paymentConfig = null,
 }: RegistrationFormProps) {
+  function SubmitButton({
+    children,
+    disabled = false,
+  }: {
+    children: React.ReactNode;
+    disabled?: boolean;
+  }) {
+    const { pending } = useFormStatus();
+
+    return (
+      <button
+        type="submit"
+        disabled={disabled || pending}
+        className="flex-1 rounded-lg bg-gradient-to-r from-orange-500 to-orange-400 px-6 py-3 text-base font-semibold text-white transition hover:-translate-y-0.5 hover:shadow-[0_8px_16px_rgba(255,107,53,0.3)] disabled:cursor-not-allowed disabled:opacity-50 inline-flex items-center justify-center gap-2"
+      >
+        {pending ? (
+          <>
+            <PadelLoader size="xl" />
+            <span>Chargement...</span>
+          </>
+        ) : (
+          children
+        )}
+      </button>
+    );
+  }
+
+  function VerifyButton({
+    onClick,
+    isVerifying,
+    children,
+    variant = "orange",
+  }: {
+    onClick: () => void;
+    isVerifying: boolean;
+    children: React.ReactNode;
+    variant?: "orange" | "emerald";
+  }) {
+    const variantClasses =
+      variant === "emerald"
+        ? "bg-gradient-to-r from-emerald-500 to-emerald-400 hover:shadow-[0_8px_16px_rgba(16,185,129,0.3)]"
+        : "bg-gradient-to-r from-orange-500 to-orange-400 hover:shadow-[0_8px_16px_rgba(255,107,53,0.3)]";
+
+    return (
+      <button
+        type="button"
+        onClick={onClick}
+        disabled={isVerifying}
+        className={`flex-1 rounded-lg px-6 py-3 text-base font-semibold text-white transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-50 inline-flex items-center justify-center gap-2 ${variantClasses}`}
+      >
+        {isVerifying ? (
+          <>
+            <PadelLoader size="xl" />
+            <span>Vérification...</span>
+          </>
+        ) : (
+          children
+        )}
+      </button>
+    );
+  }
+
   const [playerPhoto, setPlayerPhoto] = useState<File | null>(null);
   const [mode, setMode] = useState<RegistrationMode>("new");
   const [phone, setPhone] = useState("");
@@ -922,36 +985,21 @@ export function RegistrationForm({
 
                 {mode === "new" ? (
                   <div className="flex gap-3">
-                    <button
-                      type="submit"
-                      className="flex-1 rounded-lg bg-gradient-to-r from-orange-500 to-orange-400 px-6 py-3 text-base font-semibold text-white transition hover:-translate-y-0.5 hover:shadow-[0_8px_16px_rgba(255,107,53,0.3)]"
-                    >
-                      S&#39;inscrire au tournoi
-                    </button>
+                    <SubmitButton>S&#39;inscrire au tournoi</SubmitButton>
                   </div>
                 ) : null}
 
                 {mode === "existing" && !verifiedPlayer && phoneStatus !== "error" ? (
                   <div className="flex gap-3">
-                    <button
-                      type="button"
-                      onClick={handleVerifyPhone}
-                      disabled={isVerifying}
-                      className="flex-1 rounded-lg bg-gradient-to-r from-orange-500 to-orange-400 px-6 py-3 text-base font-semibold text-white transition hover:-translate-y-0.5 hover:shadow-[0_8px_16px_rgba(255,107,53,0.3)] disabled:opacity-50"
-                    >
-                      {isVerifying ? "Vérification..." : "Vérifier mon compte"}
-                    </button>
+                    <VerifyButton onClick={handleVerifyPhone} isVerifying={isVerifying}>
+                      Vérifier mon compte
+                    </VerifyButton>
                   </div>
                 ) : null}
 
                 {mode === "existing" && verifiedPlayer ? (
                   <div className="flex flex-col gap-3 sm:flex-row">
-                    <button
-                      type="submit"
-                      className="flex-1 rounded-lg bg-gradient-to-r from-orange-500 to-orange-400 px-6 py-3 text-base font-semibold text-white transition hover:-translate-y-0.5 hover:shadow-[0_8px_16px_rgba(255,107,53,0.3)]"
-                    >
-                      Confirmer l&#39;inscription
-                    </button>
+                    <SubmitButton>Confirmer l&#39;inscription</SubmitButton>
                     <button
                       type="button"
                       onClick={resetExistingFlow}
@@ -964,13 +1012,9 @@ export function RegistrationForm({
 
                 {mode === "existing" && phoneStatus === "error" && !verifiedPlayer ? (
                   <div className="flex flex-col gap-2 text-sm">
-                    <button
-                      type="button"
-                      onClick={handleVerifyPhone}
-                      className="w-full rounded-lg bg-gradient-to-r from-orange-500 to-orange-400 px-6 py-3 text-base font-semibold text-white transition hover:-translate-y-0.5 hover:shadow-[0_8px_16px_rgba(255,107,53,0.3)]"
-                    >
+                    <VerifyButton onClick={handleVerifyPhone} isVerifying={isVerifying}>
                       Réessayer
-                    </button>
+                    </VerifyButton>
                     <button
                       type="button"
                       onClick={() => handleModeChange("new")}
@@ -991,25 +1035,18 @@ export function RegistrationForm({
                 })}
                 {player1Mode === "existing" && !player1VerifiedPlayer && player1PhoneStatus !== "error" ? (
                   <div className="flex gap-3">
-                    <button
-                      type="button"
+                    <VerifyButton
                       onClick={() => handleVerifyPlayerPhone("player1")}
-                      disabled={player1IsVerifying}
-                      className="flex-1 rounded-lg bg-gradient-to-r from-orange-500 to-orange-400 px-6 py-3 text-base font-semibold text-white transition hover:-translate-y-0.5 hover:shadow-[0_8px_16px_rgba(255,107,53,0.3)] disabled:opacity-50"
+                      isVerifying={player1IsVerifying}
                     >
-                      {player1IsVerifying ? "Vérification..." : "Vérifier le compte du joueur 1"}
-                    </button>
+                      Vérifier le compte du joueur 1
+                    </VerifyButton>
                   </div>
                 ) : null}
 
                 {player1Mode === "existing" && player1VerifiedPlayer ? (
                   <div className="flex flex-col gap-3 sm:flex-row">
-                    <button
-                      type="submit"
-                      className="flex-1 rounded-lg bg-gradient-to-r from-orange-500 to-orange-400 px-6 py-3 text-base font-semibold text-white transition hover:-translate-y-0.5 hover:shadow-[0_8px_16px_rgba(255,107,53,0.3)]"
-                    >
-                      Confirmer l&#39;inscription
-                    </button>
+                    <SubmitButton>Confirmer l&#39;inscription</SubmitButton>
                     <button
                       type="button"
                       onClick={resetPlayer1ExistingFlow}
@@ -1022,13 +1059,12 @@ export function RegistrationForm({
 
                 {player1Mode === "existing" && player1PhoneStatus === "error" && !player1VerifiedPlayer ? (
                   <div className="flex flex-col gap-2 text-sm">
-                    <button
-                      type="button"
+                    <VerifyButton
                       onClick={() => handleVerifyPlayerPhone("player1")}
-                      className="w-full rounded-lg bg-gradient-to-r from-orange-500 to-orange-400 px-6 py-3 text-base font-semibold text-white transition hover:-translate-y-0.5 hover:shadow-[0_8px_16px_rgba(255,107,53,0.3)]"
+                      isVerifying={player1IsVerifying}
                     >
                       Réessayer
-                    </button>
+                    </VerifyButton>
                     <button
                       type="button"
                       onClick={() => handlePlayer1ModeChange("new")}
@@ -1344,25 +1380,19 @@ export function RegistrationForm({
 
               {player2Mode === "existing" && !player2VerifiedPlayer && player2PhoneStatus !== "error" ? (
                 <div className="flex gap-3">
-                  <button
-                    type="button"
+                  <VerifyButton
                     onClick={() => handleVerifyPlayerPhone("player2")}
-                    disabled={player2IsVerifying}
-                    className="flex-1 rounded-lg bg-gradient-to-r from-emerald-500 to-emerald-400 px-6 py-3 text-base font-semibold text-white transition hover:-translate-y-0.5 hover:shadow-[0_8px_16px_rgba(16,185,129,0.3)] disabled:opacity-50"
+                    isVerifying={player2IsVerifying}
+                    variant="emerald"
                   >
-                    {player2IsVerifying ? "Vérification..." : "Vérifier mon compte"}
-                  </button>
+                    Vérifier mon compte
+                  </VerifyButton>
                 </div>
               ) : null}
 
               {player2Mode === "existing" && player2VerifiedPlayer ? (
                 <div className="flex flex-col gap-3 sm:flex-row">
-                  <button
-                    type="submit"
-                    className="flex-1 rounded-lg bg-gradient-to-r from-emerald-500 to-emerald-400 px-6 py-3 text-base font-semibold text-white transition hover:-translate-y-0.5 hover:shadow-[0_8px_16px_rgba(16,185,129,0.3)]"
-                  >
-                    Confirmer l&#39;inscription
-                  </button>
+                  <SubmitButton>Confirmer l&#39;inscription</SubmitButton>
                   <button
                     type="button"
                     onClick={resetPlayer2ExistingFlow}
@@ -1375,13 +1405,13 @@ export function RegistrationForm({
 
               {player2Mode === "existing" && player2PhoneStatus === "error" && !player2VerifiedPlayer ? (
                 <div className="flex flex-col gap-2 text-sm">
-                  <button
-                    type="button"
+                  <VerifyButton
                     onClick={() => handleVerifyPlayerPhone("player2")}
-                    className="w-full rounded-lg bg-gradient-to-r from-emerald-500 to-emerald-400 px-6 py-3 text-base font-semibold text-white transition hover:-translate-y-0.5 hover:shadow-[0_8px_16px_rgba(16,185,129,0.3)]"
+                    isVerifying={player2IsVerifying}
+                    variant="emerald"
                   >
                     Réessayer
-                  </button>
+                  </VerifyButton>
                   <button
                     type="button"
                     onClick={() => handlePlayer2ModeChange("new")}
@@ -1395,19 +1425,14 @@ export function RegistrationForm({
           ) : null}
         </div>
 
-        {isPairMode ? (
-          <>
-            <PaymentInfoBlock price={price} paymentConfig={paymentConfig} isPairMode={isPairMode} />
-            <div className="flex gap-3">
-              <button
-                type="submit"
-                className="flex-1 rounded-lg bg-gradient-to-r from-orange-500 to-orange-400 px-6 py-3 text-base font-semibold text-white transition hover:-translate-y-0.5 hover:shadow-[0_8px_16px_rgba(255,107,53,0.3)]"
-              >
-                Inscrire les deux joueurs
-              </button>
-            </div>
-          </>
-        ) : null}
+          {isPairMode ? (
+            <>
+              <PaymentInfoBlock price={price} paymentConfig={paymentConfig} isPairMode={isPairMode} />
+              <div className="flex gap-3">
+                <SubmitButton>Inscrire les deux joueurs</SubmitButton>
+              </div>
+            </>
+          ) : null}
       </form>
     </div>
   );
