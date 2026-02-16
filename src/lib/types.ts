@@ -182,6 +182,7 @@ export type Team = {
   id: string;
   tournament_id: string;
   name: string | null;
+  is_seeded?: boolean;
   created_at: string;
 };
 

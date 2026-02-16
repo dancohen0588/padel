@@ -835,7 +835,7 @@ export const countRegistrations = async (tournamentId: string) => {
 export const getTeamsByTournament = async (tournamentId: string): Promise<Team[]> => {
   const database = getDatabaseClient();
   const rows = await database<Team[]>`
-    select id, tournament_id, name, created_at::text as created_at
+    select id, tournament_id, name, is_seeded, created_at::text as created_at
     from teams
     where tournament_id = ${tournamentId}
     order by created_at asc

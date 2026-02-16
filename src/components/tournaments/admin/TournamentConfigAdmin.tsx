@@ -28,6 +28,7 @@ import {
   deleteTeamAction,
   removePlayerFromTeamAction,
   updateTeamNameAction,
+  toggleTeamSeededAction,
 } from "@/app/actions/teams";
 import {
   assignTeamToPoolAction,
@@ -143,6 +144,13 @@ export function TournamentConfigContent({
     [localTeamPlayers]
   );
 
+  const seededTeams = useMemo(
+    () => new Set(localTeams.filter((team) => team.is_seeded).map((team) => team.id)),
+    [localTeams]
+  );
+
+  const seededCount = seededTeams.size;
+
   const unassignedPlayers = useMemo(
     () => approvedPlayers.filter((player) => !assignedPlayerIds.has(player.id)),
     [approvedPlayers, assignedPlayerIds]
@@ -176,6 +184,8 @@ export function TournamentConfigContent({
       (tournament.config as { poolsCount?: number } | null | undefined)?.poolsCount ??
       4
   );
+
+  const maxSeeded = poolsCount;
 
 
   useEffect(() => {
@@ -246,6 +256,35 @@ export function TournamentConfigContent({
   const handleUpdateTeamName = async (teamId: string, name: string) => {
     await updateTeamNameAction(teamId, name, adminToken);
     setLocalTeams((prev) => prev.map((team) => (team.id === teamId ? { ...team, name } : team)));
+  };
+
+  const handleToggleSeeded = async (teamId: string) => {
+    const team = localTeams.find((item) => item.id === teamId);
+    if (!team) return;
+
+    const playerCount = teamPlayerMap.get(teamId)?.length ?? 0;
+
+    if (playerCount < 2 && !team.is_seeded) {
+      setToast("Équipe incomplète (2/2 requis)");
+      return;
+    }
+
+    if (!team.is_seeded && seededCount >= maxSeeded) {
+      setToast(`Limite atteinte (${maxSeeded} têtes de série max)`);
+      return;
+    }
+
+    const result = await toggleTeamSeededAction(teamId, tournament.id, adminToken);
+
+    if (!result.success) {
+      setToast(result.error || "Erreur");
+      return;
+    }
+
+    setLocalTeams((prev) =>
+      prev.map((item) => (item.id === teamId ? { ...item, is_seeded: result.isSeeded } : item))
+    );
+    setToast(result.isSeeded ? "Tête de série ajoutée" : "Tête de série retirée");
   };
 
   const ensurePools = async () => {
@@ -374,9 +413,23 @@ export function TournamentConfigContent({
 
             <Card className="rounded-2xl border border-white/10 bg-white/5 p-5 text-white shadow-card">
               <div className="flex flex-wrap items-center justify-between gap-3">
-                <p className="bg-gradient-to-br from-orange-400 to-amber-200 bg-clip-text text-sm font-semibold text-transparent">
-                  Équipes du tournoi
-                </p>
+                <div className="flex items-center gap-4">
+                  <p className="bg-gradient-to-br from-orange-400 to-amber-200 bg-clip-text text-sm font-semibold text-transparent">
+                    Équipes du tournoi
+                  </p>
+                  <div
+                    className={`rounded-full px-3 py-1.5 text-xs font-semibold transition-all ${
+                      seededCount >= maxSeeded
+                        ? "border border-red-400/30 bg-gradient-to-r from-red-500/20 to-red-400/10 text-red-300"
+                        : "border border-amber-400/30 bg-gradient-to-r from-amber-400/20 to-amber-300/10 text-amber-300"
+                    }`}
+                  >
+                    <span>⭐</span>
+                    <span className="ml-1">{seededCount}</span>
+                    <span className="text-white/50">/</span>
+                    <span>{maxSeeded}</span>
+                  </div>
+                </div>
                 <Button
                   type="button"
                   variant="outline"
@@ -391,6 +444,9 @@ export function TournamentConfigContent({
                   {localTeams.map((team) => {
                     const players = teamPlayerMap.get(team.id) ?? [];
                     const isComplete = players.length >= 2;
+                    const isSeeded = Boolean(team.is_seeded);
+                    const canBeSeeded = isComplete;
+                    const seededLimitReached = seededCount >= maxSeeded && !isSeeded;
                     return (
                       <div
                         key={team.id}
@@ -407,7 +463,31 @@ export function TournamentConfigContent({
                             defaultValue={team.name ?? ""}
                             onBlur={(event) => handleUpdateTeamName(team.id, event.target.value)}
                           />
-                          {players.length === 0 ? (
+                          {players.length > 0 ? (
+                            <button
+                              type="button"
+                              onClick={() => handleToggleSeeded(team.id)}
+                              disabled={!canBeSeeded || seededLimitReached}
+                              className={`flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl text-lg transition ${
+                                isSeeded
+                                  ? "bg-gradient-to-br from-amber-400 to-amber-500 shadow-lg hover:from-amber-300 hover:to-amber-400"
+                                  : canBeSeeded && !seededLimitReached
+                                  ? "bg-white/10 hover:bg-white/20"
+                                  : "cursor-not-allowed bg-white/5 opacity-30"
+                              }`}
+                              title={
+                                !canBeSeeded
+                                  ? "Équipe incomplète"
+                                  : seededLimitReached
+                                  ? `Limite atteinte (${maxSeeded} max)`
+                                  : isSeeded
+                                  ? "Retirer le statut de tête de série"
+                                  : "Désigner comme tête de série"
+                              }
+                            >
+                              {isSeeded ? "⭐" : "☆"}
+                            </button>
+                          ) : (
                             <button
                               type="button"
                               className="rounded-xl border border-red-500/40 bg-red-500/10 px-3 py-2 text-xs font-semibold text-red-400 transition hover:bg-red-500/20"
@@ -415,8 +495,13 @@ export function TournamentConfigContent({
                             >
                               ✕
                             </button>
-                          ) : null}
+                          )}
                         </div>
+                        {isSeeded ? (
+                          <div className="mt-2 rounded-lg border border-amber-400/40 bg-gradient-to-r from-amber-400/20 to-amber-300/10 px-3 py-1.5 text-center text-xs font-semibold text-amber-300">
+                            🏆 Tête de série
+                          </div>
+                        ) : null}
                         <DroppableArea
                           id={`drop:team:${team.id}`}
                           className="mt-3 space-y-2 rounded-xl border border-dashed border-white/15 bg-white/5 p-3"
@@ -573,28 +658,37 @@ export function TournamentConfigContent({
                         teamIds.map((teamId) => {
                           const team = localTeams.find((item) => item.id === teamId);
                           if (!team) return null;
-                          return (
-                            <DraggableItem
-                              key={team.id}
-                              id={`team:${team.id}`}
-                              className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs transition hover:border-white/30 hover:bg-white/10"
-                            >
-                              <p className="font-semibold text-white">{team.name || "Équipe"}</p>
-                              <p className="text-white/60">
-                                {(teamPlayerMap.get(team.id) ?? [])
-                                  .map((playerId) => {
-                                    const player = playerById.get(playerId);
-                                    if (!player) return "";
-                                    return player.pair_with
-                                      ? `${player.first_name} ${player.last_name} (Binôme : ${player.pair_with})`
-                                      : `${player.first_name} ${player.last_name}`;
-                                  })
-                                  .filter(Boolean)
-                                  .join(" / ")}
-                              </p>
-                            </DraggableItem>
-                          );
-                        })
+                            return (
+                              <DraggableItem
+                                key={team.id}
+                                id={`team:${team.id}`}
+                                className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs transition hover:border-white/30 hover:bg-white/10"
+                              >
+                                <div className="flex items-center justify-between gap-2">
+                                  <div className="flex-1">
+                                    <p className="font-semibold text-white">{team.name || "Équipe"}</p>
+                                    <p className="text-white/60">
+                                      {(teamPlayerMap.get(team.id) ?? [])
+                                        .map((playerId) => {
+                                          const player = playerById.get(playerId);
+                                          if (!player) return "";
+                                          return player.pair_with
+                                            ? `${player.first_name} ${player.last_name} (Binôme : ${player.pair_with})`
+                                            : `${player.first_name} ${player.last_name}`;
+                                        })
+                                        .filter(Boolean)
+                                        .join(" / ")}
+                                    </p>
+                                  </div>
+                                  {team.is_seeded ? (
+                                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-amber-400 to-amber-500 text-base shadow-md">
+                                      ⭐
+                                    </div>
+                                  ) : null}
+                                </div>
+                              </DraggableItem>
+                            );
+                          })
                       )}
                     </DroppableArea>
                     <div className="mt-3 flex items-center justify-between border-t border-white/10 pt-3">
