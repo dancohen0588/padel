@@ -92,6 +92,25 @@ export function DisplayBracket({
     return () => window.clearInterval(timer);
   }, [refreshSeconds]);
 
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== "f" && event.key !== "F") return;
+      event.preventDefault();
+
+      if (document.fullscreenElement) {
+        void document.exitFullscreen();
+        return;
+      }
+
+      const element = document.documentElement;
+      if (!element.requestFullscreen) return;
+      void element.requestFullscreen();
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
   const finalMatch = roundsByLabel.Finale[0];
 
   return (
