@@ -756,7 +756,7 @@ export function UsersValidatedTab({
             onClick={() => setShowCreateModal(false)}
           />
           <div className="relative flex min-h-screen items-center justify-center p-4">
-            <div className="relative w-full max-w-2xl rounded-2xl border border-white/10 bg-white/5 p-8 shadow-[0_8px_32px_rgba(0,0,0,0.3)]">
+            <div className="relative w-full max-w-2xl max-h-[calc(100vh-2rem)] overflow-y-auto rounded-2xl border border-white/10 bg-white/5 p-8 shadow-[0_8px_32px_rgba(0,0,0,0.3)]">
               <button
                 onClick={() => setShowCreateModal(false)}
                 className="absolute right-4 top-4 text-2xl leading-none text-white/60 hover:text-white"

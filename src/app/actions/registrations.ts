@@ -375,6 +375,19 @@ export async function createPlayerByAdminAction(
       return { status: "error", message: "Tournoi introuvable." };
     }
 
+    const registrationColumns = await database<Array<{ column_name: string }>>`
+      select column_name
+      from information_schema.columns
+      where table_schema = 'public' and table_name = 'registrations'
+      order by ordinal_position
+    `;
+
+    console.log("[createPlayerByAdminAction] context", {
+      mode,
+      tournamentId,
+      registrationColumns: registrationColumns.map((column) => column.column_name),
+    });
+
     if (mode === "existing") {
       const playerId = String(formData.get("playerId") ?? "").trim();
 
@@ -408,11 +421,9 @@ export async function createPlayerByAdminAction(
         insert into registrations (
           player_id,
           tournament_id,
-          status,
-          created_at,
-          updated_at
+          status
         )
-        values (${playerId}, ${tournamentId}, 'approved', now(), now())
+        values (${playerId}, ${tournamentId}, 'approved')
         returning id
       `;
 
@@ -488,11 +499,9 @@ export async function createPlayerByAdminAction(
       insert into registrations (
         player_id,
         tournament_id,
-        status,
-        created_at,
-        updated_at
+        status
       )
-      values (${playerId}, ${tournamentId}, 'approved', now(), now())
+      values (${playerId}, ${tournamentId}, 'approved')
       returning id
     `;
 
