@@ -7,6 +7,7 @@ import { Separator } from "@/components/ui/separator";
 type PaymentInfoBlockProps = {
   price: number | null;
   paymentConfig: PaymentConfig | null;
+  isPairMode?: boolean;
 };
 
 type MethodItem = {
@@ -52,7 +53,11 @@ const DEFAULT_PAYMENT_CONFIG: PaymentConfig = {
   paymentDeadlineHours: 48,
 };
 
-export function PaymentInfoBlock({ price, paymentConfig }: PaymentInfoBlockProps) {
+export function PaymentInfoBlock({
+  price,
+  paymentConfig,
+  isPairMode = false,
+}: PaymentInfoBlockProps) {
   const [isOpen, setIsOpen] = useState(false);
   const isPaid = (price ?? 0) > 0;
 
@@ -134,6 +139,14 @@ export function PaymentInfoBlock({ price, paymentConfig }: PaymentInfoBlockProps
     currency: "EUR",
   });
 
+  const formattedPairPrice =
+    price !== null
+      ? (price * 2).toLocaleString("fr-FR", {
+          style: "currency",
+          currency: "EUR",
+        })
+      : null;
+
   const visibleMethods = methods.filter((method) => method.enabled);
 
   return (
@@ -145,6 +158,11 @@ export function PaymentInfoBlock({ price, paymentConfig }: PaymentInfoBlockProps
           <p className="mb-3 text-xs text-white/70">
             Le prix d'inscription à ce tournoi est de{" "}
             <span className="font-bold text-white">{formattedPrice}</span>
+            {isPairMode && formattedPairPrice ? (
+              <span>
+                {" "}par joueur (soit {formattedPairPrice} pour le binôme)
+              </span>
+            ) : null}
           </p>
           <button
             type="button"

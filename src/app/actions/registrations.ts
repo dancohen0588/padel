@@ -24,6 +24,24 @@ type RegistrationResult =
 
 type RegistrationMode = "new" | "existing";
 
+type StatusUpdateResult =
+  | { status: "ok"; message: string }
+  | { status: "error"; message: string };
+
+type PairRegistrationSuccess = {
+  status: "ok";
+  message: string;
+  player1Id: string;
+  player2Id: string;
+  tournamentId: string;
+  whatsappGroupLink: string | null;
+  hasAlreadyJoined: boolean;
+};
+
+type PairRegistrationResult =
+  | PairRegistrationSuccess
+  | { status: "error"; message: string };
+
 type TournamentIdentifier =
   | { id: string }
   | { slug: string };
@@ -157,6 +175,7 @@ const registerForTournament = async (
   const mode = String(formData.get("mode") ?? "new") as RegistrationMode;
   const rawPhone = String(formData.get("phone") ?? "").trim();
   const phone = normalizePhone(rawPhone);
+  const pairWith = String(formData.get("pairWith") ?? "").trim() || null;
 
   if (!phone) {
     return { status: "error", message: "Veuillez entrer un numéro de téléphone valide" };
@@ -178,6 +197,14 @@ const registerForTournament = async (
 
     if (!player || normalizePhone(player.phone) !== phone) {
       return { status: "error", message: "Joueur non trouvé." };
+    }
+
+    if (pairWith) {
+      await database`
+        update players
+        set pair_with = ${pairWith}
+        where id = ${playerId}
+      `;
     }
 
     const registrationId = await ensureRegistration(database, tournamentId, playerId);
@@ -241,6 +268,14 @@ const registerForTournament = async (
     ranking,
     playPreference,
   });
+
+  if (pairWith) {
+    await database`
+      update players
+      set pair_with = ${pairWith}
+      where id = ${playerId}
+    `;
+  }
 
   const playerPhoto = formData.get("player_photo") as File | null;
   if (playerPhoto && playerPhoto.size > 0) {
@@ -342,6 +377,184 @@ export async function registerPlayerForTournament(
     }
 
     return await registerForTournament(database, tournamentId, formData);
+  } catch (error) {
+    return {
+      status: "error",
+      message: error instanceof Error ? error.message : "Erreur inconnue",
+    };
+  }
+}
+
+export async function registerPairAction(
+  _prevState: PairRegistrationResult | null,
+  formData: FormData
+): Promise<PairRegistrationResult> {
+  try {
+    const database = getDatabaseClient();
+    const tournamentId = String(formData.get("tournamentId") ?? "").trim();
+
+    if (!tournamentId) {
+      return { status: "error", message: "Tournoi introuvable." };
+    }
+
+    const player1Mode = String(formData.get("player1Mode") ?? "new") as RegistrationMode;
+    const player2Mode = String(formData.get("player2Mode") ?? "new") as RegistrationMode;
+
+    const pairResult = await database.begin(async (transaction) => {
+      const resolvePlayer = async (prefix: "player1" | "player2") => {
+        const mode = prefix === "player1" ? player1Mode : player2Mode;
+        const rawPhone = String(formData.get(`${prefix}Phone`) ?? "").trim();
+        const phone = normalizePhone(rawPhone);
+
+        if (!phone) {
+          throw new Error(
+            prefix === "player1"
+              ? "Le numéro de téléphone du Joueur 1 est invalide."
+              : "Le numéro de téléphone du Joueur 2 est invalide."
+          );
+        }
+
+        if (mode === "existing") {
+          const playerId = String(formData.get(`${prefix}PlayerId`) ?? "").trim();
+          if (!playerId) {
+            throw new Error(
+              prefix === "player1" ? "Joueur 1 introuvable." : "Joueur 2 introuvable."
+            );
+          }
+
+          const [player] = await transaction<
+            Array<{ id: string; phone: string | null; first_name: string; last_name: string }>
+          >`
+            select id, phone, first_name, last_name
+            from players
+            where id = ${playerId}
+            limit 1
+          `;
+
+          if (!player?.id || normalizePhone(player.phone ?? "") !== phone) {
+            throw new Error(
+              prefix === "player1" ? "Joueur 1 introuvable." : "Joueur 2 introuvable."
+            );
+          }
+
+          return {
+            id: player.id,
+            firstName: player.first_name,
+            lastName: player.last_name,
+            phone,
+          };
+        }
+
+        const firstName = String(formData.get(`${prefix}FirstName`) ?? "").trim();
+        const lastName = String(formData.get(`${prefix}LastName`) ?? "").trim();
+        const email = String(formData.get(`${prefix}Email`) ?? "").trim() || null;
+        const level = String(formData.get(`${prefix}Level`) ?? "").trim();
+        const isRankedValue = String(formData.get(`${prefix}IsRanked`) ?? "non");
+        const isRanked = isRankedValue === "oui";
+        const ranking = isRanked
+          ? String(formData.get(`${prefix}Ranking`) ?? "").trim() || null
+          : null;
+        const playPreference = String(formData.get(`${prefix}PlayPreference`) ?? "aucune").trim();
+
+        if (!firstName || !lastName || !level) {
+          throw new Error(
+            prefix === "player1"
+              ? "Veuillez remplir tous les champs obligatoires pour le Joueur 1."
+              : "Veuillez remplir tous les champs obligatoires pour le Joueur 2."
+          );
+        }
+
+        const existingPlayers = await transaction<Array<{ id: string }>>`
+          select id
+          from players
+          where CASE
+            WHEN phone ~ '^\\+33' THEN '0' || regexp_replace(substring(phone from 4), '[^0-9]', '', 'g')
+            ELSE regexp_replace(phone, '[^0-9]', '', 'g')
+          END = ${phone.replace(/^\+33/, "0").replace(/\D/g, "")}
+          limit 1
+        `;
+
+        if (existingPlayers[0]?.id) {
+          throw new Error(
+            prefix === "player1"
+              ? "Le numéro de téléphone du Joueur 1 est déjà utilisé. Utilisez le mode 'joueur existant'."
+              : "Le numéro de téléphone du Joueur 2 est déjà utilisé. Utilisez le mode 'joueur existant'."
+          );
+        }
+
+        const playerId = await createPlayer(transaction, {
+          firstName,
+          lastName,
+          email,
+          phone,
+          level,
+          isRanked,
+          ranking,
+          playPreference,
+        });
+
+        return {
+          id: playerId,
+          firstName,
+          lastName,
+          phone,
+        };
+      };
+
+      const player1 = await resolvePlayer("player1");
+      const player2 = await resolvePlayer("player2");
+
+      if (player1.id === player2.id) {
+        throw new Error("Vous ne pouvez pas vous inscrire deux fois avec le même compte.");
+      }
+
+      const player1FullName = `${player1.firstName} ${player1.lastName}`.trim();
+      const player2FullName = `${player2.firstName} ${player2.lastName}`.trim();
+
+      await transaction`
+        update players
+        set pair_with = ${player2FullName}
+        where id = ${player1.id}
+      `;
+
+      await transaction`
+        update players
+        set pair_with = ${player1FullName}
+        where id = ${player2.id}
+      `;
+
+      await ensureRegistration(transaction, tournamentId, player1.id);
+      await ensureRegistration(transaction, tournamentId, player2.id);
+
+      const whatsappGroupLink = await getTournamentWhatsappLink(transaction, tournamentId);
+      const hasAlreadyJoined = await getHasAlreadyJoined(transaction, player1.id, tournamentId);
+
+      return {
+        status: "ok",
+        message: `Inscription validée pour ${player1FullName} et ${player2FullName} !`,
+        player1Id: player1.id,
+        player2Id: player2.id,
+        tournamentId,
+        whatsappGroupLink,
+        hasAlreadyJoined,
+      };
+    });
+
+    const player1Photo = formData.get("player1_photo") as File | null;
+    if (player1Photo && player1Photo.size > 0) {
+      const photoData = new FormData();
+      photoData.set("player_photo", player1Photo);
+      await updatePlayerPhoto(pairResult.player1Id, photoData);
+    }
+
+    const player2Photo = formData.get("player2_photo") as File | null;
+    if (player2Photo && player2Photo.size > 0) {
+      const photoData = new FormData();
+      photoData.set("player_photo", player2Photo);
+      await updatePlayerPhoto(pairResult.player2Id, photoData);
+    }
+
+    return pairResult;
   } catch (error) {
     return {
       status: "error",
@@ -527,7 +740,7 @@ export async function updateRegistrationStatus(
   registrationId: string,
   status: RegistrationStatus,
   adminToken: string | null
-): Promise<RegistrationResult> {
+): Promise<StatusUpdateResult> {
   try {
     assertAdminToken(adminToken);
     const database = getDatabaseClient();

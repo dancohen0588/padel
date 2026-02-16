@@ -21,6 +21,7 @@ create table if not exists public.players (
   email text not null,
   level text,
   phone text,
+  pair_with text,
   created_at timestamptz not null default now()
 );
 

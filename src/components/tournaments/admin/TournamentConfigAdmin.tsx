@@ -351,9 +351,16 @@ export function TournamentConfigContent({
                         <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-violet-400 to-violet-600 text-xs font-semibold">
                           {getInitials(player)}
                         </div>
-                        <span className="text-xs font-semibold">
-                          {player.first_name} {player.last_name}
-                        </span>
+                        <div className="space-y-0.5">
+                          <span className="block text-xs font-semibold">
+                            {player.first_name} {player.last_name}
+                          </span>
+                          {player.pair_with ? (
+                            <span className="block text-[10px] text-white/60">
+                              Binôme : {player.pair_with}
+                            </span>
+                          ) : null}
+                        </div>
                       </div>
                       <span className="text-base text-white/30">⋮⋮</span>
                     </DraggableItem>
@@ -431,9 +438,16 @@ export function TournamentConfigContent({
                                     <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-violet-400 to-violet-600 text-[10px] font-semibold">
                                       {getInitials(player)}
                                     </div>
-                                    <span className="text-xs font-semibold">
-                                      {player.first_name} {player.last_name}
-                                    </span>
+                                    <div className="space-y-0.5">
+                                      <span className="block text-xs font-semibold">
+                                        {player.first_name} {player.last_name}
+                                      </span>
+                                      {player.pair_with ? (
+                                        <span className="block text-[10px] text-white/60">
+                                          Binôme : {player.pair_with}
+                                        </span>
+                                      ) : null}
+                                    </div>
                                   </DraggableItem>
                                 ) : (
                                   <span className="text-xs text-white/40">Glissez un joueur ici...</span>
@@ -508,7 +522,10 @@ export function TournamentConfigContent({
                       {(teamPlayerMap.get(team.id) ?? [])
                         .map((playerId) => {
                           const player = playerById.get(playerId);
-                          return player ? `${player.first_name} ${player.last_name}` : "";
+                          if (!player) return "";
+                          return player.pair_with
+                            ? `${player.first_name} ${player.last_name} (Binôme : ${player.pair_with})`
+                            : `${player.first_name} ${player.last_name}`;
                         })
                         .filter(Boolean)
                         .join(" / ")}
@@ -567,7 +584,10 @@ export function TournamentConfigContent({
                                 {(teamPlayerMap.get(team.id) ?? [])
                                   .map((playerId) => {
                                     const player = playerById.get(playerId);
-                                    return player ? `${player.first_name} ${player.last_name}` : "";
+                                    if (!player) return "";
+                                    return player.pair_with
+                                      ? `${player.first_name} ${player.last_name} (Binôme : ${player.pair_with})`
+                                      : `${player.first_name} ${player.last_name}`;
                                   })
                                   .filter(Boolean)
                                   .join(" / ")}

@@ -468,6 +468,12 @@ export function UsersValidatedTab({
                         <span>{registration.player.phone}</span>
                       </div>
                     ) : null}
+                    {registration.player.pair_with ? (
+                      <div className="flex items-center gap-2">
+                        <span>👥</span>
+                        <span>Binôme : {registration.player.pair_with}</span>
+                      </div>
+                    ) : null}
                     <div className="flex flex-wrap items-center gap-2 text-[11px] text-white/60">
                       <span>
                         Niveau :{" "}
@@ -620,6 +626,12 @@ export function UsersValidatedTab({
                           <div className="flex items-center gap-2">
                             <span>📱</span>
                             <span>{registration.player.phone}</span>
+                          </div>
+                        ) : null}
+                        {registration.player.pair_with ? (
+                          <div className="flex items-center gap-2">
+                            <span>👥</span>
+                            <span>Binôme : {registration.player.pair_with}</span>
                           </div>
                         ) : null}
                         <div className="flex flex-wrap items-center gap-2 text-[11px] text-white/60">

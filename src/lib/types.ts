@@ -107,7 +107,38 @@ export type Player = {
   play_preference?: "droite" | "gauche" | "aucune" | null;
   phone: string | null;
   created_at: string;
+  pair_with?: string | null;
   whatsappJoinedTournaments?: WhatsAppJoin[];
+};
+
+export type PairRegistrationData = {
+  player1: {
+    mode: "new" | "existing";
+    phone: string;
+    playerId?: string;
+    firstName?: string;
+    lastName?: string;
+    email?: string | null;
+    level?: string;
+    isRanked?: boolean;
+    ranking?: string | null;
+    playPreference?: string;
+    photo?: File | null;
+  };
+  player2: {
+    mode: "new" | "existing";
+    phone: string;
+    playerId?: string;
+    firstName?: string;
+    lastName?: string;
+    email?: string | null;
+    level?: string;
+    isRanked?: boolean;
+    ranking?: string | null;
+    playPreference?: string;
+    photo?: File | null;
+  };
+  tournamentId: string;
 };
 
 export type Registration = {

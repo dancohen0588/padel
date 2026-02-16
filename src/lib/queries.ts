@@ -680,10 +680,11 @@ export const getRegistrationsByStatus = async (
     player_phone: string | null;
   player_is_ranked: boolean | null;
   player_ranking: string | null;
-  player_play_preference: "droite" | "gauche" | "aucune" | null;
-  player_created_at: string;
-  player_whatsapp_joined_tournaments: unknown;
-};
+    player_play_preference: "droite" | "gauche" | "aucune" | null;
+    player_created_at: string;
+    player_pair_with: string | null;
+    player_whatsapp_joined_tournaments: unknown;
+  };
 
   const baseSql = database`
     select
@@ -706,6 +707,7 @@ export const getRegistrationsByStatus = async (
       p.ranking as player_ranking,
       p.play_preference as player_play_preference,
       p.created_at::text as player_created_at,
+      p.pair_with as player_pair_with,
       p.whatsapp_joined_tournaments as player_whatsapp_joined_tournaments
     from registrations r
     join players p on p.id = r.player_id
@@ -767,6 +769,7 @@ export const getRegistrationsByStatus = async (
         ranking: row.player_ranking,
         play_preference: row.player_play_preference,
         created_at: row.player_created_at,
+        pair_with: row.player_pair_with,
         whatsappJoinedTournaments: whatsappJoins,
       },
     };
