@@ -6,6 +6,8 @@ import { useFormState } from "react-dom";
 import { registerPlayer } from "@/app/actions/registrations";
 import { ImageDropzone } from "@/components/ui/image-dropzone";
 import { StorageImage } from "@/components/ui/StorageImage";
+import { PaymentInfoBlock } from "@/components/payments/PaymentInfoBlock";
+import type { PaymentConfig } from "@/lib/types";
 import {
   formatPhoneForDisplay,
   normalizePhoneNumber,
@@ -34,6 +36,8 @@ type VerifiedPlayer = {
 type RegistrationFormProps = {
   action?: typeof registerPlayer;
   tournamentId?: string | null;
+  price?: number | null;
+  paymentConfig?: PaymentConfig | null;
 };
 
 const LEVEL_LABELS: Record<string, string> = {
@@ -49,6 +53,8 @@ const LEVEL_LABELS: Record<string, string> = {
 export function RegistrationForm({
   action = registerPlayer,
   tournamentId,
+  price = null,
+  paymentConfig = null,
 }: RegistrationFormProps) {
   const [playerPhoto, setPlayerPhoto] = useState<File | null>(null);
   const [mode, setMode] = useState<RegistrationMode>("new");
@@ -503,6 +509,8 @@ export function RegistrationForm({
             {state.message}
           </div>
         ) : null}
+
+        <PaymentInfoBlock price={price} paymentConfig={paymentConfig} />
 
         {mode === "new" ? (
           <div className="flex gap-3">

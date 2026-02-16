@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inscription au Tournoi - Avec Paiement</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom gradient background */
+        .gradient-bg {
+            background: linear-gradient(135deg, #1E1E2E 0%, #2A2A3E 100%);
+        }
+
+        /* Modal backdrop */
+        .modal-backdrop {
+            backdrop-filter: blur(8px);
+            animation: fadeIn 0.2s ease-out;
+        }
+
+        /* Modal content animation */
+        .modal-content {
+            animation: slideUp 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Payment method card hover effect */
+        .payment-card {
+            transition: all 0.2s ease;
+        }
+
+        .payment-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(255, 107, 53, 0.2);
+        }
+
+        /* Hide modal by default */
+        .modal {
+            display: none;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        /* Hide number input arrows */
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type="number"] {
+            -moz-appearance: textfield;
+        }
+    </style>
+</head>
+<body class="gradient-bg min-h-screen px-5 py-10 text-white">
+    <main class="mx-auto w-full max-w-[600px]">
+        <!-- Header -->
+        <div class="mb-10 text-center">
+            <h1 class="bg-gradient-to-r from-orange-500 to-orange-400 bg-clip-text text-3xl font-bold text-transparent">
+                Inscription au Tournoi
+            </h1>
+            <p class="mt-2 text-sm text-white/60">
+                Superligue 15 Mars - Inscris-toi en quelques secondes.
+            </p>
+        </div>
+
+        <!-- Main Form Container -->
+        <div class="rounded-2xl border border-white/10 bg-white/5 p-8 shadow-[0_8px_32px_rgba(0,0,0,0.3)]">
+
+            <!-- Form -->
+            <form id="registrationForm" class="space-y-5">
+
+                <!-- Personal Info -->
+                <div class="grid gap-4 md:grid-cols-2">
+                    <div>
+                        <label for="firstName" class="mb-2 block text-sm font-medium text-white/80">
+                            Prénom <span class="text-orange-400">*</span>
+                        </label>
+                        <input
+                            id="firstName"
+                            name="firstName"
+                            type="text"
+                            placeholder="John"
+                            required
+                            class="w-full rounded-lg border border-white/20 bg-white/5 px-4 py-3 text-base text-white placeholder:text-white/40 focus:border-orange-500/60 focus:outline-none"
+                        />
+                    </div>
+                    <div>
+                        <label for="lastName" class="mb-2 block text-sm font-medium text-white/80">
+                            Nom <span class="text-orange-400">*</span>
+                        </label>
+                        <input
+                            id="lastName"
+                            name="lastName"
+                            type="text"
+                            placeholder="Doe"
+                            required
+                            class="w-full rounded-lg border border-white/20 bg-white/5 px-4 py-3 text-base text-white placeholder:text-white/40 focus:border-orange-500/60 focus:outline-none"
+                        />
+                    </div>
+                </div>
+
+                <!-- Phone -->
+                <div>
+                    <label for="phone" class="mb-2 block text-sm font-medium text-white/80">
+                        Numéro de téléphone <span class="text-orange-400">*</span>
+                    </label>
+                    <input
+                        id="phone"
+                        name="phone"
+                        type="tel"
+                        placeholder="06 12 34 56 78"
+                        required
+                        class="w-full rounded-lg border border-white/20 bg-white/5 px-4 py-3 text-base text-white placeholder:text-white/40 focus:border-orange-500/60 focus:outline-none"
+                    />
+                </div>
+
+                <!-- Email (Optional) -->
+                <div>
+                    <label for="email" class="mb-2 block text-sm font-medium text-white/80">
+                        Email <span class="text-xs text-white/50">(optionnel)</span>
+                    </label>
+                    <input
+                        id="email"
+                        name="email"
+                        type="email"
+                        placeholder="votre@email.com"
+                        class="w-full rounded-lg border border-white/20 bg-white/5 px-4 py-3 text-base text-white placeholder:text-white/40 focus:border-orange-500/60 focus:outline-none"
+                    />
+                </div>
+
+                <!-- QUESTIONNAIRE SECTION -->
+                <div class="rounded-xl border border-orange-500/20 bg-orange-500/5 p-5 space-y-5">
+                    <h3 class="text-sm font-semibold text-orange-400 mb-4">
+                        📋 Questionnaire
+                    </h3>
+
+                    <!-- Question 1: Niveau 1-7 -->
+                    <div>
+                        <label for="level" class="mb-2 block text-sm font-medium text-white/80">
+                            Quel est votre niveau ? <span class="text-orange-400">*</span>
+                        </label>
+                        <select
+                            id="level"
+                            name="level"
+                            required
+                            class="w-full rounded-lg border border-white/20 bg-white/5 px-4 py-3 text-base text-white focus:border-orange-500/60 focus:outline-none"
+                        >
+                            <option value="" disabled selected>Sélectionnez votre niveau</option>
+                            <option value="1">1 - Débutant</option>
+                            <option value="2">2 - Débutant confirmé</option>
+                            <option value="3">3 - Intermédiaire</option>
+                            <option value="4">4 - Intermédiaire confirmé</option>
+                            <option value="5">5 - Confirmé</option>
+                            <option value="6">6 - Avancé</option>
+                            <option value="7">7 - Expert</option>
+                        </select>
+                        <p class="mt-2 text-xs text-white/50">
+                            1 = Débutant | 7 = Expert
+                        </p>
+                    </div>
+
+                    <!-- Question 2: Classement Padel -->
+                    <div>
+                        <label class="mb-2 block text-sm font-medium text-white/80">
+                            Êtes-vous classé au padel ? <span class="text-orange-400">*</span>
+                        </label>
+                        <div class="flex gap-4 mb-3">
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input
+                                    type="radio"
+                                    name="isRanked"
+                                    value="non"
+                                    checked
+                                    onchange="toggleRankingField()"
+                                    class="h-4 w-4 accent-orange-500"
+                                />
+                                <span class="text-sm text-white">Non</span>
+                            </label>
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input
+                                    type="radio"
+                                    name="isRanked"
+                                    value="oui"
+                                    onchange="toggleRankingField()"
+                                    class="h-4 w-4 accent-orange-500"
+                                />
+                                <span class="text-sm text-white">Oui</span>
+                            </label>
+                        </div>
+
+                        <!-- Conditional Ranking Field -->
+                        <div id="rankingField" class="hidden mt-3">
+                            <label for="ranking" class="mb-2 block text-sm font-medium text-white/80">
+                                Votre classement <span class="text-orange-400">*</span>
+                            </label>
+                            <input
+                                id="ranking"
+                                name="ranking"
+                                type="text"
+                                placeholder="Ex: P500, P1000, 15/1, 15/2..."
+                                class="w-full rounded-lg border border-white/20 bg-white/5 px-4 py-3 text-base text-white placeholder:text-white/40 focus:border-orange-500/60 focus:outline-none"
+                            />
+                        </div>
+                    </div>
+
+                    <!-- Question 3: Preference -->
+                    <div>
+                        <label class="mb-2 block text-sm font-medium text-white/80">
+                            Avez-vous une préférence ? <span class="text-orange-400">*</span>
+                        </label>
+                        <div class="flex flex-col gap-3">
+                            <label class="flex items-center gap-3 rounded-lg border border-white/10 bg-white/5 px-4 py-3 cursor-pointer transition hover:bg-white/10">
+                                <input
+                                    type="radio"
+                                    name="preference"
+                                    value="droite"
+                                    required
+                                    class="h-4 w-4 accent-orange-500"
+                                />
+                                <span class="text-sm text-white">Jouer à droite</span>
+                            </label>
+                            <label class="flex items-center gap-3 rounded-lg border border-white/10 bg-white/5 px-4 py-3 cursor-pointer transition hover:bg-white/10">
+                                <input
+                                    type="radio"
+                                    name="preference"
+                                    value="gauche"
+                                    required
+                                    class="h-4 w-4 accent-orange-500"
+                                />
+                                <span class="text-sm text-white">Jouer à gauche</span>
+                            </label>
+                            <label class="flex items-center gap-3 rounded-lg border border-white/10 bg-white/5 px-4 py-3 cursor-pointer transition hover:bg-white/10">
+                                <input
+                                    type="radio"
+                                    name="preference"
+                                    value="aucune"
+                                    checked
+                                    required
+                                    class="h-4 w-4 accent-orange-500"
+                                />
+                                <span class="text-sm text-white">Pas de préférence</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Photo de profil (Optional) -->
+                <div>
+                    <label class="mb-2 block text-sm font-medium text-white/80">
+                        Photo de profil <span class="text-xs text-white/50">(optionnel)</span>
+                    </label>
+                    <div class="flex min-h-[100px] flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-white/20 bg-white/5 px-4 py-6 text-center text-xs text-white/60 transition hover:bg-white/10">
+                        <span>📷</span>
+                        <span>Glissez votre photo ici ou cliquez pour la sélectionner</span>
+                    </div>
+                </div>
+
+                <!-- PAYMENT INFORMATION SECTION -->
+                <div class="rounded-xl border border-orange-500/30 bg-gradient-to-br from-orange-500/10 to-orange-600/5 p-5">
+                    <div class="flex items-start gap-3">
+                        <div class="flex-shrink-0 text-2xl">💳</div>
+                        <div class="flex-1">
+                            <h3 class="text-sm font-semibold text-orange-400 mb-2">
+                                Informations de paiement
+                            </h3>
+                            <p class="text-xs text-white/70 mb-3">
+                                Le prix d'inscription à ce tournoi est de <span class="font-bold text-white">25,00 €</span>
+                            </p>
+                            <button
+                                type="button"
+                                onclick="openPaymentModal()"
+                                class="w-full rounded-lg border border-orange-500/60 bg-orange-500/20 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-orange-500/30 hover:border-orange-500"
+                            >
+                                Voir les moyens de paiement
+                            </button>
+
+                            <!-- Warning Notice -->
+                            <div class="mt-3 flex items-start gap-2 rounded-lg border border-amber-500/30 bg-amber-500/10 p-3">
+                                <span class="text-base">⚠️</span>
+                                <p class="text-xs text-amber-200">
+                                    <strong>Important :</strong> Votre inscription ne sera validée qu'après réception du paiement.
+                                    Merci d'effectuer le règlement dans les 48h suivant votre inscription.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="flex gap-3">
+                    <button
+                        type="submit"
+                        class="flex-1 rounded-lg bg-gradient-to-r from-orange-500 to-orange-400 px-6 py-3 text-base font-semibold text-white transition hover:-translate-y-0.5 hover:shadow-[0_8px_16px_rgba(255,107,53,0.3)]"
+                    >
+                        S'inscrire au tournoi
+                    </button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <!-- PAYMENT MODAL -->
+    <div id="paymentModal" class="modal fixed inset-0 z-50 items-center justify-center p-4">
+        <!-- Backdrop -->
+        <div class="modal-backdrop absolute inset-0 bg-black/70" onclick="closePaymentModal()"></div>
+
+        <!-- Modal Content -->
+        <div class="modal-content relative z-10 w-full max-w-2xl rounded-2xl border border-white/10 bg-[#1E1E2E] p-6 shadow-2xl">
+            <!-- Header -->
+            <div class="mb-6 flex items-start justify-between">
+                <div>
+                    <h2 class="text-xl font-bold text-white">Moyens de paiement</h2>
+                    <p class="mt-1 text-sm text-white/60">Choisissez votre méthode de règlement</p>
+                </div>
+                <button
+                    onclick="closePaymentModal()"
+                    class="rounded-lg p-2 text-white/60 transition hover:bg-white/10 hover:text-white"
+                    aria-label="Fermer"
+                >
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Payment Methods Grid -->
+            <div class="space-y-3">
+                <!-- Virement Bancaire -->
+                <div class="payment-card rounded-xl border border-white/10 bg-white/5 p-4">
+                    <div class="flex items-start gap-4">
+                        <div class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 text-2xl">
+                            🏦
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="text-sm font-semibold text-white">Virement bancaire</h3>
+                            <p class="mt-1 text-xs text-white/60">
+                                IBAN : FR76 1234 5678 9012 3456 7890 123
+                            </p>
+                            <p class="mt-0.5 text-xs text-white/60">
+                                BIC : ABCDEFGHIJK
+                            </p>
+                            <p class="mt-1.5 text-xs text-orange-400">
+                                Précisez votre nom dans le libellé
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Lydia -->
+                <div class="payment-card rounded-xl border border-white/10 bg-white/5 p-4">
+                    <div class="flex items-start gap-4">
+                        <div class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-purple-500 to-purple-600 text-2xl">
+                            💜
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="text-sm font-semibold text-white">Lydia</h3>
+                            <p class="mt-1 text-xs text-white/60">
+                                Identifiant : @PadelClub
+                            </p>
+                            <p class="mt-1.5 text-xs text-orange-400">
+                                Paiement instantané - Idéal pour mobile
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Revolut -->
+                <div class="payment-card rounded-xl border border-white/10 bg-white/5 p-4">
+                    <div class="flex items-start gap-4">
+                        <div class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-cyan-500 to-cyan-600 text-2xl">
+                            💎
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="text-sm font-semibold text-white">Revolut</h3>
+                            <p class="mt-1 text-xs text-white/60">
+                                Lien : revolut.me/padelclub
+                            </p>
+                            <p class="mt-0.5 text-xs text-white/60">
+                                Tag : @padelclub
+                            </p>
+                            <p class="mt-1.5 text-xs text-orange-400">
+                                Transfert rapide et gratuit
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Wero -->
+                <div class="payment-card rounded-xl border border-white/10 bg-white/5 p-4">
+                    <div class="flex items-start gap-4">
+                        <div class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-green-500 to-green-600 text-2xl">
+                            🌊
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="text-sm font-semibold text-white">Wero</h3>
+                            <p class="mt-1 text-xs text-white/60">
+                                Identifiant : 06 12 34 56 78
+                            </p>
+                            <p class="mt-1.5 text-xs text-orange-400">
+                                Nouveau moyen de paiement européen
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Espèces -->
+                <div class="payment-card rounded-xl border border-white/10 bg-white/5 p-4">
+                    <div class="flex items-start gap-4">
+                        <div class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-amber-500 to-amber-600 text-2xl">
+                            💵
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="text-sm font-semibold text-white">Espèces</h3>
+                            <p class="mt-1 text-xs text-white/60">
+                                Paiement sur place le jour du tournoi
+                            </p>
+                            <p class="mt-1.5 text-xs text-orange-400">
+                                Monnaie acceptée - Prévoir l'appoint
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Important Notice -->
+            <div class="mt-6 rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-4">
+                <div class="flex items-start gap-3">
+                    <span class="text-xl">✅</span>
+                    <div class="flex-1">
+                        <p class="text-xs font-semibold text-emerald-300">
+                            Confirmation de paiement
+                        </p>
+                        <p class="mt-1 text-xs text-emerald-200/80">
+                            Après votre paiement, envoyez une capture d'écran ou une confirmation par email à
+                            <a href="mailto:paiement@padelclub.fr" class="font-semibold text-emerald-300 underline">
+                                paiement@padelclub.fr
+                            </a>
+                            pour validation rapide.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Close Button -->
+            <div class="mt-6 flex justify-end">
+                <button
+                    onclick="closePaymentModal()"
+                    class="rounded-lg bg-white/10 px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-white/15"
+                >
+                    Fermer
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Toggle ranking field visibility
+        function toggleRankingField() {
+            const isRanked = document.querySelector('input[name="isRanked"]:checked').value;
+            const rankingField = document.getElementById('rankingField');
+            const rankingInput = document.getElementById('ranking');
+
+            if (isRanked === 'oui') {
+                rankingField.classList.remove('hidden');
+                rankingInput.required = true;
+            } else {
+                rankingField.classList.add('hidden');
+                rankingInput.required = false;
+                rankingInput.value = '';
+            }
+        }
+
+        function openPaymentModal() {
+            const modal = document.getElementById('paymentModal');
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closePaymentModal() {
+            const modal = document.getElementById('paymentModal');
+            modal.classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+
+        // Close modal with Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closePaymentModal();
+            }
+        });
+
+        // Form submission
+        document.getElementById('registrationForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('Inscription envoyée ! N\'oubliez pas de régler votre participation pour valider votre inscription.');
+        });
+    </script>
+</body>
+</html>

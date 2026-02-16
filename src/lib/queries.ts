@@ -4,6 +4,7 @@ import type {
   MatchSet,
   MatchStatus,
   MatchWithTeams,
+  PaymentConfig,
   Pool,
   PoolStanding,
   PoolTeam,
@@ -29,10 +30,44 @@ import type {
   TopTeam,
 } from "@/types/home-stats";
 
+const DEFAULT_PAYMENT_CONFIG: PaymentConfig = {
+  enabled: false,
+  methods: {
+    bank: {
+      enabled: false,
+      iban: null,
+      bic: null,
+    },
+    lydia: {
+      enabled: false,
+      identifier: null,
+    },
+    revolut: {
+      enabled: false,
+      link: null,
+      tag: null,
+    },
+    wero: {
+      enabled: false,
+      identifier: null,
+    },
+    cash: {
+      enabled: false,
+    },
+  },
+  confirmationEmail: null,
+  paymentDeadlineHours: 48,
+};
+
+const getPaymentConfigOrDefault = (value: PaymentConfig | null) =>
+  value ?? DEFAULT_PAYMENT_CONFIG;
+
+const GLOBAL_PAYMENT_CONFIG_ID = "00000000-0000-0000-0000-000000000001";
+
 export const getActiveTournament = async (): Promise<Tournament | null> => {
   const database = getDatabaseClient();
   console.info("[db-debug] getActiveTournament using database");
-  const tournaments = await database<Tournament[]>`
+  const tournaments = await database<Array<Tournament & { payment_config: PaymentConfig | null }>>`
     select
       id,
       slug,
@@ -43,6 +78,8 @@ export const getActiveTournament = async (): Promise<Tournament | null> => {
       status,
       max_players,
       image_path,
+      price,
+      payment_config,
       config,
       created_at::text as created_at
     from tournaments
@@ -51,7 +88,13 @@ export const getActiveTournament = async (): Promise<Tournament | null> => {
     limit 1
   `;
 
-  return tournaments[0] ?? null;
+  const row = tournaments[0];
+  if (!row) return null;
+
+  return {
+    ...row,
+    paymentConfig: getPaymentConfigOrDefault((row.payment_config ?? null) as PaymentConfig),
+  };
 };
 
 export const getPublishedTournaments = async (): Promise<Tournament[]> => {
@@ -60,7 +103,7 @@ export const getPublishedTournaments = async (): Promise<Tournament[]> => {
 
 export const getActiveDisplayTournaments = async (): Promise<Tournament[]> => {
   const database = getDatabaseClient();
-  const rows = await database<Tournament[]>`
+  const rows = await database<Array<Tournament & { payment_config: PaymentConfig | null }>>`
     select
       id,
       slug,
@@ -71,6 +114,8 @@ export const getActiveDisplayTournaments = async (): Promise<Tournament[]> => {
       status,
       max_players,
       image_path,
+      price,
+      payment_config,
       config,
       created_at::text as created_at
     from tournaments
@@ -78,7 +123,10 @@ export const getActiveDisplayTournaments = async (): Promise<Tournament[]> => {
     order by date desc, created_at desc
   `;
 
-  return rows;
+  return rows.map((row) => ({
+    ...row,
+    paymentConfig: getPaymentConfigOrDefault((row.payment_config ?? null) as PaymentConfig),
+  }));
 };
 
 export const getTournamentWithAllData = async (tournamentId: string) => {
@@ -150,7 +198,7 @@ export const getTournaments = async (
     ? database`where status = ${status}`
     : database``;
 
-  const rows = await database<Tournament[]>`
+  const rows = await database<Array<Tournament & { payment_config: PaymentConfig | null }>>`
     select
       id,
       slug,
@@ -161,6 +209,8 @@ export const getTournaments = async (
       status,
       max_players,
       image_path,
+      price,
+      payment_config,
       config,
       created_at::text as created_at
     from tournaments
@@ -168,14 +218,17 @@ export const getTournaments = async (
     order by date desc
   `;
 
-  return rows;
+  return rows.map((row) => ({
+    ...row,
+    paymentConfig: getPaymentConfigOrDefault((row.payment_config ?? null) as PaymentConfig),
+  }));
 };
 
 export const getTournamentById = async (
   tournamentId: string
 ): Promise<Tournament | null> => {
   const database = getDatabaseClient();
-  const rows = await database<Tournament[]>`
+  const rows = await database<Array<Tournament & { payment_config: PaymentConfig | null }>>`
     select
       id,
       slug,
@@ -186,6 +239,8 @@ export const getTournamentById = async (
       status,
       max_players,
       image_path,
+      price,
+      payment_config,
       config,
       created_at::text as created_at
     from tournaments
@@ -193,7 +248,13 @@ export const getTournamentById = async (
     limit 1
   `;
 
-  return rows[0] ?? null;
+  const row = rows[0];
+  if (!row) return null;
+
+  return {
+    ...row,
+    paymentConfig: getPaymentConfigOrDefault((row.payment_config ?? null) as PaymentConfig),
+  };
 };
 
 export const getFeaturedTournamentPhotos = async (): Promise<
@@ -252,6 +313,37 @@ export const getHomeConfig = async (): Promise<
     where id = ${"00000000-0000-0000-0000-000000000001"}
   `;
   return config ?? null;
+};
+
+const normalizePaymentConfig = (value: unknown): PaymentConfig | null => {
+  if (!value) return null;
+  if (typeof value === "string") {
+    try {
+      return JSON.parse(value) as PaymentConfig;
+    } catch {
+      return null;
+    }
+  }
+  return value as PaymentConfig;
+};
+
+export const getGlobalPaymentConfig = async (): Promise<PaymentConfig> => {
+  const database = getDatabaseClient();
+  const [row] = await database<
+    { id: string; config: PaymentConfig | null }[]
+  >`
+    select id, config
+    from payment_config
+    where id = ${GLOBAL_PAYMENT_CONFIG_ID}
+  `;
+  const normalized = normalizePaymentConfig(row?.config ?? null);
+  if (!normalized) {
+    console.warn("[payment-config] invalid config, fallback defaults", {
+      hasRow: Boolean(row),
+      configType: row?.config ? typeof row.config : "null",
+    });
+  }
+  return getPaymentConfigOrDefault(normalized);
 };
 
 export const getHomeGallery = async (): Promise<

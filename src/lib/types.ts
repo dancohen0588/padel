@@ -19,6 +19,45 @@ export type TournamentConfig = {
   };
 };
 
+export type PaymentMethodBank = {
+  enabled: boolean;
+  iban: string | null;
+  bic: string | null;
+};
+
+export type PaymentMethodLydia = {
+  enabled: boolean;
+  identifier: string | null;
+};
+
+export type PaymentMethodRevolut = {
+  enabled: boolean;
+  link: string | null;
+  tag: string | null;
+};
+
+export type PaymentMethodWero = {
+  enabled: boolean;
+  identifier: string | null;
+};
+
+export type PaymentMethodCash = {
+  enabled: boolean;
+};
+
+export type PaymentConfig = {
+  enabled: boolean;
+  methods: {
+    bank: PaymentMethodBank;
+    lydia: PaymentMethodLydia;
+    revolut: PaymentMethodRevolut;
+    wero: PaymentMethodWero;
+    cash: PaymentMethodCash;
+  };
+  confirmationEmail: string | null;
+  paymentDeadlineHours: number;
+};
+
 export type Tournament = {
   id: string;
   slug: string | null;
@@ -32,6 +71,7 @@ export type Tournament = {
   config: TournamentConfig;
   created_at: string;
   price: number | null;
+  paymentConfig: PaymentConfig;
 };
 
 export type Player = {

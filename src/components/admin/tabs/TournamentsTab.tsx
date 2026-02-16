@@ -13,6 +13,8 @@ import { upsertTournamentAction, deleteTournamentAction } from "@/app/actions/to
 type TournamentsTabProps = {
   tournaments: Tournament[];
   adminToken: string;
+  selectedId: string | null;
+  onSelectTournament: (tournamentId: string | null) => void;
 };
 
 const statusLabel: Record<TournamentStatus, string> = {
@@ -24,9 +26,13 @@ const statusLabel: Record<TournamentStatus, string> = {
   ongoing: "En cours",
 };
 
-export function TournamentsTab({ tournaments, adminToken }: TournamentsTabProps) {
+export function TournamentsTab({
+  tournaments,
+  adminToken,
+  selectedId,
+  onSelectTournament,
+}: TournamentsTabProps) {
   const [search, setSearch] = useState("");
-  const [selectedId, setSelectedId] = useState<string | null>(null);
   const [playoffsEnabled, setPlayoffsEnabled] = useState(false);
   const [hasThirdPlace, setHasThirdPlace] = useState(false);
   const [status, setStatus] = useState<TournamentStatus>("draft");
@@ -253,7 +259,7 @@ export function TournamentsTab({ tournaments, adminToken }: TournamentsTabProps)
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-2">
-              <GradientButton type="button" onClick={() => setSelectedId(null)}>
+              <GradientButton type="button" onClick={() => onSelectTournament(null)}>
                 Créer
               </GradientButton>
             </div>
@@ -273,11 +279,11 @@ export function TournamentsTab({ tournaments, adminToken }: TournamentsTabProps)
                 key={tournament.id}
                 role="button"
                 tabIndex={0}
-                onClick={() => setSelectedId(tournament.id)}
+                onClick={() => onSelectTournament(tournament.id)}
                 onKeyDown={(event) => {
                   if (event.key === "Enter" || event.key === " ") {
                     event.preventDefault();
-                    setSelectedId(tournament.id);
+                    onSelectTournament(tournament.id);
                   }
                 }}
                 className={`w-full rounded-2xl border p-3 text-left transition ${
@@ -638,7 +644,7 @@ export function TournamentsTab({ tournaments, adminToken }: TournamentsTabProps)
                   formData.set("adminToken", adminToken);
                   formData.set("tournamentId", selected.id);
                   await deleteTournamentAction(formData);
-                  setSelectedId(null);
+                  onSelectTournament(null);
                   router.refresh();
                 }}
               >

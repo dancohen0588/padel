@@ -1,5 +1,5 @@
 import { RegistrationForm } from "@/app/inscription/registration-form";
-import { getTournaments } from "@/lib/queries";
+import { getGlobalPaymentConfig, getTournaments } from "@/lib/queries";
 import { registerPlayerForTournament } from "@/app/actions/registrations";
 
 type TournamentRegisterPageProps = {
@@ -9,7 +9,10 @@ type TournamentRegisterPageProps = {
 export default async function TournamentRegisterPage({
   params,
 }: TournamentRegisterPageProps) {
-  const tournaments = await getTournaments("registration");
+  const [tournaments, paymentConfig] = await Promise.all([
+    getTournaments("registration"),
+    getGlobalPaymentConfig(),
+  ]);
   const tournament = tournaments.find((entry) => entry.slug === params.slug);
 
   return (
@@ -33,6 +36,8 @@ export default async function TournamentRegisterPage({
               return registerPlayerForTournament(prevState, formData);
             }}
             tournamentId={tournament.id}
+            price={tournament.price ?? null}
+            paymentConfig={paymentConfig ?? null}
           />
         ) : (
           <div className="rounded-2xl border border-dashed border-white/20 bg-white/5 p-8 text-center text-sm text-white/60">
