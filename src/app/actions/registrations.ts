@@ -8,8 +8,18 @@ import { revalidatePath } from "next/cache";
 import { updatePlayerPhoto } from "@/app/actions/photo-actions";
 import { normalizePhoneNumber } from "@/lib/phone-utils";
 
+type RegistrationSuccess = {
+  status: "ok";
+  message: string;
+  playerId: string;
+  registrationId: string;
+  tournamentId: string;
+  whatsappGroupLink: string | null;
+  hasAlreadyJoined: boolean;
+};
+
 type RegistrationResult =
-  | { status: "ok"; message: string }
+  | RegistrationSuccess
   | { status: "error"; message: string };
 
 type RegistrationMode = "new" | "existing";
@@ -77,7 +87,7 @@ const ensureRegistration = async (
   database: Sql,
   tournamentId: string,
   playerId: string
-): Promise<void> => {
+): Promise<string> => {
   const existingRegistrations = await database<Array<{ id: string }>>`
     select id
     from registrations
@@ -89,10 +99,54 @@ const ensureRegistration = async (
     throw new Error("Vous êtes déjà inscrit à ce tournoi");
   }
 
-  await database`
+  const created = await database<Array<{ id: string }>>`
     insert into registrations (tournament_id, player_id, status)
     values (${tournamentId}, ${playerId}, 'pending')
+    returning id
   `;
+
+  if (!created[0]?.id) {
+    throw new Error("Création inscription échouée.");
+  }
+
+  return created[0].id;
+};
+
+const getTournamentWhatsappLink = async (
+  database: Sql,
+  tournamentId: string
+): Promise<string | null> => {
+  const [tournament] = await database<
+    Array<{ whatsapp_group_link: string | null }>
+  >`
+    select whatsapp_group_link
+    from tournaments
+    where id = ${tournamentId}
+    limit 1
+  `;
+
+  return tournament?.whatsapp_group_link ?? null;
+};
+
+const getHasAlreadyJoined = async (
+  database: Sql,
+  playerId: string,
+  tournamentId: string
+): Promise<boolean> => {
+  const [player] = await database<
+    Array<{ whatsapp_joined_tournaments: unknown }>
+  >`
+    select whatsapp_joined_tournaments
+    from players
+    where id = ${playerId}
+    limit 1
+  `;
+
+  const joins = (player?.whatsapp_joined_tournaments as Array<{
+    tournamentId: string;
+  }>) || [];
+
+  return joins.some((join) => join.tournamentId === tournamentId);
 };
 
 const registerForTournament = async (
@@ -126,12 +180,23 @@ const registerForTournament = async (
       return { status: "error", message: "Joueur non trouvé." };
     }
 
-    await ensureRegistration(database, tournamentId, playerId);
+    const registrationId = await ensureRegistration(database, tournamentId, playerId);
+    const whatsappGroupLink = await getTournamentWhatsappLink(database, tournamentId);
+    const hasAlreadyJoined = await getHasAlreadyJoined(
+      database,
+      playerId,
+      tournamentId
+    );
 
     return {
       status: "ok",
       message:
         "✓ Inscription réussie ! Votre compte a été rattaché à ce tournoi. Votre demande est en attente de validation.",
+      playerId,
+      registrationId,
+      tournamentId,
+      whatsappGroupLink,
+      hasAlreadyJoined,
     };
   }
 
@@ -184,12 +249,19 @@ const registerForTournament = async (
     await updatePlayerPhoto(playerId, photoData);
   }
 
-  await ensureRegistration(database, tournamentId, playerId);
+  const registrationId = await ensureRegistration(database, tournamentId, playerId);
+  const whatsappGroupLink = await getTournamentWhatsappLink(database, tournamentId);
+  const hasAlreadyJoined = await getHasAlreadyJoined(database, playerId, tournamentId);
 
   return {
     status: "ok",
     message:
       "✓ Inscription réussie ! Votre demande est en attente de validation par l'administrateur.",
+    playerId,
+    registrationId,
+    tournamentId,
+    whatsappGroupLink,
+    hasAlreadyJoined,
   };
 };
 

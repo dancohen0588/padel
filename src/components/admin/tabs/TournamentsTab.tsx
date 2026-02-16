@@ -43,6 +43,7 @@ export function TournamentsTab({
   const [teamsQualified, setTeamsQualified] = useState(0);
   const [slugValue, setSlugValue] = useState("");
   const [priceValue, setPriceValue] = useState<string>("");
+  const [whatsappLink, setWhatsappLink] = useState<string>("");
   const [imagePath, setImagePath] = useState<string | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -86,6 +87,7 @@ export function TournamentsTab({
     setPriceValue(
       selected?.price !== null && selected?.price !== undefined ? String(selected.price) : ""
     );
+    setWhatsappLink(selected?.whatsappGroupLink ?? "");
     setUploadError(null);
   }, [selected]);
 
@@ -410,6 +412,24 @@ export function TournamentsTab({
             />
             <span className="text-xs text-muted-foreground">
               Laissez vide pour un tournoi gratuit ou sans prix défini
+            </span>
+          </label>
+          <label className="flex flex-col gap-2 text-sm font-semibold text-brand-charcoal">
+            Lien du groupe WhatsApp
+            <div className="flex items-center gap-2">
+              <span className="text-xl">💬</span>
+              <Input
+                name="whatsapp_group_link"
+                type="url"
+                placeholder="https://chat.whatsapp.com/XXXXX"
+                value={whatsappLink}
+                onChange={(event) => setWhatsappLink(event.target.value)}
+                className="flex-1"
+              />
+            </div>
+            <span className="text-xs text-muted-foreground">
+              Laissez vide si vous ne souhaitez pas partager de groupe WhatsApp.
+              Le lien doit être au format : https://chat.whatsapp.com/XXXXX
             </span>
           </label>
           <label className="flex flex-col gap-2 text-sm font-semibold text-brand-charcoal">

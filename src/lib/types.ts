@@ -58,6 +58,11 @@ export type PaymentConfig = {
   paymentDeadlineHours: number;
 };
 
+export type WhatsAppJoin = {
+  tournamentId: string;
+  joinedAt: string;
+};
+
 export type Tournament = {
   id: string;
   slug: string | null;
@@ -72,6 +77,7 @@ export type Tournament = {
   created_at: string;
   price: number | null;
   paymentConfig: PaymentConfig;
+  whatsappGroupLink: string | null;
 };
 
 export type Player = {
@@ -85,6 +91,7 @@ export type Player = {
   play_preference?: "droite" | "gauche" | "aucune" | null;
   phone: string | null;
   created_at: string;
+  whatsappJoinedTournaments?: WhatsAppJoin[];
 };
 
 export type Registration = {

@@ -7,6 +7,7 @@ import { registerPlayer } from "@/app/actions/registrations";
 import { ImageDropzone } from "@/components/ui/image-dropzone";
 import { StorageImage } from "@/components/ui/StorageImage";
 import { PaymentInfoBlock } from "@/components/payments/PaymentInfoBlock";
+import { WhatsAppGroupSection } from "@/components/registration/WhatsAppGroupSection";
 import type { PaymentConfig } from "@/lib/types";
 import {
   formatPhoneForDisplay,
@@ -182,23 +183,35 @@ export function RegistrationForm({
 
   if (state?.status === "ok") {
     return (
-      <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-6 text-center">
-        <div className="space-y-3">
-          <div className="text-sm font-semibold text-emerald-300">
-            ✅ Inscription reçue
+      <div className="space-y-6">
+        <div className="success-animation rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-6 text-center">
+          <div className="space-y-3">
+            <div className="text-sm font-semibold text-emerald-300">
+              ✅ Inscription reçue
+            </div>
+            <p className="text-lg font-semibold text-white">
+              Inscription validée par l&#39;équipe !
+            </p>
+            <p className="text-sm text-white/70">{state.message}</p>
           </div>
-          <p className="text-lg font-semibold text-white">
-            Inscription validée par l&#39;équipe !
-          </p>
-          <p className="text-sm text-white/70">{state.message}</p>
-          <div className="pt-2">
-            <Link
-              href="/"
-              className="inline-flex items-center justify-center rounded-lg border border-white/20 bg-white/10 px-5 py-2 text-sm font-semibold text-white transition hover:bg-white/15"
-            >
-              Retour à l’accueil
-            </Link>
-          </div>
+        </div>
+
+        {state.whatsappGroupLink ? (
+          <WhatsAppGroupSection
+            whatsappGroupLink={state.whatsappGroupLink}
+            playerId={state.playerId}
+            tournamentId={state.tournamentId}
+            hasAlreadyJoined={state.hasAlreadyJoined}
+          />
+        ) : null}
+
+        <div className="pt-2 text-center">
+          <Link
+            href="/"
+            className="inline-flex items-center justify-center rounded-lg border border-white/20 bg-white/10 px-5 py-2 text-sm font-semibold text-white transition hover:bg-white/15"
+          >
+            Retour à l’accueil
+          </Link>
         </div>
       </div>
     );
