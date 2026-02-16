@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Tournoi - Onglet Joueurs avec Création</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            orange: '#FF6B35',
+                            orangeLight: '#FF8C42',
+                            yellow: '#FFD166',
+                            charcoal: '#1E1E2E',
+                        },
+                        status: {
+                            pending: '#FFD166',
+                            approved: '#7BD89B',
+                            rejected: '#FF8B8B',
+                        }
+                    },
+                    boxShadow: {
+                        card: '0 10px 30px -18px rgba(30, 30, 46, 0.25)',
+                        glow: '0 12px 24px -12px rgba(255, 107, 53, 0.45)',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #1E1E2E;
+            color: #ffffff;
+        }
+        .gradient-primary {
+            background: linear-gradient(135deg, #ff6b35 0%, #ff8c42 100%);
+        }
+        .modal-backdrop {
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(4px);
+        }
+        .modal-content {
+            animation: slideUp 0.3s ease-out;
+        }
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        @keyframes subtlePulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-[#1E1E2E] text-white">
+    <!-- Header -->
+    <header class="border-b border-white/10 bg-white/5">
+        <div class="mx-auto max-w-6xl px-6 py-4">
+            <div class="flex items-center justify-between">
+                <h1 class="text-xl font-bold text-white">🏆 Padel Tournament Admin</h1>
+                <div class="text-sm text-white/60">Admin Panel</div>
+            </div>
+        </div>
+    </header>
+
+    <main class="mx-auto w-full max-w-6xl space-y-10 px-6 py-12">
+        <!-- Tournament Header -->
+        <div class="rounded-3xl border border-orange-400/30 bg-gradient-to-br from-orange-500/10 via-orange-500/5 to-transparent p-6 shadow-card">
+            <div class="flex flex-wrap items-center gap-4">
+                <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-orange-400 to-orange-500 text-xl shadow-md">
+                    🏆
+                </div>
+                <div class="min-w-0 flex-1">
+                    <h1 class="bg-gradient-to-br from-orange-400 to-amber-200 bg-clip-text text-2xl font-semibold text-transparent">
+                        Configurer le tournoi
+                    </h1>
+                    <div class="mt-1 flex flex-wrap items-center gap-2 text-sm text-white/60">
+                        <span class="font-semibold text-white/80">Superligue 15 Mars</span>
+                        <span class="text-white/30">•</span>
+                        <span>📅 15 Mars 2025</span>
+                        <span class="text-white/30">•</span>
+                        <span>📍 Paris</span>
+                    </div>
+                </div>
+                <div class="inline-flex items-center gap-2 rounded-full border border-emerald-400/30 bg-emerald-500/15 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-emerald-300">
+                    <span class="h-2 w-2 animate-pulse rounded-full bg-emerald-300"></span>
+                    En cours
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="flex h-auto w-full flex-wrap gap-3 rounded-2xl border border-white/10 bg-white/5 p-3 shadow-card">
+            <button class="group inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-xs font-semibold text-white/70 transition hover:border-orange-400/40 hover:bg-orange-500/10 hover:text-white">
+                <span>📋</span>
+                <span>À valider</span>
+                <span class="rounded-full bg-white/20 px-2 py-0.5 text-[10px] font-semibold text-white/90">0</span>
+            </button>
+            <button class="group inline-flex items-center gap-2 rounded-xl border-transparent bg-gradient-to-br from-orange-400 to-orange-500 px-4 py-2 text-xs font-semibold text-white shadow-md">
+                <span>✓</span>
+                <span>Joueurs</span>
+                <span class="rounded-full bg-white/30 px-2 py-0.5 text-[10px] font-semibold text-white">7</span>
+            </button>
+            <button class="group inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-xs font-semibold text-white/70 transition hover:border-orange-400/40 hover:bg-orange-500/10 hover:text-white">
+                <span>👥</span>
+                <span>Équipes</span>
+                <span class="rounded-full bg-white/20 px-2 py-0.5 text-[10px] font-semibold text-white/90">8</span>
+            </button>
+        </div>
+
+        <!-- Content Joueurs Tab -->
+        <div class="space-y-6">
+            <!-- Section titre avec bouton créer -->
+            <div class="flex items-center justify-between">
+                <div class="space-y-2">
+                    <p class="text-2xl font-semibold text-white">Joueurs validés</p>
+                    <p class="text-sm text-white/60">7 joueurs confirmés pour le tournoi</p>
+                </div>
+                <button
+                    id="createPlayerBtn"
+                    class="gradient-primary rounded-lg px-6 py-3 text-sm font-semibold text-white shadow-glow transition hover:-translate-y-0.5"
+                >
+                    ➕ Créer un joueur
+                </button>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="rounded-2xl border border-white/10 bg-white/5 p-6 text-white shadow-card">
+                <div class="grid gap-4 md:grid-cols-5">
+                    <div class="space-y-1 rounded-2xl border border-white/10 bg-white/5 p-4">
+                        <p class="text-2xl font-semibold">7</p>
+                        <p class="text-xs uppercase tracking-wide text-white/60">Joueurs validés</p>
+                    </div>
+                    <div class="space-y-1 rounded-2xl border border-white/10 bg-white/5 p-4">
+                        <p class="text-2xl font-semibold">3</p>
+                        <p class="text-xs uppercase tracking-wide text-white/60">Équipes formées</p>
+                    </div>
+                    <div class="space-y-1 rounded-2xl border border-white/10 bg-white/5 p-4">
+                        <p class="text-2xl font-semibold">78%</p>
+                        <p class="text-xs uppercase tracking-wide text-white/60">Taux de validation</p>
+                    </div>
+                    <div class="space-y-1 rounded-2xl border border-green-500/20 bg-gradient-to-br from-green-500/10 to-transparent p-4">
+                        <div class="flex items-center gap-2">
+                            <p class="text-2xl font-semibold">1</p>
+                            <svg class="h-5 w-5 text-green-400" fill="currentColor" viewBox="0 0 24 24" style="animation: subtlePulse 2s ease-in-out infinite">
+                                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" />
+                            </svg>
+                        </div>
+                        <p class="text-xs uppercase tracking-wide text-green-300/80">Sur WhatsApp</p>
+                    </div>
+                    <div class="space-y-1 rounded-2xl border border-emerald-500/20 bg-gradient-to-br from-emerald-500/10 to-transparent p-4">
+                        <div class="flex items-center gap-2">
+                            <p class="text-2xl font-semibold">4</p>
+                            <svg class="h-5 w-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                            </svg>
+                        </div>
+                        <p class="text-xs uppercase tracking-wide text-emerald-300/80">Ont payé</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Liste des participants -->
+            <div class="rounded-2xl border border-white/10 bg-white/5 p-6 text-white shadow-card">
+                <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                    <div>
+                        <p class="text-lg font-semibold">Liste des participants</p>
+                        <p class="text-sm text-white/60">7 joueurs validés pour le tournoi</p>
+                    </div>
+                    <input
+                        type="search"
+                        placeholder="🔍 Rechercher un joueur..."
+                        class="rounded-lg border border-white/20 bg-white/5 px-4 py-2 text-white placeholder:text-white/40 focus:border-white/30 focus:outline-none md:max-w-sm"
+                    />
+                </div>
+                <div class="mt-4 flex flex-wrap gap-2">
+                    <button type="button" class="rounded-full bg-white/15 px-3 py-1 text-xs font-semibold text-white transition">Tous</button>
+                    <button type="button" class="rounded-full bg-white/5 px-3 py-1 text-xs font-semibold text-white/60 transition hover:bg-white/10">Sur WhatsApp</button>
+                    <button type="button" class="rounded-full bg-white/5 px-3 py-1 text-xs font-semibold text-white/60 transition hover:bg-white/10">Pas sur WhatsApp</button>
+                    <button type="button" class="rounded-full bg-white/5 px-3 py-1 text-xs font-semibold text-white/60 transition hover:bg-white/10">Payé</button>
+                    <button type="button" class="rounded-full bg-white/5 px-3 py-1 text-xs font-semibold text-white/60 transition hover:bg-white/10">Non payé</button>
+                </div>
+            </div>
+
+            <!-- Grille de joueurs -->
+            <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                <!-- Joueur 1 - Payé -->
+                <div class="rounded-2xl border border-white/10 bg-white/5 p-5 text-white shadow-card">
+                    <div class="flex items-start gap-4">
+                        <div class="flex h-12 w-12 items-center justify-center rounded-full bg-white/10 text-sm font-semibold text-white">TD</div>
+                        <div class="flex-1 space-y-3">
+                            <div class="space-y-1">
+                                <p class="text-base font-semibold">Thomas Dubois</p>
+                                <div class="flex items-center gap-2 text-[11px] uppercase tracking-wide text-emerald-200">
+                                    <span class="h-2 w-2 rounded-full bg-emerald-400"></span>
+                                    <span>Validé</span>
+                                </div>
+                            </div>
+                            <div class="space-y-2 text-sm text-white/70">
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <div class="flex items-center gap-2">
+                                        <span>✉️</span>
+                                        <span>thomas@email.com</span>
+                                    </div>
+                                    <span class="inline-flex items-center gap-1 rounded-full border border-green-400/30 bg-green-500/15 px-2 py-0.5 text-[11px] font-semibold text-green-300">
+                                        <svg class="h-2.5 w-2.5" fill="currentColor" viewBox="0 0 24 24">
+                                            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" />
+                                        </svg>
+                                        WhatsApp
+                                    </span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span>📱</span>
+                                    <span>+33 6 12 34 56 78</span>
+                                </div>
+                                <div class="flex flex-wrap items-center gap-2 text-[11px] text-white/60">
+                                    <span>Niveau : 3 - Intermédiaire</span>
+                                    <span>•</span>
+                                    <span>Classement : P500</span>
+                                    <span>•</span>
+                                    <span>Côté préféré : droite</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-4 space-y-3">
+                        <div class="flex items-center justify-between gap-3">
+                            <span class="rounded-full bg-status-approved px-3 py-1 text-xs font-semibold text-brand-charcoal">Validé</span>
+                            <span class="inline-flex items-center gap-1 rounded-full border border-emerald-400/30 bg-emerald-500/15 px-2.5 py-1 text-[11px] font-semibold text-emerald-300">
+                                <svg class="h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                </svg>
+                                <span>Payé</span>
+                            </span>
+                        </div>
+                        <select class="rounded-lg border border-white/20 bg-white/10 px-3 py-1.5 text-xs text-white focus:border-orange-400/50 focus:outline-none focus:ring-2 focus:ring-orange-400/20">
+                            <option value="" class="bg-[#1E1E2E] text-white/50">Moyen de paiement</option>
+                            <option value="lydia" selected class="bg-[#1E1E2E] text-white">💜 Lydia</option>
+                            <option value="bank" class="bg-[#1E1E2E] text-white">🏦 Virement bancaire</option>
+                            <option value="revolut" class="bg-[#1E1E2E] text-white">💳 Revolut</option>
+                            <option value="wero" class="bg-[#1E1E2E] text-white">💰 Wero</option>
+                            <option value="cash" class="bg-[#1E1E2E] text-white">💵 Paiement sur place</option>
+                        </select>
+                        <button class="w-full rounded-[10px] bg-white/10 px-4 py-2 text-sm font-semibold text-white shadow-glow transition hover:bg-white/15">
+                            ↶ Repasser en attente
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Joueur 2 - Non payé -->
+                <div class="rounded-2xl border border-white/10 bg-white/5 p-5 text-white shadow-card">
+                    <div class="flex items-start gap-4">
+                        <div class="flex h-12 w-12 items-center justify-center rounded-full bg-white/10 text-sm font-semibold text-white">ML</div>
+                        <div class="flex-1 space-y-3">
+                            <div class="space-y-1">
+                                <p class="text-base font-semibold">Marie Lambert</p>
+                                <div class="flex items-center gap-2 text-[11px] uppercase tracking-wide text-emerald-200">
+                                    <span class="h-2 w-2 rounded-full bg-emerald-400"></span>
+                                    <span>Validé</span>
+                                </div>
+                            </div>
+                            <div class="space-y-2 text-sm text-white/70">
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <div class="flex items-center gap-2">
+                                        <span>✉️</span>
+                                        <span>marie@email.com</span>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span>📱</span>
+                                    <span>+33 6 23 45 67 89</span>
+                                </div>
+                                <div class="flex flex-wrap items-center gap-2 text-[11px] text-white/60">
+                                    <span>Niveau : 5 - Confirmé</span>
+                                    <span>•</span>
+                                    <span>Classement : P1000</span>
+                                    <span>•</span>
+                                    <span>Côté préféré : gauche</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-4 space-y-3">
+                        <div class="flex items-center justify-between gap-3">
+                            <span class="rounded-full bg-status-approved px-3 py-1 text-xs font-semibold text-brand-charcoal">Validé</span>
+                            <span class="inline-flex items-center gap-1 rounded-full border border-rose-400/30 bg-rose-500/15 px-2.5 py-1 text-[11px] font-semibold text-rose-300">
+                                <svg class="h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                                </svg>
+                                <span>Non payé</span>
+                            </span>
+                        </div>
+                        <select disabled class="cursor-not-allowed rounded-lg border border-white/20 bg-white/10 px-3 py-1.5 text-xs text-white/50 focus:outline-none">
+                            <option class="bg-[#1E1E2E]">Moyen de paiement</option>
+                        </select>
+                        <button class="w-full rounded-[10px] bg-white/10 px-4 py-2 text-sm font-semibold text-white shadow-glow transition hover:bg-white/15">
+                            ↶ Repasser en attente
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modale de création de joueur -->
+    <div id="createPlayerModal" class="fixed inset-0 z-50 hidden">
+        <div class="modal-backdrop absolute inset-0" onclick="document.getElementById('createPlayerModal').classList.add('hidden')"></div>
+        <div class="relative flex min-h-screen items-center justify-center p-4">
+            <div class="modal-content relative w-full max-w-2xl rounded-2xl border border-white/10 bg-white/5 p-8 shadow-[0_8px_32px_rgba(0,0,0,0.3)]">
+                <button onclick="document.getElementById('createPlayerModal').classList.add('hidden')" class="absolute right-4 top-4 text-2xl leading-none text-white/60 hover:text-white">✕</button>
+
+                <div class="mb-8">
+                    <h2 class="bg-gradient-to-r from-orange-500 to-orange-400 bg-clip-text text-3xl font-bold text-transparent">Créer un nouveau joueur</h2>
+                    <p class="mt-2 text-sm text-white/60">Le joueur sera automatiquement validé et pourra participer au tournoi</p>
+                </div>
+
+                <!-- Toggle nouveau/existant -->
+                <div class="mb-8 rounded-xl border border-white/10 bg-white/5 p-5">
+                    <label class="block text-sm font-semibold text-white/90">Avez-vous déjà participé à un tournoi ?</label>
+                    <div class="mt-4 flex items-center gap-4">
+                        <span id="labelNew" class="text-xs font-semibold text-orange-400">Non, première fois</span>
+                        <button type="button" id="modeToggle" class="relative h-8 w-16 rounded-full border-2 border-white/20 bg-white/10">
+                            <span id="toggleKnob" class="absolute left-1 top-1/2 h-6 w-6 -translate-y-1/2 rounded-full bg-white shadow transition"></span>
+                        </button>
+                        <span id="labelExisting" class="text-xs font-semibold text-white/60">Oui, j'ai déjà joué</span>
+                    </div>
+                    <div id="infoExisting" class="mt-4 hidden rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-xs text-emerald-300">
+                        ℹ️ Utilisez le numéro de téléphone de votre première inscription pour retrouver votre compte et compiler vos statistiques.
+                    </div>
+                </div>
+
+                <form class="space-y-5">
+                    <!-- Téléphone -->
+                    <div>
+                        <label class="mb-2 block text-sm font-medium text-white/80">
+                            Numéro de téléphone <span class="text-orange-400">*</span>
+                        </label>
+                        <div class="flex gap-3">
+                            <input id="phoneInput" name="phone" placeholder="06 12 34 56 78 ou +33 6 12 34 56 78" type="tel" required class="flex-1 rounded-lg border border-white/20 bg-white/5 px-4 py-3 text-base text-white placeholder:text-white/40 focus:border-orange-500/60 focus:outline-none" />
+                            <button type="button" id="verifyBtn" class="hidden rounded-lg bg-gradient-to-r from-orange-500 to-orange-400 px-6 py-3 text-base font-semibold text-white transition hover:-translate-y-0.5 hover:shadow-[0_8px_16px_rgba(255,107,53,0.3)]">
+                                Vérifier
+                            </button>
+                        </div>
+                        <p class="mt-2 text-xs text-white/50">Formats acceptés : 06.12.34.56.78, 06 12 34 56 78, 0612345678, +33 6 12 34 56 78</p>
+                        <div id="phoneMessage" class="mt-3 hidden rounded-lg border px-4 py-3 text-sm"></div>
+                    </div>
+
+                    <!-- Profil joueur existant trouvé -->
+                    <div id="existingPlayerProfile" class="hidden rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4">
+                        <div class="flex items-center gap-4">
+                            <div class="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-orange-500 to-orange-400 text-xl font-semibold text-white">TD</div>
+                            <div>
+                                <p class="text-lg font-semibold text-white">Thomas Dubois</p>
+                                <p class="text-sm text-white/60">+33 6 12 34 56 78</p>
+                                <p class="text-xs text-white/50">thomas@email.com</p>
+                            </div>
+                        </div>
+                        <div class="mt-4 border-t border-white/10 pt-3 text-sm text-white/70">
+                            <div class="flex items-center justify-between py-1">
+                                <span>Niveau</span>
+                                <span class="font-semibold text-white">3 - Intermédiaire</span>
+                            </div>
+                            <div class="flex items-center justify-between py-1">
+                                <span>Tournois précédents</span>
+                                <span class="font-semibold text-white">5 participations</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Formulaire nouveau joueur -->
+                    <div id="newPlayerForm" class="space-y-5">
+                        <div class="grid gap-4 md:grid-cols-2">
+                            <div>
+                                <label class="mb-2 block text-sm font-medium text-white/80">Prénom <span class="text-orange-400">*</span></label>
+                                <input name="firstName" placeholder="John" required class="w-full rounded-lg border border-white/20 bg-white/5 px-4 py-3 text-base text-white placeholder:text-white/40 focus:border-orange-500/60 focus:outline-none" />
+                            </div>
+                            <div>
+                                <label class="mb-2 block text-sm font-medium text-white/80">Nom <span class="text-orange-400">*</span></label>
+                                <input name="lastName" placeholder="Doe" required class="w-full rounded-lg border border-white/20 bg-white/5 px-4 py-3 text-base text-white placeholder:text-white/40 focus:border-orange-500/60 focus:outline-none" />
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="mb-2 block text-sm font-medium text-white/80">Email <span class="text-xs text-white/50">(optionnel)</span></label>
+                            <input name="email" placeholder="votre@email.com" type="email" class="w-full rounded-lg border border-white/20 bg-white/5 px-4 py-3 text-base text-white placeholder:text-white/40 focus:border-orange-500/60 focus:outline-none" />
+                            <p class="mt-2 text-xs text-white/50">L'email est facultatif mais recommandé pour recevoir les notifications.</p>
+                        </div>
+
+                        <div class="space-y-5 rounded-xl border border-orange-500/20 bg-orange-500/5 p-5">
+                            <h3 class="text-sm font-semibold text-orange-400">📋 Questionnaire</h3>
+
+                            <div>
+                                <label class="mb-2 block text-sm font-medium text-white/80">Quel est votre niveau ? <span class="text-orange-400">*</span></label>
+                                <select name="level" required class="w-full rounded-lg border border-white/20 bg-white/5 px-4 py-3 text-base text-white focus:border-orange-500/60 focus:outline-none">
+                                    <option value="" disabled selected>Sélectionnez votre niveau</option>
+                                    <option value="1">1 - Débutant</option>
+                                    <option value="2">2 - Débutant confirmé</option>
+                                    <option value="3">3 - Intermédiaire</option>
+                                    <option value="4">4 - Intermédiaire confirmé</option>
+                                    <option value="5">5 - Confirmé</option>
+                                    <option value="6">6 - Avancé</option>
+                                    <option value="7">7 - Expert</option>
+                                </select>
+                                <p class="mt-2 text-xs text-white/50">1 = Débutant | 7 = Expert</p>
+                            </div>
+
+                            <div>
+                                <label class="mb-2 block text-sm font-medium text-white/80">Êtes-vous classé au padel ?</label>
+                                <div class="mb-3 flex gap-4">
+                                    <label class="flex cursor-pointer items-center gap-2">
+                                        <input type="radio" name="isRanked" value="non" checked onclick="document.getElementById('rankingInput').style.display='none'" class="h-4 w-4 accent-orange-500" />
+                                        <span class="text-sm text-white">Non</span>
+                                    </label>
+                                    <label class="flex cursor-pointer items-center gap-2">
+                                        <input type="radio" name="isRanked" value="oui" onclick="document.getElementById('rankingInput').style.display='block'" class="h-4 w-4 accent-orange-500" />
+                                        <span class="text-sm text-white">Oui</span>
+                                    </label>
+                                </div>
+                                <div id="rankingInput" class="mt-3" style="display: none;">
+                                    <label class="mb-2 block text-sm font-medium text-white/80">Votre classement</label>
+                                    <input name="ranking" type="text" placeholder="Ex: P500, P1000, 15/1, 15/2..." class="w-full rounded-lg border border-white/20 bg-white/5 px-4 py-3 text-base text-white placeholder:text-white/40 focus:border-orange-500/60 focus:outline-none" />
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="mb-2 block text-sm font-medium text-white/80">Avez-vous une préférence ? <span class="text-orange-400">*</span></label>
+                                <div class="flex flex-col gap-3">
+                                    <label class="flex cursor-pointer items-center gap-3 rounded-lg border border-white/10 bg-white/5 px-4 py-3 transition hover:bg-white/10">
+                                        <input type="radio" name="playPreference" value="droite" required class="h-4 w-4 accent-orange-500" />
+                                        <span class="text-sm text-white">Jouer à droite</span>
+                                    </label>
+                                    <label class="flex cursor-pointer items-center gap-3 rounded-lg border border-white/10 bg-white/5 px-4 py-3 transition hover:bg-white/10">
+                                        <input type="radio" name="playPreference" value="gauche" required class="h-4 w-4 accent-orange-500" />
+                                        <span class="text-sm text-white">Jouer à gauche</span>
+                                    </label>
+                                    <label class="flex cursor-pointer items-center gap-3 rounded-lg border border-white/10 bg-white/5 px-4 py-3 transition hover:bg-white/10">
+                                        <input type="radio" name="playPreference" value="aucune" checked required class="h-4 w-4 accent-orange-500" />
+                                        <span class="text-sm text-white">Pas de préférence</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-300">
+                        ✓ Ce joueur sera immédiatement validé et ajouté à la liste des participants.
+                    </div>
+
+                    <div class="flex gap-3">
+                        <button type="button" onclick="document.getElementById('createPlayerModal').classList.add('hidden')" class="flex-1 rounded-lg border border-white/20 bg-white/10 px-6 py-3 text-base font-semibold text-white transition hover:bg-white/15">Annuler</button>
+                        <button type="submit" class="flex-1 rounded-lg bg-gradient-to-r from-orange-500 to-orange-400 px-6 py-3 text-base font-semibold text-white transition hover:-translate-y-0.5 hover:shadow-[0_8px_16px_rgba(255,107,53,0.3)]">Créer et valider</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const modal = document.getElementById('createPlayerModal');
+        const createBtn = document.getElementById('createPlayerBtn');
+        const modeToggle = document.getElementById('modeToggle');
+        const toggleKnob = document.getElementById('toggleKnob');
+        const labelNew = document.getElementById('labelNew');
+        const labelExisting = document.getElementById('labelExisting');
+        const infoExisting = document.getElementById('infoExisting');
+        const newPlayerForm = document.getElementById('newPlayerForm');
+        const verifyBtn = document.getElementById('verifyBtn');
+        const phoneInput = document.getElementById('phoneInput');
+        const phoneMessage = document.getElementById('phoneMessage');
+        const existingPlayerProfile = document.getElementById('existingPlayerProfile');
+
+        let mode = 'new';
+
+        createBtn.addEventListener('click', () => modal.classList.remove('hidden'));
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') modal.classList.add('hidden');
+        });
+
+        modeToggle.addEventListener('click', () => {
+            mode = mode === 'new' ? 'existing' : 'new';
+
+            if (mode === 'existing') {
+                toggleKnob.classList.remove('left-1');
+                toggleKnob.classList.add('right-1');
+                modeToggle.classList.add('border-orange-500', 'bg-gradient-to-r', 'from-orange-500', 'to-orange-400');
+                modeToggle.classList.remove('border-white/20', 'bg-white/10');
+                labelNew.classList.remove('text-orange-400');
+                labelNew.classList.add('text-white/60');
+                labelExisting.classList.remove('text-white/60');
+                labelExisting.classList.add('text-orange-400');
+                infoExisting.classList.remove('hidden');
+                verifyBtn.classList.remove('hidden');
+                newPlayerForm.classList.add('hidden');
+                phoneInput.classList.add('border-orange-500/60', 'bg-orange-50/10');
+                existingPlayerProfile.classList.add('hidden');
+                phoneMessage.classList.add('hidden');
+            } else {
+                toggleKnob.classList.add('left-1');
+                toggleKnob.classList.remove('right-1');
+                modeToggle.classList.remove('border-orange-500', 'bg-gradient-to-r', 'from-orange-500', 'to-orange-400');
+                modeToggle.classList.add('border-white/20', 'bg-white/10');
+                labelNew.classList.add('text-orange-400');
+                labelNew.classList.remove('text-white/60');
+                labelExisting.classList.add('text-white/60');
+                labelExisting.classList.remove('text-orange-400');
+                infoExisting.classList.add('hidden');
+                verifyBtn.classList.add('hidden');
+                newPlayerForm.classList.remove('hidden');
+                phoneInput.classList.remove('border-orange-500/60', 'bg-orange-50/10');
+                existingPlayerProfile.classList.add('hidden');
+                phoneMessage.classList.add('hidden');
+            }
+        });
+
+        verifyBtn.addEventListener('click', () => {
+            // Simulation de vérification
+            phoneMessage.textContent = '✓ Compte trouvé : Thomas Dubois. Confirmez pour vous inscrire à ce tournoi.';
+            phoneMessage.classList.remove('hidden', 'border-red-500/30', 'bg-red-500/10', 'text-red-300');
+            phoneMessage.classList.add('border-emerald-500/30', 'bg-emerald-500/10', 'text-emerald-300');
+            existingPlayerProfile.classList.remove('hidden');
+        });
+    </script>
+</body>
+</html>

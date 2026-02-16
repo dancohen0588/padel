@@ -183,6 +183,7 @@ export default async function TournamentAdminPage({
               statusCounts={counts}
               adminToken={adminToken}
               paymentConfig={paymentConfig}
+              tournamentId={tournament.id}
             />
           </TabsContent>
           <TabsContent value="teams" className="mt-6">

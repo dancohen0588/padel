@@ -1,7 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useFormState } from "react-dom";
 import type {
   PaymentConfig,
   RegistrationStatus,
@@ -14,20 +15,59 @@ import { GradientButton } from "@/components/ui/gradient-button";
 import { WhatsAppBadge } from "@/components/admin/WhatsAppBadge";
 import { PaymentBadge } from "@/components/admin/PaymentBadge";
 import { PaymentMethodSelect } from "@/components/admin/PaymentMethodSelect";
-import { updateRegistrationStatusAction } from "@/app/actions/registrations";
+import { StorageImage } from "@/components/ui/StorageImage";
+import { Toast } from "@/components/ui/toast";
+import {
+  createPlayerByAdminAction,
+  updateRegistrationStatusAction,
+} from "@/app/actions/registrations";
+import {
+  formatPhoneForDisplay,
+  normalizePhoneNumber,
+} from "@/lib/phone-utils";
 
 type UsersValidatedTabProps = {
   registrations: RegistrationWithPlayer[];
   statusCounts: Record<RegistrationStatus, number>;
   adminToken: string;
   paymentConfig: PaymentConfig;
+  tournamentId: string;
 };
+
+const LEVEL_LABELS: Record<string, string> = {
+  "1": "1 - Débutant",
+  "2": "2 - Débutant confirmé",
+  "3": "3 - Intermédiaire",
+  "4": "4 - Intermédiaire confirmé",
+  "5": "5 - Confirmé",
+  "6": "6 - Avancé",
+  "7": "7 - Expert",
+};
+
+type VerifiedPlayer = {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string | null;
+  phone: string;
+  photoUrl: string | null;
+  level: string | null;
+  isRanked: boolean;
+  ranking: string | null;
+  playPreference: string | null;
+  tournamentsPlayed: number;
+};
+
+type CreatePlayerResult = Awaited<ReturnType<typeof createPlayerByAdminAction>>;
+
+const initialCreateState: CreatePlayerResult | null = null;
 
 export function UsersValidatedTab({
   registrations,
   statusCounts,
   adminToken,
   paymentConfig,
+  tournamentId,
 }: UsersValidatedTabProps) {
   const [search, setSearch] = useState("");
   const [whatsAppFilter, setWhatsAppFilter] = useState<
@@ -36,18 +76,141 @@ export function UsersValidatedTab({
   const [paymentFilter, setPaymentFilter] = useState<
     "all" | "paid" | "unpaid"
   >("all");
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [mode, setMode] = useState<"new" | "existing">("new");
+  const [phone, setPhone] = useState("");
+  const [phoneStatus, setPhoneStatus] = useState<"idle" | "success" | "error">(
+    "idle"
+  );
+  const [phoneMessage, setPhoneMessage] = useState<string | null>(null);
+  const [verifiedPlayer, setVerifiedPlayer] = useState<VerifiedPlayer | null>(null);
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [isRanked, setIsRanked] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
   const router = useRouter();
 
+  const enhancedAction = async (
+    prevState: CreatePlayerResult | null,
+    formData: FormData
+  ) => {
+    formData.set("mode", mode);
 
-  const LEVEL_LABELS: Record<string, string> = {
-    "1": "1 - Débutant",
-    "2": "2 - Débutant confirmé",
-    "3": "3 - Intermédiaire",
-    "4": "4 - Intermédiaire confirmé",
-    "5": "5 - Confirmé",
-    "6": "6 - Avancé",
-    "7": "7 - Expert",
+    if (mode === "existing" && verifiedPlayer) {
+      formData.set("playerId", verifiedPlayer.id);
+      formData.set("phone", verifiedPlayer.phone);
+    } else if (mode === "new") {
+      const rawPhone = String(formData.get("phone") ?? "").trim();
+      const normalizedPhone = normalizePhoneNumber(rawPhone);
+      if (normalizedPhone) {
+        formData.set("phone", normalizedPhone);
+      }
+    }
+
+    return createPlayerByAdminAction(prevState, formData);
   };
+
+  const [state, formAction] = useFormState(enhancedAction, initialCreateState);
+
+
+  useEffect(() => {
+    if (!showCreateModal) return;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setShowCreateModal(false);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [showCreateModal]);
+
+  useEffect(() => {
+    if (state?.status !== "ok") return;
+    setShowCreateModal(false);
+    setToast(state.message);
+    router.refresh();
+  }, [router, state]);
+
+  const resetExistingFlow = () => {
+    setPhone("");
+    setPhoneStatus("idle");
+    setPhoneMessage(null);
+    setVerifiedPlayer(null);
+    setIsVerifying(false);
+  };
+
+  const handleModeChange = (nextMode: "new" | "existing") => {
+    setMode(nextMode);
+    resetExistingFlow();
+  };
+
+  const handleVerifyPhone = async () => {
+    const trimmedPhone = phone.trim();
+    if (!trimmedPhone) {
+      setPhoneStatus("error");
+      setPhoneMessage("Veuillez entrer un numéro de téléphone valide");
+      return;
+    }
+
+    const normalizedPhone = normalizePhoneNumber(trimmedPhone);
+    if (!normalizedPhone) {
+      setPhoneStatus("error");
+      setPhoneMessage(
+        "Format de téléphone invalide. Utilisez : 06 12 34 56 78 ou +33 6 12 34 56 78"
+      );
+      return;
+    }
+
+    setIsVerifying(true);
+    setPhoneStatus("idle");
+    setPhoneMessage(null);
+
+    try {
+      const response = await fetch(
+        `/api/tournaments/${tournamentId}/verify-phone`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ phone: normalizedPhone }),
+        }
+      );
+
+      const payload = (await response.json()) as
+        | { success: true; player: VerifiedPlayer }
+        | { success: false; error: string };
+
+      if (!response.ok || !payload.success) {
+        setPhoneStatus("error");
+        setPhoneMessage(
+          payload.success
+            ? "✗ Aucun compte trouvé avec ce numéro. Vérifiez votre numéro ou créez un nouveau joueur."
+            : payload.error
+        );
+        setVerifiedPlayer(null);
+        return;
+      }
+
+      setVerifiedPlayer(payload.player);
+      setPhoneStatus("success");
+      setPhoneMessage(
+        `✓ Compte trouvé : ${payload.player.firstName} ${payload.player.lastName}. Confirmez pour l'ajouter au tournoi.`
+      );
+    } catch (error) {
+      console.error("verify-phone error", error);
+      setPhoneStatus("error");
+      setPhoneMessage("Erreur serveur.");
+      setVerifiedPlayer(null);
+    } finally {
+      setIsVerifying(false);
+    }
+  };
+
+  const levelLabel = useMemo(() => {
+    if (!verifiedPlayer?.level) {
+      return "—";
+    }
+
+    return LEVEL_LABELS[verifiedPlayer.level] ?? verifiedPlayer.level;
+  }, [verifiedPlayer]);
 
   const approved = useMemo(
     () =>
@@ -107,11 +270,20 @@ export function UsersValidatedTab({
 
   return (
     <div className="space-y-6">
-      <div className="space-y-2">
-        <p className="text-2xl font-semibold text-white">Joueurs validés</p>
-        <p className="text-sm text-white/60">
-          {approvedCount} joueurs confirmés pour le tournoi
-        </p>
+      {toast ? <Toast message={toast} onDismiss={() => setToast(null)} /> : null}
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div className="space-y-2">
+          <p className="text-2xl font-semibold text-white">Joueurs validés</p>
+          <p className="text-sm text-white/60">
+            {approvedCount} joueurs confirmés pour le tournoi
+          </p>
+        </div>
+        <button
+          onClick={() => setShowCreateModal(true)}
+          className="gradient-primary rounded-lg px-6 py-3 text-sm font-semibold text-white shadow-glow transition hover:-translate-y-0.5"
+        >
+          ➕ Créer un joueur
+        </button>
       </div>
 
       <Card className="rounded-2xl border border-white/10 bg-white/5 p-6 text-white shadow-card">
@@ -377,7 +549,7 @@ export function UsersValidatedTab({
                   d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
                 />
               </svg>
-              <span className="text-lg font-semibold">Liste d'attente</span>
+              <span className="text-lg font-semibold">Liste d&#39;attente</span>
             </div>
             <div className="h-px flex-1 bg-gradient-to-r from-transparent via-amber-500/30 to-transparent" />
           </div>
@@ -397,10 +569,10 @@ export function UsersValidatedTab({
               </svg>
               <div className="flex-1">
                 <p className="text-sm font-semibold text-amber-300">
-                  {waitlist.length} joueur{waitlist.length > 1 ? "s" : ""} en liste d'attente
+                  {waitlist.length} joueur{waitlist.length > 1 ? "s" : ""} en liste d&#39;attente
                 </p>
                 <p className="mt-1 text-xs text-white/70">
-                  Ces joueurs pourront être validés manuellement dès qu'une place se libère.
+                  Ces joueurs pourront être validés manuellement dès qu&#39;une place se libère.
                 </p>
               </div>
             </div>
@@ -430,7 +602,7 @@ export function UsersValidatedTab({
                         </p>
                         <div className="flex items-center gap-2 text-[11px] uppercase tracking-wide text-amber-200">
                           <span className="h-2 w-2 animate-pulse rounded-full bg-amber-400" />
-                          <span>Liste d'attente</span>
+                          <span>Liste d&#39;attente</span>
                         </div>
                       </div>
                       <div className="space-y-2 text-sm text-white/70">
@@ -537,11 +709,11 @@ export function UsersValidatedTab({
             <p className="text-sm font-semibold text-blue-300">
               Suivi des paiements
             </p>
-            <p className="mt-1 text-xs text-white/70">
-              Le badge indique si le joueur a réglé son inscription. Sélectionnez le
-              moyen de paiement utilisé dans la liste déroulante. Les moyens disponibles
-              sont configurés dans l'onglet "Paiements" de l'admin (/admin/inscriptions).
-            </p>
+              <p className="mt-1 text-xs text-white/70">
+                Le badge indique si le joueur a réglé son inscription. Sélectionnez le
+                moyen de paiement utilisé dans la liste déroulante. Les moyens disponibles
+                sont configurés dans l&#39;onglet &quot;Paiements&quot; de l&#39;admin (/admin/inscriptions).
+              </p>
           </div>
         </div>
       </Card>
@@ -570,13 +742,391 @@ export function UsersValidatedTab({
                 </svg>
                 WhatsApp
               </span>{" "}
-              indique que le joueur a cliqué sur "Rejoindre le groupe WhatsApp"
+              indique que le joueur a cliqué sur &quot;Rejoindre le groupe WhatsApp&quot;
               depuis sa page de confirmation. Survolez le badge pour voir la date
-              et l'heure exactes du clic.
+              et l&#39;heure exactes du clic.
             </p>
           </div>
         </div>
       </div>
+      {showCreateModal ? (
+        <div className="fixed inset-0 z-50">
+          <div
+            className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+            onClick={() => setShowCreateModal(false)}
+          />
+          <div className="relative flex min-h-screen items-center justify-center p-4">
+            <div className="relative w-full max-w-2xl rounded-2xl border border-white/10 bg-white/5 p-8 shadow-[0_8px_32px_rgba(0,0,0,0.3)]">
+              <button
+                onClick={() => setShowCreateModal(false)}
+                className="absolute right-4 top-4 text-2xl leading-none text-white/60 hover:text-white"
+              >
+                ✕
+              </button>
+
+              <div className="mb-8">
+                <h2 className="bg-gradient-to-r from-orange-500 to-orange-400 bg-clip-text text-3xl font-bold text-transparent">
+                  Créer un nouveau joueur
+                </h2>
+                <p className="mt-2 text-sm text-white/60">
+                  Le joueur sera automatiquement validé et pourra participer au tournoi
+                </p>
+              </div>
+
+              <div className="mb-6 rounded-xl border border-white/10 bg-white/5 p-5">
+                <label className="block text-sm font-semibold text-white/90">
+                  Avez-vous déjà participé à un tournoi ?
+                </label>
+                <div className="mt-4 flex items-center gap-4">
+                  <span
+                    className={`text-xs font-semibold transition ${
+                      mode === "new" ? "text-orange-400" : "text-white/60"
+                    }`}
+                  >
+                    Non, première fois
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      handleModeChange(mode === "new" ? "existing" : "new")
+                    }
+                    className={`relative h-8 w-16 rounded-full border-2 transition ${
+                      mode === "existing"
+                        ? "border-orange-500 bg-gradient-to-r from-orange-500 to-orange-400"
+                        : "border-white/20 bg-white/10"
+                    }`}
+                    aria-label="Basculer participant existant"
+                  >
+                    <span
+                      className={`absolute top-1/2 h-6 w-6 -translate-y-1/2 rounded-full bg-white shadow transition ${
+                        mode === "existing" ? "right-1" : "left-1"
+                      }`}
+                    />
+                  </button>
+                  <span
+                    className={`text-xs font-semibold transition ${
+                      mode === "existing" ? "text-orange-400" : "text-white/60"
+                    }`}
+                  >
+                    Oui, j&#39;ai déjà joué
+                  </span>
+                </div>
+                {mode === "existing" ? (
+                  <div className="mt-4 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-xs text-emerald-300">
+                    ℹ️ Utilisez le numéro de téléphone de la première inscription du joueur
+                    pour retrouver son compte et compiler ses statistiques.
+                  </div>
+                ) : null}
+              </div>
+
+              <form action={formAction} className="space-y-5">
+                <input type="hidden" name="tournamentId" value={tournamentId} />
+                <input type="hidden" name="adminToken" value={adminToken} />
+                <input type="hidden" name="mode" value={mode} />
+
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-white/80">
+                    Numéro de téléphone <span className="text-orange-400">*</span>
+                  </label>
+                  <input
+                    name="phone"
+                    placeholder="06 12 34 56 78 ou +33 6 12 34 56 78"
+                    type="tel"
+                    value={phone}
+                    onChange={(event) => setPhone(event.target.value)}
+                    required
+                    readOnly={mode === "existing" && Boolean(verifiedPlayer)}
+                    aria-describedby="phone-message"
+                    className={`w-full rounded-lg border px-4 py-3 text-base text-white transition ${
+                      mode === "existing"
+                        ? "border-orange-500/60 bg-orange-50/10"
+                        : "border-white/20 bg-white/5"
+                    } ${
+                      phoneStatus === "error"
+                        ? "border-red-500/60"
+                        : phoneStatus === "success"
+                          ? "border-emerald-500/60"
+                          : ""
+                    } ${mode === "existing" ? "text-lg" : ""} placeholder:text-white/40`}
+                  />
+                  {phoneMessage ? (
+                    <div
+                      id="phone-message"
+                      className={`mt-3 rounded-lg border px-4 py-3 text-sm ${
+                        phoneStatus === "error"
+                          ? "border-red-500/30 bg-red-500/10 text-red-300"
+                          : "border-emerald-500/30 bg-emerald-500/10 text-emerald-300"
+                      }`}
+                    >
+                      {phoneMessage}
+                    </div>
+                  ) : null}
+                  <p className="mt-2 text-xs text-white/50">
+                    Formats acceptés : 06.12.34.56.78, 06 12 34 56 78, 0612345678, +33 6
+                    12 34 56 78
+                  </p>
+                </div>
+
+                {mode === "existing" && verifiedPlayer ? (
+                  <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4">
+                    <div className="flex items-center gap-4">
+                      <div className="relative h-16 w-16 overflow-hidden rounded-full bg-gradient-to-br from-orange-500 to-orange-400 text-white">
+                        {verifiedPlayer.photoUrl ? (
+                          <StorageImage
+                            src={verifiedPlayer.photoUrl}
+                            alt={`${verifiedPlayer.firstName} ${verifiedPlayer.lastName}`}
+                            fill
+                            className="object-cover"
+                          />
+                        ) : (
+                          <div className="flex h-full w-full items-center justify-center text-xl font-semibold">
+                            {verifiedPlayer.firstName[0]}
+                            {verifiedPlayer.lastName[0]}
+                          </div>
+                        )}
+                      </div>
+                      <div>
+                        <p className="text-lg font-semibold text-white">
+                          {verifiedPlayer.firstName} {verifiedPlayer.lastName}
+                        </p>
+                        <p className="text-sm text-white/60">
+                          {formatPhoneForDisplay(verifiedPlayer.phone)}
+                        </p>
+                        {verifiedPlayer.email ? (
+                          <p className="text-xs text-white/50">{verifiedPlayer.email}</p>
+                        ) : null}
+                      </div>
+                    </div>
+                    <div className="mt-4 border-t border-white/10 pt-3 text-sm text-white/70">
+                      <div className="flex items-center justify-between py-1">
+                        <span>Niveau</span>
+                        <span className="font-semibold text-white">{levelLabel}</span>
+                      </div>
+                      <div className="flex items-center justify-between py-1">
+                        <span>Tournois précédents</span>
+                        <span className="font-semibold text-white">
+                          {verifiedPlayer.tournamentsPlayed} participations
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ) : null}
+
+                {mode === "new" ? (
+                  <>
+                    <div className="grid gap-4 md:grid-cols-2">
+                      <div>
+                        <label className="mb-2 block text-sm font-medium text-white/80">
+                          Prénom <span className="text-orange-400">*</span>
+                        </label>
+                        <input
+                          name="firstName"
+                          placeholder="John"
+                          required
+                          className="w-full rounded-lg border border-white/20 bg-white/5 px-4 py-3 text-base text-white placeholder:text-white/40"
+                        />
+                      </div>
+                      <div>
+                        <label className="mb-2 block text-sm font-medium text-white/80">
+                          Nom <span className="text-orange-400">*</span>
+                        </label>
+                        <input
+                          name="lastName"
+                          placeholder="Doe"
+                          required
+                          className="w-full rounded-lg border border-white/20 bg-white/5 px-4 py-3 text-base text-white placeholder:text-white/40"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="mb-2 block text-sm font-medium text-white/80">
+                        Email <span className="text-xs text-white/50">(optionnel)</span>
+                      </label>
+                      <input
+                        name="email"
+                        placeholder="votre@email.com"
+                        type="email"
+                        className="w-full rounded-lg border border-white/20 bg-white/5 px-4 py-3 text-base text-white placeholder:text-white/40"
+                      />
+                      <p className="mt-2 text-xs text-white/50">
+                        L&#39;email est facultatif mais recommandé pour recevoir les notifications.
+                      </p>
+                    </div>
+                    <div className="space-y-5 rounded-xl border border-orange-500/20 bg-orange-500/5 p-5">
+                      <h3 className="mb-4 text-sm font-semibold text-orange-400">
+                        📋 Questionnaire
+                      </h3>
+                      <div>
+                        <label className="mb-2 block text-sm font-medium text-white/80">
+                          Quel est votre niveau ? <span className="text-orange-400">*</span>
+                        </label>
+                        <select
+                          name="level"
+                          required
+                          className="w-full rounded-lg border border-white/20 bg-white/5 px-4 py-3 text-base text-white"
+                          defaultValue=""
+                        >
+                          <option value="" disabled>
+                            Sélectionnez votre niveau
+                          </option>
+                          <option value="1">1 - Débutant</option>
+                          <option value="2">2 - Débutant confirmé</option>
+                          <option value="3">3 - Intermédiaire</option>
+                          <option value="4">4 - Intermédiaire confirmé</option>
+                          <option value="5">5 - Confirmé</option>
+                          <option value="6">6 - Avancé</option>
+                          <option value="7">7 - Expert</option>
+                        </select>
+                        <p className="mt-2 text-xs text-white/50">1 = Débutant | 7 = Expert</p>
+                      </div>
+                      <div>
+                        <label className="mb-2 block text-sm font-medium text-white/80">
+                          Êtes-vous classé au padel ? <span className="text-orange-400">*</span>
+                        </label>
+                        <div className="mb-3 flex gap-4">
+                          <label className="flex cursor-pointer items-center gap-2">
+                            <input
+                              type="radio"
+                              name="isRanked"
+                              value="non"
+                              checked={!isRanked}
+                              onChange={() => setIsRanked(false)}
+                              className="h-4 w-4 accent-orange-500"
+                            />
+                            <span className="text-sm text-white">Non</span>
+                          </label>
+                          <label className="flex cursor-pointer items-center gap-2">
+                            <input
+                              type="radio"
+                              name="isRanked"
+                              value="oui"
+                              checked={isRanked}
+                              onChange={() => setIsRanked(true)}
+                              className="h-4 w-4 accent-orange-500"
+                            />
+                            <span className="text-sm text-white">Oui</span>
+                          </label>
+                        </div>
+                        {isRanked ? (
+                          <div className="mt-3">
+                            <label className="mb-2 block text-sm font-medium text-white/80">
+                              Votre classement <span className="text-orange-400">*</span>
+                            </label>
+                            <input
+                              name="ranking"
+                              type="text"
+                              placeholder="Ex: P500, P1000, 15/1, 15/2..."
+                              required={isRanked}
+                              className="w-full rounded-lg border border-white/20 bg-white/5 px-4 py-3 text-base text-white placeholder:text-white/40"
+                            />
+                          </div>
+                        ) : null}
+                      </div>
+                      <div>
+                        <label className="mb-2 block text-sm font-medium text-white/80">
+                          Avez-vous une préférence ? <span className="text-orange-400">*</span>
+                        </label>
+                        <div className="flex flex-col gap-3">
+                          <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-white/10 bg-white/5 px-4 py-3 transition hover:bg-white/10">
+                            <input
+                              type="radio"
+                              name="playPreference"
+                              value="droite"
+                              required
+                              className="h-4 w-4 accent-orange-500"
+                            />
+                            <span className="text-sm text-white">Jouer à droite</span>
+                          </label>
+                          <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-white/10 bg-white/5 px-4 py-3 transition hover:bg-white/10">
+                            <input
+                              type="radio"
+                              name="playPreference"
+                              value="gauche"
+                              required
+                              className="h-4 w-4 accent-orange-500"
+                            />
+                            <span className="text-sm text-white">Jouer à gauche</span>
+                          </label>
+                          <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-white/10 bg-white/5 px-4 py-3 transition hover:bg-white/10">
+                            <input
+                              type="radio"
+                              name="playPreference"
+                              value="aucune"
+                              defaultChecked
+                              required
+                              className="h-4 w-4 accent-orange-500"
+                            />
+                            <span className="text-sm text-white">Pas de préférence</span>
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                ) : null}
+
+                {state?.status === "error" ? (
+                  <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+                    {state.message}
+                  </div>
+                ) : null}
+
+                <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-300">
+                  ✓ Ce joueur sera immédiatement validé et ajouté à la liste des participants.
+                </div>
+
+                <div className="flex gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setShowCreateModal(false)}
+                    className="flex-1 rounded-lg border border-white/20 bg-white/10 px-6 py-3 text-base font-semibold text-white transition hover:bg-white/15"
+                  >
+                    Annuler
+                  </button>
+                  <button
+                    type="submit"
+                    className="flex-1 rounded-lg bg-gradient-to-r from-orange-500 to-orange-400 px-6 py-3 text-base font-semibold text-white transition hover:-translate-y-0.5 hover:shadow-[0_8px_16px_rgba(255,107,53,0.3)]"
+                    disabled={mode === "existing" && !verifiedPlayer}
+                  >
+                    Créer et valider
+                  </button>
+                </div>
+
+                {mode === "existing" && !verifiedPlayer && phoneStatus !== "error" ? (
+                  <div className="flex gap-3">
+                    <button
+                      type="button"
+                      onClick={handleVerifyPhone}
+                      disabled={isVerifying}
+                      className="flex-1 rounded-lg bg-gradient-to-r from-orange-500 to-orange-400 px-6 py-3 text-base font-semibold text-white transition hover:-translate-y-0.5 hover:shadow-[0_8px_16px_rgba(255,107,53,0.3)] disabled:opacity-50"
+                    >
+                      {isVerifying ? "Vérification..." : "Vérifier"}
+                    </button>
+                  </div>
+                ) : null}
+
+                {mode === "existing" && phoneStatus === "error" && !verifiedPlayer ? (
+                  <div className="flex flex-col gap-2 text-sm">
+                    <button
+                      type="button"
+                      onClick={handleVerifyPhone}
+                      className="w-full rounded-lg bg-gradient-to-r from-orange-500 to-orange-400 px-6 py-3 text-base font-semibold text-white transition hover:-translate-y-0.5 hover:shadow-[0_8px_16px_rgba(255,107,53,0.3)]"
+                    >
+                      Réessayer
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleModeChange("new")}
+                      className="text-xs font-semibold text-orange-400 underline"
+                    >
+                      Créer un nouveau joueur
+                    </button>
+                  </div>
+                ) : null}
+              </form>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

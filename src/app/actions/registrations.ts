@@ -350,6 +350,170 @@ export async function registerPlayerForTournament(
   }
 }
 
+type AdminCreatePlayerResult =
+  | {
+      status: "ok";
+      message: string;
+      playerId: string;
+      tournamentId: string;
+    }
+  | { status: "error"; message: string };
+
+export async function createPlayerByAdminAction(
+  _prevState: unknown,
+  formData: FormData
+): Promise<AdminCreatePlayerResult> {
+  try {
+    const adminToken = String(formData.get("adminToken") ?? "").trim();
+    assertAdminToken(adminToken);
+
+    const database = getDatabaseClient();
+    const mode = String(formData.get("mode") ?? "new") as RegistrationMode;
+    const tournamentId = String(formData.get("tournamentId") ?? "").trim();
+
+    if (!tournamentId) {
+      return { status: "error", message: "Tournoi introuvable." };
+    }
+
+    if (mode === "existing") {
+      const playerId = String(formData.get("playerId") ?? "").trim();
+
+      if (!playerId) {
+        return { status: "error", message: "Joueur non trouvé." };
+      }
+
+      const [player] = await database<Array<{ id: string }>>`
+        select id
+        from players
+        where id = ${playerId}
+        limit 1
+      `;
+
+      if (!player?.id) {
+        return { status: "error", message: "Joueur non trouvé." };
+      }
+
+      const existingRegistration = await database<Array<{ id: string }>>`
+        select id
+        from registrations
+        where tournament_id = ${tournamentId} and player_id = ${playerId}
+        limit 1
+      `;
+
+      if (existingRegistration.length > 0) {
+        return { status: "error", message: "Ce joueur est déjà inscrit" };
+      }
+
+      const created = await database<Array<{ id: string }>>`
+        insert into registrations (
+          player_id,
+          tournament_id,
+          status,
+          created_at,
+          updated_at
+        )
+        values (${playerId}, ${tournamentId}, 'approved', now(), now())
+        returning id
+      `;
+
+      if (!created[0]?.id) {
+        return { status: "error", message: "Création inscription échouée." };
+      }
+
+      return {
+        status: "ok",
+        message: "Joueur créé et validé avec succès",
+        playerId,
+        tournamentId,
+      };
+    }
+
+    const rawPhone = String(formData.get("phone") ?? "").trim();
+    const phone = normalizePhone(rawPhone);
+
+    if (!phone) {
+      return {
+        status: "error",
+        message:
+          "Format de téléphone invalide. Utilisez : 06 12 34 56 78 ou +33 6 12 34 56 78",
+      };
+    }
+
+    const existingPlayers = await database<Array<{ id: string }>>`
+      select id
+      from players
+      where CASE
+        WHEN phone ~ '^\\+33' THEN '0' || regexp_replace(substring(phone from 4), '[^0-9]', '', 'g')
+        ELSE regexp_replace(phone, '[^0-9]', '', 'g')
+      END = ${phone.replace(/^\+33/, "0").replace(/\D/g, "")}
+      limit 1
+    `;
+
+    if (existingPlayers[0]?.id) {
+      return {
+        status: "error",
+        message: "Ce numéro existe déjà, utilisez le mode 'Joueur existant'",
+      };
+    }
+
+    const firstName = String(formData.get("firstName") ?? "").trim();
+    const lastName = String(formData.get("lastName") ?? "").trim();
+    const email = String(formData.get("email") ?? "").trim() || null;
+    const level = String(formData.get("level") ?? "").trim();
+    const isRankedValue = String(formData.get("isRanked") ?? "non");
+    const isRanked = isRankedValue === "oui";
+    const ranking = isRanked ? String(formData.get("ranking") ?? "").trim() : null;
+    const playPreference = String(formData.get("playPreference") ?? "aucune").trim();
+
+    if (!firstName || !lastName || !level) {
+      return { status: "error", message: "Champs requis manquants." };
+    }
+
+    if (isRanked && !ranking) {
+      return { status: "error", message: "Classement requis." };
+    }
+
+    const playerId = await createPlayer(database, {
+      firstName,
+      lastName,
+      email,
+      phone,
+      level,
+      isRanked,
+      ranking,
+      playPreference,
+    });
+
+    const created = await database<Array<{ id: string }>>`
+      insert into registrations (
+        player_id,
+        tournament_id,
+        status,
+        created_at,
+        updated_at
+      )
+      values (${playerId}, ${tournamentId}, 'approved', now(), now())
+      returning id
+    `;
+
+    if (!created[0]?.id) {
+      return { status: "error", message: "Création inscription échouée." };
+    }
+
+    return {
+      status: "ok",
+      message: "Joueur créé et validé avec succès",
+      playerId,
+      tournamentId,
+    };
+  } catch (error) {
+    return {
+      status: "error",
+      message: error instanceof Error ? error.message : "Erreur inconnue",
+    };
+  }
+}
+
 export async function updateRegistrationStatus(
   registrationId: string,
   status: RegistrationStatus,
