@@ -1203,6 +1203,9 @@ export const getPlayoffMatchesWithTeams = async (
     team1_created_at: string | null;
     team2_created_at: string | null;
     winner_created_at: string | null;
+    team1_is_seeded: boolean | null;
+    team2_is_seeded: boolean | null;
+    winner_is_seeded: boolean | null;
     round_number: number;
     round_name: string;
   };
@@ -1227,10 +1230,13 @@ export const getPlayoffMatchesWithTeams = async (
       pr.round_name,
       t1.name as team1_name,
       t1.created_at::text as team1_created_at,
+      t1.is_seeded as team1_is_seeded,
       t2.name as team2_name,
       t2.created_at::text as team2_created_at,
+      t2.is_seeded as team2_is_seeded,
       tw.name as winner_name,
-      tw.created_at::text as winner_created_at
+      tw.created_at::text as winner_created_at,
+      tw.is_seeded as winner_is_seeded
     from playoff_matches pm
     join playoff_rounds pr on pr.id = pm.round_id
     left join teams t1 on t1.id = pm.team1_id
@@ -1290,6 +1296,7 @@ export const getPlayoffMatchesWithTeams = async (
           id: row.team1_id,
           tournament_id: row.tournament_id,
           name: row.team1_name,
+          is_seeded: row.team1_is_seeded ?? undefined,
           created_at: row.team1_created_at ?? "",
         }
       : null,
@@ -1298,6 +1305,7 @@ export const getPlayoffMatchesWithTeams = async (
           id: row.team2_id,
           tournament_id: row.tournament_id,
           name: row.team2_name,
+          is_seeded: row.team2_is_seeded ?? undefined,
           created_at: row.team2_created_at ?? "",
         }
       : null,
@@ -1306,6 +1314,7 @@ export const getPlayoffMatchesWithTeams = async (
           id: row.winner_id,
           tournament_id: row.tournament_id,
           name: row.winner_name,
+          is_seeded: row.winner_is_seeded ?? undefined,
           created_at: row.winner_created_at ?? "",
         }
       : null,

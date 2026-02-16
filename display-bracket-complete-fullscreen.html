@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tournoi des Frérots - Phases finales</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      background: #1E1E2E;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      overflow: hidden;
+    }
+
+    .gradient-text {
+      background: linear-gradient(135deg, #fb923c 0%, #fbbf24 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .match-card {
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      transition: all 0.3s ease;
+    }
+
+    .match-card:hover {
+      border-color: rgba(251, 146, 60, 0.4);
+      box-shadow: 0 0 15px rgba(251, 146, 60, 0.2);
+    }
+
+    .match-team {
+      transition: all 0.2s ease;
+    }
+
+    .match-team.winner {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(5, 150, 105, 0.1));
+      border-left: 2px solid #10b981;
+    }
+
+    .match-team.loser {
+      opacity: 0.5;
+    }
+
+    .phase-label {
+      background: linear-gradient(135deg, rgba(251, 146, 60, 0.2), rgba(251, 191, 36, 0.1));
+      border: 1px solid rgba(251, 146, 60, 0.3);
+    }
+
+    .finale-badge {
+      background: linear-gradient(135deg, rgba(251, 191, 36, 0.3), rgba(245, 158, 11, 0.2));
+      border: 2px solid rgba(251, 191, 36, 0.6);
+      box-shadow: 0 0 25px rgba(251, 191, 36, 0.3);
+      animation: pulse-glow 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse-glow {
+      0%, 100% {
+        box-shadow: 0 0 25px rgba(251, 191, 36, 0.3);
+      }
+      50% {
+        box-shadow: 0 0 40px rgba(251, 191, 36, 0.5);
+      }
+    }
+
+    .seeded-star {
+      filter: drop-shadow(0 1px 3px rgba(251, 191, 36, 0.6));
+    }
+
+    /* Grid layout optimisé pour tout afficher */
+    .bracket-container {
+      display: grid;
+      grid-template-columns: 2fr 1.5fr 1.2fr 1fr;
+      gap: 1.5rem;
+      align-items: center;
+      height: 100%;
+      padding: 0 1rem;
+    }
+
+    .bracket-round {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-evenly;
+      height: 100%;
+    }
+
+    .bracket-round-header {
+      text-align: center;
+      margin-bottom: 0.5rem;
+    }
+
+    .matches-grid {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-evenly;
+      flex: 1;
+      gap: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="flex h-screen flex-col px-6 py-4">
+    <!-- En-tête compact -->
+    <div class="mb-4 text-center">
+      <h1 class="gradient-text mb-1 text-5xl font-bold tracking-tight">
+        Tournoi des Frérots
+      </h1>
+      <p class="text-base text-white/50">Phases finales - 16 Février 2026</p>
+    </div>
+
+    <!-- Bracket complet -->
+    <div class="flex-1">
+      <div class="bracket-container h-full">
+
+        <!-- 8èmes de finale (8 matchs) -->
+        <div class="bracket-round">
+          <div class="bracket-round-header">
+            <div class="phase-label inline-block rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wider text-orange-300">
+              8èmes
+            </div>
+          </div>
+          <div class="matches-grid">
+            <!-- Match 1 -->
+            <div class="match-card rounded-xl p-2">
+              <div class="mb-1 text-center text-[10px] font-semibold text-white/40">M1</div>
+              <div class="space-y-1">
+                <div class="match-team winner flex items-center justify-between rounded-lg bg-white/5 px-2 py-1.5">
+                  <div class="flex items-center gap-1.5">
+                    <span class="seeded-star text-xs">⭐</span>
+                    <span class="text-xs font-semibold text-white">Les Aigles</span>
+                  </div>
+                  <span class="text-sm font-bold text-emerald-400">6</span>
+                </div>
+                <div class="match-team loser flex items-center justify-between rounded-lg bg-white/5 px-2 py-1.5">
+                  <span class="text-xs font-semibold text-white">Les Dolphins</span>
+                  <span class="text-sm font-bold text-white/50">2</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Match 2 -->
+            <div class="match-card rounded-xl p-2">
+              <div class="mb-1 text-center text-[10px] font-semibold text-white/40">M2</div>
+              <div class="space-y-1">
+                <div class="match-team winner flex items-center justify-between rounded-lg bg-white/5 px-2 py-1.5">
+                  <span class="text-xs font-semibold text-white">Les Faucons</span>
+                  <span class="text-sm font-bold text-emerald-400">6</span>
+                </div>
+                <div class="match-team loser flex items-center justify-between rounded-lg bg-white/5 px-2 py-1.5">
+                  <span class="text-xs font-semibold text-white">Les Requins</span>
+                  <span class="text-sm font-bold text-white/50">4</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Match 3 -->
+            <div class="match-card rounded-xl p-2">
+              <div class="mb-1 text-center text-[10px] font-semibold text-white/40">M3</div>
+              <div class="space-y-1">
+                <div class="match-team winner flex items-center justify-between rounded-lg bg-white/5 px-2 py-1.5">
+                  <div class="flex items-center gap-1.5">
+                    <span class="seeded-star text-xs">⭐</span>
+                    <span class="text-xs font-semibold text-white">Les Titans</span>
+                  </div>
+                  <span class="text-sm font-bold text-emerald-400">6</span>
+                </div>
+                <div class="match-team loser flex items-center justify-between rounded-lg bg-white/5 px-2 py-1.5">
+                  <span class="text-xs font-semibold text-white">Les Panthères</span>
+                  <span class="text-sm font-bold text-white/50">3</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Match 4 -->
+            <div class="match-card rounded-xl p-2">
+              <div class="mb-1 text-center text-[10px] font-semibold text-white/40">M4</div>
+              <div class="space-y-1">
+                <div class="match-team winner flex items-center justify-between rounded-lg bg-white/5 px-2 py-1.5">
+                  <span class="text-xs font-semibold text-white">Les Warriors</span>
+                  <span class="text-sm font-bold text-emerald-400">7</span>
+                </div>
+                <div class="match-team loser flex items-center justify-between rounded-lg bg-white/5 px-2 py-1.5">
+                  <span class="text-xs font-semibold text-white">Les Lions</span>
+                  <span class="text-sm font-bold text-white/50">5</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Match 5 -->
+            <div class="match-card rounded-xl p-2">
+              <div class="mb-1 text-center text-[10px] font-semibold text-white/40">M5</div>
+              <div class="space-y-1">
+                <div class="match-team winner flex items-center justify-between rounded-lg bg-white/5 px-2 py-1.5">
+                  <div class="flex items-center gap-1.5">
+                    <span class="seeded-star text-xs">⭐</span>
+                    <span class="text-xs font-semibold text-white">Les Cobras</span>
+                  </div>
+                  <span class="text-sm font-bold text-emerald-400">6</span>
+                </div>
+                <div class="match-team loser flex items-center justify-between rounded-lg bg-white/5 px-2 py-1.5">
+                  <span class="text-xs font-semibold text-white">Les Tigres</span>
+                  <span class="text-sm font-bold text-white/50">1</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Match 6 -->
+            <div class="match-card rounded-xl p-2">
+              <div class="mb-1 text-center text-[10px] font-semibold text-white/40">M6</div>
+              <div class="space-y-1">
+                <div class="match-team winner flex items-center justify-between rounded-lg bg-white/5 px-2 py-1.5">
+                  <span class="text-xs font-semibold text-white">Les Jaguars</span>
+                  <span class="text-sm font-bold text-emerald-400">6</span>
+                </div>
+                <div class="match-team loser flex items-center justify-between rounded-lg bg-white/5 px-2 py-1.5">
+                  <span class="text-xs font-semibold text-white">Les Ours</span>
+                  <span class="text-sm font-bold text-white/50">4</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Match 7 -->
+            <div class="match-card rounded-xl p-2">
+              <div class="mb-1 text-center text-[10px] font-semibold text-white/40">M7</div>
+              <div class="space-y-1">
+                <div class="match-team winner flex items-center justify-between rounded-lg bg-white/5 px-2 py-1.5">
+                  <div class="flex items-center gap-1.5">
+                    <span class="seeded-star text-xs">⭐</span>
+                    <span class="text-xs font-semibold text-white">Les Loups</span>
+                  </div>
+                  <span class="text-sm font-bold text-emerald-400">6</span>
+                </div>
+                <div class="match-team loser flex items-center justify-between rounded-lg bg-white/5 px-2 py-1.5">
+                  <span class="text-xs font-semibold text-white">Les Renards</span>
+                  <span class="text-sm font-bold text-white/50">2</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Match 8 -->
+            <div class="match-card rounded-xl p-2">
+              <div class="mb-1 text-center text-[10px] font-semibold text-white/40">M8</div>
+              <div class="space-y-1">
+                <div class="match-team winner flex items-center justify-between rounded-lg bg-white/5 px-2 py-1.5">
+                  <span class="text-xs font-semibold text-white">Les Aigles 2</span>
+                  <span class="text-sm font-bold text-emerald-400">6</span>
+                </div>
+                <div class="match-team loser flex items-center justify-between rounded-lg bg-white/5 px-2 py-1.5">
+                  <span class="text-xs font-semibold text-white">Les Lynx</span>
+                  <span class="text-sm font-bold text-white/50">3</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quarts de finale (4 matchs) -->
+        <div class="bracket-round">
+          <div class="bracket-round-header">
+            <div class="phase-label inline-block rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wider text-orange-300">
+              Quarts
+            </div>
+          </div>
+          <div class="matches-grid">
+            <!-- Quart 1 -->
+            <div class="match-card rounded-xl p-2.5">
+              <div class="mb-1.5 text-center text-[10px] font-semibold text-white/40">Q1</div>
+              <div class="space-y-1.5">
+                <div class="match-team winner flex items-center justify-between rounded-lg bg-white/5 px-2.5 py-2">
+                  <div class="flex items-center gap-1.5">
+                    <span class="seeded-star text-sm">⭐</span>
+                    <span class="text-sm font-semibold text-white">Les Aigles</span>
+                  </div>
+                  <span class="text-base font-bold text-emerald-400">6</span>
+                </div>
+                <div class="match-team loser flex items-center justify-between rounded-lg bg-white/5 px-2.5 py-2">
+                  <span class="text-sm font-semibold text-white">Les Faucons</span>
+                  <span class="text-base font-bold text-white/50">4</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Quart 2 -->
+            <div class="match-card rounded-xl p-2.5">
+              <div class="mb-1.5 text-center text-[10px] font-semibold text-white/40">Q2</div>
+              <div class="space-y-1.5">
+                <div class="match-team winner flex items-center justify-between rounded-lg bg-white/5 px-2.5 py-2">
+                  <div class="flex items-center gap-1.5">
+                    <span class="seeded-star text-sm">⭐</span>
+                    <span class="text-sm font-semibold text-white">Les Titans</span>
+                  </div>
+                  <span class="text-base font-bold text-emerald-400">6</span>
+                </div>
+                <div class="match-team loser flex items-center justify-between rounded-lg bg-white/5 px-2.5 py-2">
+                  <span class="text-sm font-semibold text-white">Les Warriors</span>
+                  <span class="text-base font-bold text-white/50">3</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Quart 3 -->
+            <div class="match-card rounded-xl p-2.5">
+              <div class="mb-1.5 text-center text-[10px] font-semibold text-white/40">Q3</div>
+              <div class="space-y-1.5">
+                <div class="match-team winner flex items-center justify-between rounded-lg bg-white/5 px-2.5 py-2">
+                  <div class="flex items-center gap-1.5">
+                    <span class="seeded-star text-sm">⭐</span>
+                    <span class="text-sm font-semibold text-white">Les Cobras</span>
+                  </div>
+                  <span class="text-base font-bold text-emerald-400">7</span>
+                </div>
+                <div class="match-team loser flex items-center justify-between rounded-lg bg-white/5 px-2.5 py-2">
+                  <span class="text-sm font-semibold text-white">Les Jaguars</span>
+                  <span class="text-base font-bold text-white/50">5</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Quart 4 -->
+            <div class="match-card rounded-xl p-2.5">
+              <div class="mb-1.5 text-center text-[10px] font-semibold text-white/40">Q4</div>
+              <div class="space-y-1.5">
+                <div class="match-team winner flex items-center justify-between rounded-lg bg-white/5 px-2.5 py-2">
+                  <div class="flex items-center gap-1.5">
+                    <span class="seeded-star text-sm">⭐</span>
+                    <span class="text-sm font-semibold text-white">Les Loups</span>
+                  </div>
+                  <span class="text-base font-bold text-emerald-400">6</span>
+                </div>
+                <div class="match-team loser flex items-center justify-between rounded-lg bg-white/5 px-2.5 py-2">
+                  <span class="text-sm font-semibold text-white">Les Aigles 2</span>
+                  <span class="text-base font-bold text-white/50">2</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Demi-finales (2 matchs) -->
+        <div class="bracket-round">
+          <div class="bracket-round-header">
+            <div class="phase-label inline-block rounded-full px-3 py-1.5 text-sm font-bold uppercase tracking-wider text-orange-300">
+              Demi
+            </div>
+          </div>
+          <div class="matches-grid">
+            <!-- Demi 1 -->
+            <div class="match-card rounded-2xl p-3">
+              <div class="mb-2 text-center text-xs font-semibold text-white/40">Demi 1</div>
+              <div class="space-y-2">
+                <div class="match-team winner flex items-center justify-between rounded-lg bg-white/5 px-3 py-2.5">
+                  <div class="flex items-center gap-2">
+                    <span class="seeded-star text-base">⭐</span>
+                    <span class="text-base font-semibold text-white">Les Aigles</span>
+                  </div>
+                  <span class="text-xl font-bold text-emerald-400">6</span>
+                </div>
+                <div class="match-team loser flex items-center justify-between rounded-lg bg-white/5 px-3 py-2.5">
+                  <div class="flex items-center gap-2">
+                    <span class="seeded-star text-base">⭐</span>
+                    <span class="text-base font-semibold text-white">Les Titans</span>
+                  </div>
+                  <span class="text-xl font-bold text-white/50">4</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Demi 2 -->
+            <div class="match-card rounded-2xl p-3">
+              <div class="mb-2 text-center text-xs font-semibold text-white/40">Demi 2</div>
+              <div class="space-y-2">
+                <div class="match-team winner flex items-center justify-between rounded-lg bg-white/5 px-3 py-2.5">
+                  <div class="flex items-center gap-2">
+                    <span class="seeded-star text-base">⭐</span>
+                    <span class="text-base font-semibold text-white">Les Cobras</span>
+                  </div>
+                  <span class="text-xl font-bold text-emerald-400">6</span>
+                </div>
+                <div class="match-team loser flex items-center justify-between rounded-lg bg-white/5 px-3 py-2.5">
+                  <div class="flex items-center gap-2">
+                    <span class="seeded-star text-base">⭐</span>
+                    <span class="text-base font-semibold text-white">Les Loups</span>
+                  </div>
+                  <span class="text-xl font-bold text-white/50">3</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Finale (1 match) -->
+        <div class="bracket-round flex items-center">
+          <div class="w-full">
+            <div class="mb-4 text-center">
+              <div class="inline-block rounded-full border-2 border-amber-400/50 bg-gradient-to-r from-amber-400/30 to-amber-300/20 px-4 py-2 text-base font-bold uppercase tracking-wider text-amber-300 shadow-lg">
+                🏆 Finale
+              </div>
+            </div>
+
+            <!-- Match Finale -->
+            <div class="finale-badge relative rounded-2xl p-4">
+              <div class="space-y-2.5">
+                <div class="match-team winner flex items-center justify-between rounded-xl bg-black/20 px-4 py-3">
+                  <div class="flex items-center gap-2">
+                    <span class="seeded-star text-lg">⭐</span>
+                    <span class="text-lg font-bold text-white">Les Aigles</span>
+                  </div>
+                  <span class="text-2xl font-bold text-emerald-400">6</span>
+                </div>
+                <div class="match-team loser flex items-center justify-between rounded-xl bg-black/20 px-4 py-3">
+                  <div class="flex items-center gap-2">
+                    <span class="seeded-star text-lg">⭐</span>
+                    <span class="text-lg font-bold text-white">Les Cobras</span>
+                  </div>
+                  <span class="text-2xl font-bold text-white/50">4</span>
+                </div>
+              </div>
+              <div class="mt-3 text-center">
+                <div class="inline-flex items-center gap-2 rounded-full bg-amber-400/20 px-4 py-1.5 text-xs font-bold uppercase tracking-wide text-amber-300">
+                  <span>🏆</span>
+                  <span>Champions</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="mt-3 flex items-center justify-center gap-4 text-sm text-white/40">
+      <div id="clock"></div>
+      <div class="h-1 w-1 rounded-full bg-white/40"></div>
+      <div>🎾 Padel Tournament</div>
+    </div>
+  </div>
+
+  <script>
+    // Horloge en temps réel
+    function updateClock() {
+      const now = new Date();
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      const seconds = String(now.getSeconds()).padStart(2, '0');
+      document.getElementById('clock').textContent = `${hours}:${minutes}:${seconds}`;
+    }
+
+    updateClock();
+    setInterval(updateClock, 1000);
+
+    // Plein écran avec touche F
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'f' || e.key === 'F') {
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen();
+        } else {
+          document.exitFullscreen();
+        }
+      }
+    });
+  </script>
+</body>
+</html>
