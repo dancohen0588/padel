@@ -102,11 +102,20 @@ export function RegistrationForm({
     formData: FormData
   ) => {
     if (isPairMode) {
+      console.debug("RegistrationForm:submit-pair", {
+        tournamentId,
+        player1Mode,
+        player2Mode,
+      });
       if (player1Photo) {
         formData.set("player1_photo", player1Photo);
       }
       if (player2Photo) {
         formData.set("player2_photo", player2Photo);
+      }
+
+      if (tournamentId) {
+        formData.set("tournamentId", tournamentId);
       }
 
       formData.set("player1Mode", player1Mode);
@@ -442,10 +451,17 @@ export function RegistrationForm({
     );
   }
 
+  console.debug("RegistrationForm:render", {
+    isPairMode,
+    mode,
+    player1Mode,
+    player2Mode,
+  });
+
   return (
     <div
       className={`rounded-2xl border border-white/10 bg-white/5 p-8 shadow-[0_8px_32px_rgba(0,0,0,0.3)] ${
-        isPairMode ? "max-w-[1400px]" : "max-w-[600px]"
+        isPairMode ? "w-full max-w-none" : "max-w-[600px]"
       } mx-auto`}
     >
       {!isPairMode ? (
@@ -488,6 +504,7 @@ export function RegistrationForm({
 
       {!isPairMode ? (
         <div className="mb-8 rounded-xl border border-white/10 bg-white/5 p-5">
+        {console.debug("RegistrationForm:solo-switch", { isPairMode, mode })}
         <label className="block text-sm font-semibold text-white/90">
           Avez-vous déjà participé à un tournoi ?
         </label>
@@ -533,15 +550,18 @@ export function RegistrationForm({
       ) : null}
 
       <form action={formAction} className="space-y-5">
+        <input type="hidden" name="tournamentId" value={tournamentId ?? ""} />
         <div
           className={
-            isPairMode ? "lg:grid lg:grid-cols-2 lg:gap-6" : "space-y-6"
+            isPairMode
+              ? "w-full lg:grid lg:grid-cols-2 lg:gap-6"
+              : "space-y-6"
           }
         >
-          <div className="rounded-2xl border border-white/10 bg-white/5 p-6 shadow-[0_8px_32px_rgba(0,0,0,0.3)]">
-            {isPairMode ? (
-              <div className="mb-6">
-                <div className="inline-flex items-center gap-2 rounded-full border border-orange-400/30 bg-orange-500/15 px-4 py-2 text-sm font-semibold text-orange-300">
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-6 shadow-[0_8px_32px_rgba(0,0,0,0.3)]">
+              {isPairMode ? (
+                <div className="mb-6">
+                  <div className="inline-flex items-center gap-2 rounded-full border border-orange-400/30 bg-orange-500/15 px-4 py-2 text-sm font-semibold text-orange-300">
                   <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
                     <path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" />
                   </svg>
@@ -550,56 +570,56 @@ export function RegistrationForm({
               </div>
             ) : null}
 
-            <div className="mb-8 rounded-xl border border-white/10 bg-white/5 p-5">
-              <label className="block text-sm font-semibold text-white/90">
-                Avez-vous déjà participé à un tournoi ?
-              </label>
-              <div className="mt-4 flex items-center gap-4">
-                <span
-                  className={`text-xs font-semibold transition ${
-                    (isPairMode ? player1Mode : mode) === "new"
-                      ? "text-orange-400"
-                      : "text-white/60"
-                  }`}
-                >
-                  Non, première fois
-                </span>
-                <button
-                  type="button"
-                  onClick={() =>
-                    isPairMode
-                      ? handlePlayer1ModeChange(player1Mode === "new" ? "existing" : "new")
-                      : handleModeChange(mode === "new" ? "existing" : "new")
-                  }
-                  className={`relative h-8 w-16 rounded-full border-2 transition ${
-                    (isPairMode ? player1Mode : mode) === "existing"
-                      ? "border-orange-500 bg-gradient-to-r from-orange-500 to-orange-400"
-                      : "border-white/20 bg-white/10"
-                  }`}
-                  aria-label="Basculer participant existant"
-                >
+            {isPairMode ? (
+              <div className="mb-8 rounded-xl border border-white/10 bg-white/5 p-5">
+                {console.debug("RegistrationForm:pair-switch", {
+                  isPairMode,
+                  player1Mode,
+                })}
+                <label className="block text-sm font-semibold text-white/90">
+                  Avez-vous déjà participé à un tournoi ?
+                </label>
+                <div className="mt-4 flex items-center gap-4">
                   <span
-                    className={`absolute top-1/2 h-6 w-6 -translate-y-1/2 rounded-full bg-white shadow transition ${
-                      (isPairMode ? player1Mode : mode) === "existing" ? "right-1" : "left-1"
+                    className={`text-xs font-semibold transition ${
+                      player1Mode === "new" ? "text-orange-400" : "text-white/60"
                     }`}
-                  />
-                </button>
-                <span
-                  className={`text-xs font-semibold transition ${
-                    (isPairMode ? player1Mode : mode) === "existing"
-                      ? "text-orange-400"
-                      : "text-white/60"
-                  }`}
-                >
-                  Oui, j&#39;ai déjà joué
-                </span>
-              </div>
-              {(isPairMode ? player1Mode : mode) === "existing" ? (
-                <div className="mt-4 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-xs text-emerald-300">
-                  ℹ️ Utilisez le numéro de téléphone de votre première inscription pour retrouver votre compte et compiler vos statistiques.
+                  >
+                    Non, première fois
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      handlePlayer1ModeChange(player1Mode === "new" ? "existing" : "new")
+                    }
+                    className={`relative h-8 w-16 rounded-full border-2 transition ${
+                      player1Mode === "existing"
+                        ? "border-orange-500 bg-gradient-to-r from-orange-500 to-orange-400"
+                        : "border-white/20 bg-white/10"
+                    }`}
+                    aria-label="Basculer participant existant"
+                  >
+                    <span
+                      className={`absolute top-1/2 h-6 w-6 -translate-y-1/2 rounded-full bg-white shadow transition ${
+                        player1Mode === "existing" ? "right-1" : "left-1"
+                      }`}
+                    />
+                  </button>
+                  <span
+                    className={`text-xs font-semibold transition ${
+                      player1Mode === "existing" ? "text-orange-400" : "text-white/60"
+                    }`}
+                  >
+                    Oui, j&#39;ai déjà joué
+                  </span>
                 </div>
-              ) : null}
-            </div>
+                {player1Mode === "existing" ? (
+                  <div className="mt-4 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-xs text-emerald-300">
+                    ℹ️ Utilisez le numéro de téléphone de votre première inscription pour retrouver votre compte et compiler vos statistiques.
+                  </div>
+                ) : null}
+              </div>
+            ) : null}
 
             <div>
               <label className="mb-2 block text-sm font-medium text-white/80">
@@ -954,6 +974,64 @@ export function RegistrationForm({
                     <button
                       type="button"
                       onClick={() => handleModeChange("new")}
+                      className="text-xs font-semibold text-orange-400 underline"
+                    >
+                      M&#39;inscrire comme nouveau participant
+                    </button>
+                  </div>
+                ) : null}
+              </>
+            ) : null}
+
+            {isPairMode ? (
+              <>
+                {console.debug("RegistrationForm:player1-cta-location", {
+                  isPairMode,
+                  player1Mode,
+                })}
+                {player1Mode === "existing" && !player1VerifiedPlayer && player1PhoneStatus !== "error" ? (
+                  <div className="flex gap-3">
+                    <button
+                      type="button"
+                      onClick={() => handleVerifyPlayerPhone("player1")}
+                      disabled={player1IsVerifying}
+                      className="flex-1 rounded-lg bg-gradient-to-r from-orange-500 to-orange-400 px-6 py-3 text-base font-semibold text-white transition hover:-translate-y-0.5 hover:shadow-[0_8px_16px_rgba(255,107,53,0.3)] disabled:opacity-50"
+                    >
+                      {player1IsVerifying ? "Vérification..." : "Vérifier le compte du joueur 1"}
+                    </button>
+                  </div>
+                ) : null}
+
+                {player1Mode === "existing" && player1VerifiedPlayer ? (
+                  <div className="flex flex-col gap-3 sm:flex-row">
+                    <button
+                      type="submit"
+                      className="flex-1 rounded-lg bg-gradient-to-r from-orange-500 to-orange-400 px-6 py-3 text-base font-semibold text-white transition hover:-translate-y-0.5 hover:shadow-[0_8px_16px_rgba(255,107,53,0.3)]"
+                    >
+                      Confirmer l&#39;inscription
+                    </button>
+                    <button
+                      type="button"
+                      onClick={resetPlayer1ExistingFlow}
+                      className="flex-1 rounded-lg border border-white/20 bg-white/10 px-6 py-3 text-base font-semibold text-white transition hover:bg-white/15"
+                    >
+                      Ce n&#39;est pas moi
+                    </button>
+                  </div>
+                ) : null}
+
+                {player1Mode === "existing" && player1PhoneStatus === "error" && !player1VerifiedPlayer ? (
+                  <div className="flex flex-col gap-2 text-sm">
+                    <button
+                      type="button"
+                      onClick={() => handleVerifyPlayerPhone("player1")}
+                      className="w-full rounded-lg bg-gradient-to-r from-orange-500 to-orange-400 px-6 py-3 text-base font-semibold text-white transition hover:-translate-y-0.5 hover:shadow-[0_8px_16px_rgba(255,107,53,0.3)]"
+                    >
+                      Réessayer
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handlePlayer1ModeChange("new")}
                       className="text-xs font-semibold text-orange-400 underline"
                     >
                       M&#39;inscrire comme nouveau participant
@@ -1328,55 +1406,6 @@ export function RegistrationForm({
                 Inscrire les deux joueurs
               </button>
             </div>
-            {player1Mode === "existing" && !player1VerifiedPlayer && player1PhoneStatus !== "error" ? (
-              <div className="flex gap-3">
-                <button
-                  type="button"
-                  onClick={() => handleVerifyPlayerPhone("player1")}
-                  disabled={player1IsVerifying}
-                  className="flex-1 rounded-lg bg-gradient-to-r from-orange-500 to-orange-400 px-6 py-3 text-base font-semibold text-white transition hover:-translate-y-0.5 hover:shadow-[0_8px_16px_rgba(255,107,53,0.3)] disabled:opacity-50"
-                >
-                  {player1IsVerifying ? "Vérification..." : "Vérifier le compte du joueur 1"}
-                </button>
-              </div>
-            ) : null}
-
-            {player1Mode === "existing" && player1VerifiedPlayer ? (
-              <div className="flex flex-col gap-3 sm:flex-row">
-                <button
-                  type="submit"
-                  className="flex-1 rounded-lg bg-gradient-to-r from-orange-500 to-orange-400 px-6 py-3 text-base font-semibold text-white transition hover:-translate-y-0.5 hover:shadow-[0_8px_16px_rgba(255,107,53,0.3)]"
-                >
-                  Confirmer l&#39;inscription
-                </button>
-                <button
-                  type="button"
-                  onClick={resetPlayer1ExistingFlow}
-                  className="flex-1 rounded-lg border border-white/20 bg-white/10 px-6 py-3 text-base font-semibold text-white transition hover:bg-white/15"
-                >
-                  Ce n&#39;est pas moi
-                </button>
-              </div>
-            ) : null}
-
-            {player1Mode === "existing" && player1PhoneStatus === "error" && !player1VerifiedPlayer ? (
-              <div className="flex flex-col gap-2 text-sm">
-                <button
-                  type="button"
-                  onClick={() => handleVerifyPlayerPhone("player1")}
-                  className="w-full rounded-lg bg-gradient-to-r from-orange-500 to-orange-400 px-6 py-3 text-base font-semibold text-white transition hover:-translate-y-0.5 hover:shadow-[0_8px_16px_rgba(255,107,53,0.3)]"
-                >
-                  Réessayer
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handlePlayer1ModeChange("new")}
-                  className="text-xs font-semibold text-orange-400 underline"
-                >
-                  M&#39;inscrire comme nouveau participant
-                </button>
-              </div>
-            ) : null}
           </>
         ) : null}
       </form>

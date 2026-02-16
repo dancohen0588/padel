@@ -226,6 +226,39 @@ export const getTournaments = async (
   }));
 };
 
+export type RegistrationTournamentSummary = Pick<
+  Tournament,
+  "id" | "slug" | "name" | "price"
+>;
+
+export const getTournamentBySlugForRegistration = async (
+  slug: string
+): Promise<RegistrationTournamentSummary | null> => {
+  const database = getDatabaseClient();
+  const [row] = await database<
+    Array<{
+      id: string;
+      slug: string | null;
+      name: string;
+      price: number | null;
+    }>
+  >`
+    select id, slug, name, price
+    from tournaments
+    where slug = ${slug}
+    limit 1
+  `;
+
+  if (!row) return null;
+
+  return {
+    id: row.id,
+    slug: row.slug,
+    name: row.name,
+    price: row.price,
+  };
+};
+
 export const getTournamentById = async (
   tournamentId: string
 ): Promise<Tournament | null> => {

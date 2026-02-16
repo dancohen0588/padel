@@ -1,5 +1,8 @@
 import { RegistrationForm } from "@/app/inscription/registration-form";
-import { getGlobalPaymentConfig, getTournaments } from "@/lib/queries";
+import {
+  getGlobalPaymentConfig,
+  getTournamentBySlugForRegistration,
+} from "@/lib/queries";
 import { registerPlayerForTournament } from "@/app/actions/registrations";
 
 type TournamentRegisterPageProps = {
@@ -9,15 +12,14 @@ type TournamentRegisterPageProps = {
 export default async function TournamentRegisterPage({
   params,
 }: TournamentRegisterPageProps) {
-  const [tournaments, paymentConfig] = await Promise.all([
-    getTournaments("registration"),
+  const [tournament, paymentConfig] = await Promise.all([
+    getTournamentBySlugForRegistration(params.slug),
     getGlobalPaymentConfig(),
   ]);
-  const tournament = tournaments.find((entry) => entry.slug === params.slug);
 
   return (
     <div className="min-h-screen bg-[linear-gradient(135deg,#1E1E2E_0%,#2A2A3E_100%)] px-5 py-10 text-white">
-      <main className="mx-auto w-full max-w-[600px]">
+      <main className="mx-auto w-full">
         <div className="mb-10 text-center">
           <h1 className="bg-gradient-to-r from-orange-500 to-orange-400 bg-clip-text text-3xl font-bold text-transparent">
             Inscription au Tournoi

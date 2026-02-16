@@ -13,7 +13,7 @@ export default async function InscriptionPage() {
   return (
     <div className="min-h-screen bg-brand-gray">
       <Header />
-      <main className="mx-auto w-full max-w-4xl px-6 py-10">
+      <main className="mx-auto w-full px-6 py-10">
         <SectionHeader
           title="Inscription joueur"
           subtitle="Rejoins le tournoi du moment en quelques secondes. On valide rapidement chaque inscription."

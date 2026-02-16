@@ -392,6 +392,12 @@ export async function registerPairAction(
   try {
     const database = getDatabaseClient();
     const tournamentId = String(formData.get("tournamentId") ?? "").trim();
+    const slug = String(formData.get("slug") ?? "").trim();
+
+    console.info("[db-debug] registerPairAction", {
+      tournamentId,
+      slug,
+    });
 
     if (!tournamentId) {
       return { status: "error", message: "Tournoi introuvable." };
