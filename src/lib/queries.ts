@@ -15,6 +15,7 @@ import type {
   Tournament,
   TournamentPhoto,
   TournamentStatus,
+  WhatsAppJoin,
 } from "@/lib/types";
 import type {
   PlayoffMatch,
@@ -660,7 +661,7 @@ export const getRegistrationsByStatus = async (
   status?: RegistrationStatus
 ): Promise<RegistrationWithPlayer[]> => {
   const database = getDatabaseClient();
-  type RegistrationRow = {
+type RegistrationRow = {
     id: string;
     tournament_id: string;
     player_id: string;
@@ -672,11 +673,12 @@ export const getRegistrationsByStatus = async (
     player_email: string;
     player_level: string | null;
     player_phone: string | null;
-    player_is_ranked: boolean | null;
-    player_ranking: string | null;
-    player_play_preference: "droite" | "gauche" | "aucune" | null;
-    player_created_at: string;
-  };
+  player_is_ranked: boolean | null;
+  player_ranking: string | null;
+  player_play_preference: "droite" | "gauche" | "aucune" | null;
+  player_created_at: string;
+  player_whatsapp_joined_tournaments: unknown;
+};
 
   const baseSql = database`
     select
@@ -694,7 +696,8 @@ export const getRegistrationsByStatus = async (
       p.is_ranked as player_is_ranked,
       p.ranking as player_ranking,
       p.play_preference as player_play_preference,
-      p.created_at::text as player_created_at
+      p.created_at::text as player_created_at,
+      p.whatsapp_joined_tournaments as player_whatsapp_joined_tournaments
     from registrations r
     join players p on p.id = r.player_id
     where r.tournament_id = ${tournamentId}
@@ -723,25 +726,33 @@ export const getRegistrationsByStatus = async (
     })),
   });
 
-  return rows.map((row) => ({
-    id: row.id,
-    tournament_id: row.tournament_id,
-    player_id: row.player_id,
-    status: row.status,
-    registered_at: row.registered_at,
-    player: {
-      id: row.player_id_join,
-      first_name: row.player_first_name,
-      last_name: row.player_last_name,
-      email: row.player_email,
-      level: row.player_level,
-      phone: row.player_phone,
-      is_ranked: row.player_is_ranked,
-      ranking: row.player_ranking,
-      play_preference: row.player_play_preference,
-      created_at: row.player_created_at,
-    },
-  }));
+  return rows.map((row) => {
+    const whatsappJoins = (row.player_whatsapp_joined_tournaments as WhatsAppJoin[]) ?? [];
+    const whatsappJoin = whatsappJoins.find((join) => join.tournamentId === tournamentId);
+
+    return {
+      id: row.id,
+      tournament_id: row.tournament_id,
+      player_id: row.player_id,
+      status: row.status,
+      registered_at: row.registered_at,
+      hasJoinedWhatsApp: Boolean(whatsappJoin),
+      whatsappJoinDate: whatsappJoin?.joinedAt ?? null,
+      player: {
+        id: row.player_id_join,
+        first_name: row.player_first_name,
+        last_name: row.player_last_name,
+        email: row.player_email,
+        level: row.player_level,
+        phone: row.player_phone,
+        is_ranked: row.player_is_ranked,
+        ranking: row.player_ranking,
+        play_preference: row.player_play_preference,
+        created_at: row.player_created_at,
+        whatsappJoinedTournaments: whatsappJoins,
+      },
+    };
+  });
 };
 
 export const countRegistrations = async (tournamentId: string) => {

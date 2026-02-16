@@ -104,6 +104,8 @@ export type Registration = {
 
 export type RegistrationWithPlayer = Registration & {
   player: Player;
+  hasJoinedWhatsApp?: boolean;
+  whatsappJoinDate?: string | null;
 };
 
 export type TournamentPhoto = {
