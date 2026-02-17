@@ -26,7 +26,6 @@ export function UsersManagement({ initialData, adminToken }: UsersManagementProp
   const [isEditOpen, setIsEditOpen] = useState(false);
 
   const currentSearch = searchParams.get("search") ?? "";
-  const currentStatus = searchParams.get("status") ?? "all";
 
   const openEditModal = (player: Player) => {
     setSelectedPlayer(player);
@@ -40,6 +39,7 @@ export function UsersManagement({ initialData, adminToken }: UsersManagementProp
 
   const updateParams = (next: Record<string, string | null>) => {
     const params = new URLSearchParams(searchParams.toString());
+    params.delete("status");
     Object.entries(next).forEach(([key, value]) => {
       if (value && value.length) {
         params.set(key, value);
@@ -53,10 +53,6 @@ export function UsersManagement({ initialData, adminToken }: UsersManagementProp
 
   const handleSearch = (value: string) => {
     updateParams({ search: value, page: "1" });
-  };
-
-  const handleStatus = (value: string) => {
-    updateParams({ status: value === "all" ? null : value, page: "1" });
   };
 
   const handlePage = (value: number) => {
@@ -130,16 +126,6 @@ export function UsersManagement({ initialData, adminToken }: UsersManagementProp
               </svg>
             </div>
 
-            <select
-              className="input-field text-sm"
-              value={currentStatus}
-              onChange={(event) => handleStatus(event.target.value)}
-            >
-              <option value="all">Tous les statuts</option>
-              <option value="verified">✓ Vérifiés</option>
-              <option value="pending">⏳ En attente</option>
-              <option value="suspended">🚫 Suspendus</option>
-            </select>
           </div>
 
           <div className="rounded-xl border border-emerald-400/30 bg-emerald-500/10 px-4 py-2 text-center">
@@ -161,9 +147,6 @@ export function UsersManagement({ initialData, adminToken }: UsersManagementProp
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-white/50">
                   Contact
-                </th>
-                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-white/50">
-                  Statut
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-white/50">
                   Inscription
@@ -216,21 +199,6 @@ export function UsersManagement({ initialData, adminToken }: UsersManagementProp
                         <span>{player.phone ?? "—"}</span>
                       </div>
                     </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    {player.status === "verified" ? (
-                      <span className="inline-flex items-center gap-1 rounded-full border border-emerald-400/40 bg-emerald-500/10 px-3 py-1 text-xs font-semibold uppercase text-emerald-300">
-                        ✓ Vérifié
-                      </span>
-                    ) : player.status === "suspended" ? (
-                      <span className="inline-flex items-center gap-1 rounded-full border border-rose-400/40 bg-rose-500/10 px-3 py-1 text-xs font-semibold uppercase text-rose-300">
-                        🚫 Suspendu
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center gap-1 rounded-full border border-amber-400/40 bg-amber-500/10 px-3 py-1 text-xs font-semibold uppercase text-amber-300">
-                        ⏳ En attente
-                      </span>
-                    )}
                   </td>
                   <td className="px-6 py-4">
                     <div className="text-sm text-white/70">

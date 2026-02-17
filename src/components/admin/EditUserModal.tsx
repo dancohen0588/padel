@@ -31,7 +31,6 @@ export function EditUserModal({
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
-  const [status, setStatus] = useState<Player["status"]>("pending");
   const [adminNotes, setAdminNotes] = useState("");
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -44,7 +43,6 @@ export function EditUserModal({
     setLastName(player.last_name ?? "");
     setEmail(player.email ?? "");
     setPhone(player.phone ?? "");
-    setStatus(player.status ?? "pending");
     setAdminNotes(player.admin_notes ?? "");
     setPhotoUrl(player.photo_url ?? null);
     setSelectedFile(null);
@@ -87,7 +85,6 @@ export function EditUserModal({
       last_name?: string;
       email?: string | null;
       phone?: string | null;
-      status?: Player["status"];
       admin_notes?: string | null;
     } = {};
 
@@ -102,9 +99,6 @@ export function EditUserModal({
     }
     if ((phone || "") !== (player.phone ?? "")) {
       nextData.phone = phone.trim() ? phone.trim() : null;
-    }
-    if (status !== (player.status ?? "pending")) {
-      nextData.status = status ?? "pending";
     }
     if ((adminNotes || "") !== (player.admin_notes ?? "")) {
       nextData.admin_notes = adminNotes.trim() ? adminNotes.trim() : null;
@@ -295,20 +289,6 @@ export function EditUserModal({
                 className="input-field text-base"
                 placeholder="06 12 34 56 78"
               />
-            </div>
-            <div>
-              <label className="mb-2 block text-sm font-medium text-white/80">Statut</label>
-              <select
-                value={status ?? "pending"}
-                onChange={(event) =>
-                  setStatus(event.target.value as Player["status"])
-                }
-                className="input-field text-base"
-              >
-                <option value="pending">⏳ En attente</option>
-                <option value="verified">✓ Vérifié</option>
-                <option value="suspended">🚫 Suspendu</option>
-              </select>
             </div>
             <div className="md:col-span-2">
               <label className="mb-2 block text-sm font-medium text-white/80">

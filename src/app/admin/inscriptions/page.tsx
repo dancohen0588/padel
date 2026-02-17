@@ -16,7 +16,7 @@ import { assertAdminToken } from "@/lib/admin";
 export default async function AdminInscriptionsPage({
   searchParams,
 }: {
-  searchParams: { token?: string; search?: string; status?: string; page?: string };
+  searchParams: { token?: string; search?: string; page?: string };
 }) {
   const adminToken = searchParams.token ?? "";
 
@@ -43,11 +43,6 @@ export default async function AdminInscriptionsPage({
   }
 
   const search = searchParams.search ?? "";
-  const status = (searchParams.status ?? "all") as
-    | "all"
-    | "verified"
-    | "pending"
-    | "suspended";
   const page = Number(searchParams.page ?? "1");
 
   const [
@@ -65,7 +60,7 @@ export default async function AdminInscriptionsPage({
     getHomeConfig(),
     getHomeGallery(),
     getGlobalPaymentConfig(),
-    getAllPlayersAction(adminToken, search, status, page, 10),
+    getAllPlayersAction(adminToken, search, page, 10),
   ]);
 
   return (
