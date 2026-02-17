@@ -169,22 +169,23 @@ export function PaymentsTab({
 
   return (
     <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-      <Card className="rounded-2xl border border-border bg-white shadow-card">
+      <Card className="rounded-2xl border border-white/10 bg-white/5 text-white shadow-card">
         <CardHeader className="space-y-1">
-          <p className="text-sm font-semibold text-brand-charcoal">Paiements globaux</p>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-sm font-semibold text-white">Paiements globaux</p>
+          <p className="text-xs text-white/60">
             Activez les moyens de paiement et les informations à afficher pour tous les tournois.
           </p>
         </CardHeader>
         <CardContent className="space-y-5">
-          <div className="flex items-center justify-between rounded-2xl border border-border bg-muted/30 px-4 py-3">
+          <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
             <div>
-              <p className="text-sm font-semibold text-brand-charcoal">Paiements activés</p>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-sm font-semibold text-white">Paiements activés</p>
+              <p className="text-xs text-white/60">
                 Active la section paiement dans le formulaire d'inscription
               </p>
             </div>
             <Switch
+              className="switch-root"
               checked={config.enabled}
               onCheckedChange={(checked) =>
                 setConfig((prev) => ({
@@ -195,136 +196,147 @@ export function PaymentsTab({
             />
           </div>
 
-          <Separator />
+          <Separator className="bg-white/10" />
 
           <div className="space-y-3">
-            <Label className="text-xs uppercase text-muted-foreground">
+            <Label className="text-xs uppercase text-white/50">
               Moyens de paiement
             </Label>
 
-            <div className="space-y-4 rounded-2xl border border-border bg-white p-4">
+            <div className="space-y-4 rounded-2xl border border-white/10 bg-white/5 p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-semibold text-brand-charcoal">Virement bancaire</p>
-                  <p className="text-xs text-muted-foreground">IBAN + BIC</p>
+                  <p className="text-sm font-semibold text-white">Virement bancaire</p>
+                  <p className="text-xs text-white/60">IBAN + BIC</p>
                 </div>
                 <Switch
+                  className="switch-root"
                   checked={config.methods.bank.enabled}
                   onCheckedChange={(checked) => updateMethod("bank", { enabled: checked })}
                 />
               </div>
               <div className="grid gap-3 md:grid-cols-2">
                 <div className="space-y-2">
-                  <Label>IBAN</Label>
+                  <Label className="text-white/70">IBAN</Label>
                   <Input
                     value={config.methods.bank.iban ?? ""}
                     onChange={(event) => updateMethod("bank", { iban: event.target.value || null })}
                     placeholder="FR76 ..."
+                    className="input-field"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>BIC</Label>
+                  <Label className="text-white/70">BIC</Label>
                   <Input
                     value={config.methods.bank.bic ?? ""}
                     onChange={(event) => updateMethod("bank", { bic: event.target.value || null })}
                     placeholder="AGRIFRPP"
+                    className="input-field"
                   />
                 </div>
               </div>
             </div>
 
-            <div className="space-y-4 rounded-2xl border border-border bg-white p-4">
+            <div className="space-y-4 rounded-2xl border border-white/10 bg-white/5 p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-semibold text-brand-charcoal">Lydia</p>
-                  <p className="text-xs text-muted-foreground">Identifiant Lydia</p>
+                  <p className="text-sm font-semibold text-white">Lydia</p>
+                  <p className="text-xs text-white/60">Identifiant Lydia</p>
                 </div>
                 <Switch
+                  className="switch-root"
                   checked={config.methods.lydia.enabled}
                   onCheckedChange={(checked) => updateMethod("lydia", { enabled: checked })}
                 />
               </div>
               <div className="space-y-2">
-                <Label>Identifiant</Label>
+                <Label className="text-white/70">Identifiant</Label>
                 <Input
                   value={config.methods.lydia.identifier ?? ""}
                   onChange={(event) =>
                     updateMethod("lydia", { identifier: event.target.value || null })
                   }
                   placeholder="@votreclub"
+                  className="input-field"
                 />
               </div>
             </div>
 
-            <div className="space-y-4 rounded-2xl border border-border bg-white p-4">
+            <div className="space-y-4 rounded-2xl border border-white/10 bg-white/5 p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-semibold text-brand-charcoal">Revolut</p>
-                  <p className="text-xs text-muted-foreground">Lien ou tag</p>
+                  <p className="text-sm font-semibold text-white">Revolut</p>
+                  <p className="text-xs text-white/60">Lien ou tag</p>
                 </div>
                 <Switch
+                  className="switch-root"
                   checked={config.methods.revolut.enabled}
                   onCheckedChange={(checked) => updateMethod("revolut", { enabled: checked })}
                 />
               </div>
               <div className="grid gap-3 md:grid-cols-2">
                 <div className="space-y-2">
-                  <Label>Lien</Label>
+                  <Label className="text-white/70">Lien</Label>
                   <Input
                     value={config.methods.revolut.link ?? ""}
                     onChange={(event) => updateMethod("revolut", { link: event.target.value || null })}
                     placeholder="https://revolut.me/..."
+                    className="input-field"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Tag</Label>
+                  <Label className="text-white/70">Tag</Label>
                   <Input
                     value={config.methods.revolut.tag ?? ""}
                     onChange={(event) => updateMethod("revolut", { tag: event.target.value || null })}
                     placeholder="@club"
+                    className="input-field"
                   />
                 </div>
               </div>
             </div>
 
-            <div className="space-y-4 rounded-2xl border border-border bg-white p-4">
+            <div className="space-y-4 rounded-2xl border border-white/10 bg-white/5 p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-semibold text-brand-charcoal">Wero</p>
-                  <p className="text-xs text-muted-foreground">Identifiant Wero</p>
+                  <p className="text-sm font-semibold text-white">Wero</p>
+                  <p className="text-xs text-white/60">Identifiant Wero</p>
                 </div>
                 <Switch
+                  className="switch-root"
                   checked={config.methods.wero.enabled}
                   onCheckedChange={(checked) => updateMethod("wero", { enabled: checked })}
                 />
               </div>
               <div className="space-y-2">
-                <Label>Identifiant</Label>
+                <Label className="text-white/70">Identifiant</Label>
                 <Input
                   value={config.methods.wero.identifier ?? ""}
                   onChange={(event) => updateMethod("wero", { identifier: event.target.value || null })}
                   placeholder="+33 6 12 34 56 78"
+                  className="input-field"
                 />
               </div>
             </div>
 
-            <div className="flex items-center justify-between rounded-2xl border border-border bg-white p-4">
+            <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 p-4">
               <div>
-                <p className="text-sm font-semibold text-brand-charcoal">Paiement sur place</p>
-                <p className="text-xs text-muted-foreground">Chèque ou espèces</p>
+                <p className="text-sm font-semibold text-white">Paiement sur place</p>
+                <p className="text-xs text-white/60">Chèque ou espèces</p>
               </div>
               <Switch
+                className="switch-root"
                 checked={config.methods.cash.enabled}
                 onCheckedChange={(checked) => updateMethod("cash", { enabled: checked })}
               />
             </div>
           </div>
 
-          <Separator />
+          <Separator className="bg-white/10" />
 
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
-              <Label>Email de confirmation</Label>
+              <Label className="text-white/70">Email de confirmation</Label>
               <Input
                 type="email"
                 value={config.confirmationEmail ?? ""}
@@ -335,10 +347,11 @@ export function PaymentsTab({
                   }))
                 }
                 placeholder="contact@club.fr"
+                className="input-field"
               />
             </div>
             <div className="space-y-2">
-              <Label>Délai de paiement (heures)</Label>
+              <Label className="text-white/70">Délai de paiement (heures)</Label>
               <Input
                 type="number"
                 min={0}
@@ -349,12 +362,13 @@ export function PaymentsTab({
                     paymentDeadlineHours: Number(event.target.value || 0),
                   }))
                 }
+                className="input-field"
               />
             </div>
           </div>
 
           {saveError ? (
-            <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-500">
+            <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
               {saveError}
             </div>
           ) : null}

@@ -101,14 +101,23 @@ export type Player = {
   first_name: string;
   last_name: string;
   email: string | null;
+  photo_url?: string | null;
+  status?: "verified" | "pending" | "suspended";
+  admin_notes?: string | null;
   level: string | null;
   is_ranked?: boolean | null;
   ranking?: string | null;
   play_preference?: "droite" | "gauche" | "aucune" | null;
   phone: string | null;
   created_at: string;
+  updated_at?: string;
   pair_with?: string | null;
   whatsappJoinedTournaments?: WhatsAppJoin[];
+};
+
+export type PlayerWithStats = Player & {
+  tournaments_count?: number;
+  registrations_count?: number;
 };
 
 export type PairRegistrationData = {

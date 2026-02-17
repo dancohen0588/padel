@@ -169,7 +169,7 @@ export function PhotosTab({ adminToken, config, photos }: PhotosTabProps) {
           <Button
             type="submit"
             disabled={!coverFile || isPending}
-            className="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white"
+            className="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-md"
           >
             {isPending ? "Upload en cours..." : "Mettre à jour la couverture"}
           </Button>
@@ -198,13 +198,13 @@ export function PhotosTab({ adminToken, config, photos }: PhotosTabProps) {
               value={galleryCaption}
               onChange={(event) => setGalleryCaption(event.target.value)}
               placeholder="Ex: Tournoi d'été 2025"
-              className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-2 text-white placeholder:text-white/40 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
+              className="input-field"
             />
           </div>
           <Button
             type="submit"
             disabled={!galleryFile || isPending}
-            className="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white"
+            className="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-md"
           >
             {isPending ? "Ajout en cours..." : "Ajouter à la galerie"}
           </Button>
@@ -219,7 +219,7 @@ export function PhotosTab({ adminToken, config, photos }: PhotosTabProps) {
             orderedItems.map((photo, index) => (
               <div
                 key={photo.id}
-                className="flex items-center gap-4 rounded-xl border border-white/10 bg-white/5 p-4"
+                className="flex items-center gap-4 rounded-xl border border-white/10 bg-white/5 p-4 transition hover:border-orange-400/30"
               >
                 <div className="flex flex-col items-center gap-1 text-white/40">
                   <button
@@ -252,7 +252,7 @@ export function PhotosTab({ adminToken, config, photos }: PhotosTabProps) {
                 <button
                   type="button"
                   onClick={() => handleDeletePhoto(photo.id)}
-                  className="rounded-lg p-2 text-red-300 hover:bg-red-500/20"
+                  className="rounded-lg p-2 text-red-300 transition hover:bg-red-500/20"
                 >
                   <Trash2 className="h-4 w-4" />
                 </button>
@@ -265,7 +265,7 @@ export function PhotosTab({ adminToken, config, photos }: PhotosTabProps) {
           <Button
             type="button"
             onClick={persistOrder}
-            className="mt-4 w-full border border-white/10 bg-white/5 text-white"
+            className="mt-4 w-full border border-white/10 bg-white/5 text-white hover:border-orange-400/40 hover:bg-white/10"
             variant="outline"
           >
             Enregistrer l'ordre

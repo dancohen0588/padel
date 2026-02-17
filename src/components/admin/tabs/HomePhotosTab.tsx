@@ -50,13 +50,13 @@ export function HomePhotosTab({
 
   return (
     <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-      <Card className="rounded-2xl border border-border bg-white p-4 shadow-card">
+      <Card className="rounded-2xl border border-white/10 bg-white/5 p-4 text-white shadow-card">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="text-sm font-semibold text-brand-charcoal">
+            <p className="text-sm font-semibold text-white">
               Photos Home Page
             </p>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-white/60">
               {featuredPhotos.length} photos en vedette
             </p>
           </div>
@@ -64,7 +64,7 @@ export function HomePhotosTab({
             placeholder="Rechercher une photo"
             value={search}
             onChange={(event) => setSearch(event.target.value)}
-            className="sm:max-w-xs"
+            className="input-field sm:max-w-xs"
           />
         </div>
 
@@ -77,38 +77,40 @@ export function HomePhotosTab({
                 onClick={() => setSelectedId(photo.id)}
                 className={`rounded-2xl border p-3 text-left transition ${
                   selectedId === photo.id
-                    ? "border-brand-charcoal bg-brand-gray/20"
-                    : "border-border bg-white hover:bg-muted/40"
+                    ? "border-orange-400/40 bg-orange-500/10"
+                    : "border-white/10 bg-white/5 hover:border-orange-400/30 hover:bg-white/10"
                 }`}
               >
                 <div className="flex items-center justify-between gap-3">
                   <div>
-                    <p className="text-xs text-muted-foreground">{photo.url}</p>
-                    <p className="text-sm font-semibold text-brand-charcoal">
+                    <p className="text-xs text-white/50">{photo.url}</p>
+                    <p className="text-sm font-semibold text-white">
                       {photo.caption ?? "Sans légende"}
                     </p>
                   </div>
                   {photo.featured ? (
-                    <Badge variant="secondary">Home</Badge>
+                    <Badge className="border border-orange-400/40 bg-orange-500/10 text-xs font-semibold text-orange-200">
+                      Home
+                    </Badge>
                   ) : null}
                 </div>
               </button>
             ))
           ) : (
-            <div className="rounded-2xl border border-dashed border-border bg-white p-6 text-center text-sm text-muted-foreground">
+            <div className="rounded-2xl border border-dashed border-white/20 bg-white/5 p-6 text-center text-sm text-white/60">
               Aucune photo trouvée.
             </div>
           )}
         </div>
       </Card>
 
-      <Card className="rounded-2xl border border-border bg-white p-4 shadow-card">
+      <Card className="rounded-2xl border border-white/10 bg-white/5 p-4 text-white shadow-card">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm font-semibold text-brand-charcoal">
+            <p className="text-sm font-semibold text-white">
               {selected ? "Modifier la photo" : "Ajouter une photo"}
             </p>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-white/60">
               Associez-la à un tournoi et choisissez Home
             </p>
           </div>
@@ -117,6 +119,7 @@ export function HomePhotosTab({
               type="button"
               variant="outline"
               onClick={() => setSelectedId(null)}
+              className="border-white/20 bg-transparent text-white/80 hover:border-orange-400/50 hover:text-white"
             >
               Nouveau
             </Button>
@@ -133,31 +136,39 @@ export function HomePhotosTab({
           <input type="hidden" name="adminToken" value={adminToken} />
           <input type="hidden" name="photoId" value={selected?.id ?? ""} />
 
-          <Input name="url" placeholder="URL photo" defaultValue={selected?.url ?? ""} />
+          <Input
+            name="url"
+            placeholder="URL photo"
+            defaultValue={selected?.url ?? ""}
+            className="input-field"
+          />
           <Input
             name="caption"
             placeholder="Légende"
             defaultValue={selected?.caption ?? ""}
+            className="input-field"
           />
           <Input
             name="tournamentId"
             placeholder="ID tournoi (optionnel)"
             defaultValue={selected?.tournament_id ?? ""}
+            className="input-field"
           />
           <Input
             name="featured"
             placeholder="Afficher en Home (true/false)"
             defaultValue={selected?.featured ? "true" : "false"}
+            className="input-field"
           />
 
           {tournaments.length ? (
-            <div className="rounded-2xl border border-dashed border-border bg-white p-3 text-xs text-muted-foreground">
+            <div className="rounded-2xl border border-dashed border-white/20 bg-white/5 p-3 text-xs text-white/60">
               IDs tournois disponibles :
               <div className="mt-2 flex flex-wrap gap-2">
                 {tournaments.map((tournament) => (
                   <span
                     key={tournament.id}
-                    className="rounded-full border border-border px-2 py-1"
+                    className="rounded-full border border-white/10 bg-white/5 px-2 py-1 text-white/70"
                   >
                     {tournament.name} · {tournament.id}
                   </span>
@@ -184,6 +195,7 @@ export function HomePhotosTab({
                   setSelectedId(null);
                   router.refresh();
                 }}
+                className="border-white/20 bg-transparent text-white/80 hover:border-orange-400/50 hover:text-white"
               >
                 Supprimer
               </Button>

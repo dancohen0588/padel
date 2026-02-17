@@ -251,16 +251,12 @@ export function TournamentsTab({
 
   return (
     <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-      <Card className="rounded-2xl border border-border bg-white p-4 shadow-card">
+      <Card className="rounded-2xl border border-white/10 bg-white/5 p-5 text-white shadow-card">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
             <div>
-              <p className="text-sm font-semibold text-brand-charcoal">
-                Tournois créés
-              </p>
-              <p className="text-xs text-muted-foreground">
-                {tournaments.length} entrées
-              </p>
+              <p className="text-sm font-semibold text-white">Tournois créés</p>
+              <p className="text-xs text-white/50">{tournaments.length} entrées</p>
             </div>
             <div className="flex flex-wrap items-center gap-2">
               <GradientButton type="button" onClick={() => onSelectTournament(null)}>
@@ -272,7 +268,7 @@ export function TournamentsTab({
             placeholder="Rechercher un tournoi"
             value={search}
             onChange={(event) => setSearch(event.target.value)}
-            className="sm:max-w-xs"
+            className="input-field sm:max-w-xs"
           />
         </div>
 
@@ -290,10 +286,10 @@ export function TournamentsTab({
                     onSelectTournament(tournament.id);
                   }
                 }}
-                className={`w-full rounded-2xl border p-3 text-left transition ${
+                className={`w-full rounded-2xl border p-4 text-left transition ${
                   selectedId === tournament.id
-                    ? "border-brand-charcoal bg-brand-gray/20"
-                    : "border-border bg-white hover:bg-muted/40"
+                    ? "border-orange-400/40 bg-white/10"
+                    : "border-white/10 bg-white/5 hover:border-orange-400/30"
                 }`}
               >
                 <div className="flex items-center justify-between gap-3">
@@ -305,26 +301,28 @@ export function TournamentsTab({
                         className="h-12 w-12 rounded-xl object-cover"
                       />
                     ) : (
-                      <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-muted text-[10px] font-semibold text-muted-foreground">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/10 text-[10px] font-semibold text-white/50">
                         N/A
                       </div>
                     )}
                     <div>
-                      <p className="text-sm font-semibold text-brand-charcoal">
+                      <p className="text-sm font-semibold text-white">
                         {tournament.name}
                       </p>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-xs text-white/50">
                         {tournament.date} · {tournament.location ?? "Lieu à définir"}
                       </p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Badge variant="secondary">{statusLabel[tournament.status]}</Badge>
+                    <Badge className="border border-white/10 bg-white/10 text-xs text-white/70">
+                      {statusLabel[tournament.status]}
+                    </Badge>
                     {tournament.slug ? (
                       <Button
                         type="button"
                         variant="outline"
-                        className="bg-brand-violet text-white hover:bg-brand-violet/90 hover:text-white"
+                        className="border-white/10 bg-white/5 text-white hover:border-orange-400/40 hover:bg-orange-500/10"
                         onClick={() => {
                           startNavigation();
                           router.push(`/tournaments/${tournament.slug}/admin${adminQuery}`);
@@ -338,22 +336,20 @@ export function TournamentsTab({
               </div>
             ))
           ) : (
-            <div className="rounded-2xl border border-dashed border-border bg-white p-6 text-center text-sm text-muted-foreground">
+            <div className="rounded-2xl border border-dashed border-white/10 bg-white/5 p-6 text-center text-sm text-white/50">
               Aucun tournoi trouvé.
             </div>
           )}
         </div>
       </Card>
 
-      <Card className="rounded-2xl border border-border bg-white p-4 shadow-card">
+      <Card className="rounded-2xl border border-white/10 bg-white/5 p-6 text-white shadow-card">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm font-semibold text-brand-charcoal">
+            <p className="text-sm font-semibold text-white">
               {selected ? "Modifier le tournoi" : "Créer un tournoi"}
             </p>
-            <p className="text-xs text-muted-foreground">
-              Configurer le format et publier
-            </p>
+            <p className="text-xs text-white/50">Configurer le format et publier</p>
           </div>
         </div>
 
@@ -376,33 +372,35 @@ export function TournamentsTab({
           <input type="hidden" name="adminToken" value={adminToken} />
           <input type="hidden" name="tournamentId" value={selected?.id ?? ""} />
 
-          <label className="flex flex-col gap-2 text-sm font-semibold text-brand-charcoal">
+          <label className="flex flex-col gap-2 text-sm font-semibold text-white">
             Nom du tournoi
-            <Input name="name" placeholder="Nom" defaultValue={selected?.name ?? ""} />
+            <Input name="name" placeholder="Nom" defaultValue={selected?.name ?? ""} className="input-field" />
           </label>
-          <label className="flex flex-col gap-2 text-sm font-semibold text-brand-charcoal">
+          <label className="flex flex-col gap-2 text-sm font-semibold text-white">
             Slug
             <Input
               name="slug"
               placeholder="Slug"
               defaultValue={selected?.slug ?? ""}
               onChange={(event) => setSlugValue(event.target.value)}
+              className="input-field"
             />
             <input type="hidden" name="imagePath" value={imagePath ?? ""} />
           </label>
-          <label className="flex flex-col gap-2 text-sm font-semibold text-brand-charcoal">
+          <label className="flex flex-col gap-2 text-sm font-semibold text-white">
             Date
-            <Input name="date" type="date" defaultValue={selected?.date ?? ""} />
+            <Input name="date" type="date" defaultValue={selected?.date ?? ""} className="input-field" />
           </label>
-          <label className="flex flex-col gap-2 text-sm font-semibold text-brand-charcoal">
+          <label className="flex flex-col gap-2 text-sm font-semibold text-white">
             Lieu
             <Input
               name="location"
               placeholder="Lieu"
               defaultValue={selected?.location ?? ""}
+              className="input-field"
             />
           </label>
-          <label className="flex flex-col gap-2 text-sm font-semibold text-brand-charcoal">
+          <label className="flex flex-col gap-2 text-sm font-semibold text-white">
             Prix d&apos;inscription (€)
             <Input
               name="price"
@@ -412,12 +410,13 @@ export function TournamentsTab({
               placeholder="Ex: 25.00"
               value={priceValue}
               onChange={(event) => setPriceValue(event.target.value)}
+              className="input-field"
             />
-            <span className="text-xs text-muted-foreground">
+            <span className="text-xs text-white/50">
               Laissez vide pour un tournoi gratuit ou sans prix défini
             </span>
           </label>
-          <label className="flex flex-col gap-2 text-sm font-semibold text-brand-charcoal">
+          <label className="flex flex-col gap-2 text-sm font-semibold text-white">
             Lien du groupe WhatsApp
             <div className="flex items-center gap-2">
               <span className="text-xl">💬</span>
@@ -427,15 +426,15 @@ export function TournamentsTab({
                 placeholder="https://chat.whatsapp.com/XXXXX"
                 value={whatsappLink}
                 onChange={(event) => setWhatsappLink(event.target.value)}
-                className="flex-1"
+                className="input-field flex-1"
               />
             </div>
-            <span className="text-xs text-muted-foreground">
+            <span className="text-xs text-white/50">
               Laissez vide si vous ne souhaitez pas partager de groupe WhatsApp.
               Le lien doit être au format : https://chat.whatsapp.com/XXXXX
             </span>
           </label>
-          <label className="flex flex-col gap-2 text-sm font-semibold text-brand-charcoal">
+          <label className="flex flex-col gap-2 text-sm font-semibold text-white">
             Nombre d&apos;équipes
             <Input
               name="maxPlayers"
@@ -443,9 +442,10 @@ export function TournamentsTab({
               placeholder="Max joueurs"
               defaultValue={selected?.max_players ?? ""}
               onChange={(event) => setMaxPlayers(Number(event.target.value || 0))}
+              className="input-field"
             />
           </label>
-          <div className="flex flex-col gap-2 text-sm font-semibold text-brand-charcoal">
+          <div className="flex flex-col gap-2 text-sm font-semibold text-white">
             Photo du tournoi
             <input
               ref={fileInputRef}
@@ -470,7 +470,7 @@ export function TournamentsTab({
                   void handleFileUpload(file);
                 }
               }}
-              className="flex min-h-[140px] flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-border bg-white px-4 py-6 text-center text-xs font-semibold text-muted-foreground transition hover:bg-muted/40"
+              className="upload-zone flex min-h-[140px] flex-col items-center justify-center gap-2 rounded-2xl px-4 py-6 text-center text-xs font-semibold text-white/70"
             >
               {imagePreview ? (
                 <img
@@ -483,13 +483,13 @@ export function TournamentsTab({
                   Glissez-déposez une image ici ou cliquez pour importer (JPG/PNG/WEBP, 5 Mo max).
                 </span>
               )}
-              {isUploading ? <span>Upload en cours...</span> : null}
+              {isUploading ? <span className="text-white/60">Upload en cours...</span> : null}
             </button>
             {imagePath ? (
               <Button
                 type="button"
                 variant="outline"
-                className="w-fit bg-brand-violet text-white hover:bg-brand-violet/90 hover:text-white"
+                className="w-fit border-white/10 bg-white/5 text-white hover:border-orange-400/40 hover:bg-orange-500/10"
                 onClick={() => void handleRemoveImage()}
                 disabled={isUploading}
               >
@@ -497,20 +497,21 @@ export function TournamentsTab({
               </Button>
             ) : null}
             {uploadError ? (
-              <span className="text-xs font-semibold text-red-500">{uploadError}</span>
+              <span className="text-xs font-semibold text-red-300">{uploadError}</span>
             ) : null}
           </div>
-          <label className="flex flex-col gap-2 text-sm font-semibold text-brand-charcoal">
+          <label className="flex flex-col gap-2 text-sm font-semibold text-white">
             Description
             <Input
               name="description"
               placeholder="Description"
               defaultValue={selected?.description ?? ""}
+              className="input-field"
             />
           </label>
 
           <div className="flex flex-col gap-3">
-            <label className="flex flex-col gap-2 text-sm font-semibold text-brand-charcoal">
+            <label className="flex flex-col gap-2 text-sm font-semibold text-white">
               Mode d&apos;appariement des joueurs
               <input type="hidden" name="pairingMode" value={pairingMode} />
               <div className="grid grid-cols-3 gap-2">
@@ -519,10 +520,8 @@ export function TournamentsTab({
                     key={value}
                     type="button"
                     onClick={() => setPairingMode(value)}
-                    className={`rounded-full border px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.08em] transition whitespace-nowrap ${
-                      pairingMode === value
-                        ? "border-brand-violet bg-brand-violet text-white"
-                        : "border-border bg-white text-brand-charcoal"
+                    className={`radio-button rounded-lg px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.08em] whitespace-nowrap ${
+                      pairingMode === value ? "active" : ""
                     }`}
                   >
                     {value === "manual"
@@ -534,7 +533,7 @@ export function TournamentsTab({
                 ))}
               </div>
             </label>
-            <label className="flex flex-col gap-2 text-sm font-semibold text-brand-charcoal">
+            <label className="flex flex-col gap-2 text-sm font-semibold text-white">
               Nombre de poules
               <Input
                 name="poolsCount"
@@ -542,12 +541,13 @@ export function TournamentsTab({
                 placeholder="Nombre de poules"
                 defaultValue={selected?.config?.pools_count ?? 4}
                 onChange={(event) => setPoolsCount(Number(event.target.value || 0))}
+                className="input-field"
               />
-              <span className="text-xs font-semibold text-status-approved">
+              <span className="text-xs font-semibold text-emerald-300">
                 {poolsInfo}
               </span>
             </label>
-            <label className="flex flex-col gap-2 text-sm font-semibold text-brand-charcoal">
+            <label className="flex flex-col gap-2 text-sm font-semibold text-white">
               Équipes qualifiées
               <Input
                 name="teamsQualified"
@@ -555,14 +555,15 @@ export function TournamentsTab({
                 placeholder="Équipes qualifiées"
                 defaultValue={selected?.config?.playoffs?.teams_qualified ?? 8}
                 onChange={(event) => setTeamsQualified(Number(event.target.value || 0))}
+                className="input-field"
               />
               {qualifiedInfo ? (
-                <span className="text-xs font-semibold text-status-approved">
+                <span className="text-xs font-semibold text-emerald-300">
                   {qualifiedInfo}
                 </span>
               ) : null}
             </label>
-            <label className="flex flex-col gap-2 text-sm font-semibold text-brand-charcoal">
+            <label className="flex flex-col gap-2 text-sm font-semibold text-white">
               Format playoffs
               <input type="hidden" name="playoffsFormat" value={playoffsFormat} />
               <div className="grid grid-cols-2 gap-2">
@@ -571,10 +572,8 @@ export function TournamentsTab({
                     key={value}
                     type="button"
                     onClick={() => setPlayoffsFormat(value)}
-                    className={`rounded-full border px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.08em] transition whitespace-nowrap ${
-                      playoffsFormat === value
-                        ? "border-brand-violet bg-brand-violet text-white"
-                        : "border-border bg-white text-brand-charcoal"
+                    className={`radio-button rounded-lg px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.08em] whitespace-nowrap ${
+                      playoffsFormat === value ? "active" : ""
                     }`}
                   >
                     {value}
@@ -584,7 +583,7 @@ export function TournamentsTab({
             </label>
           </div>
           <div className="flex flex-col gap-4">
-            <div className="flex flex-col gap-2 text-sm font-semibold text-brand-charcoal">
+            <div className="flex flex-col gap-2 text-sm font-semibold text-white">
               Playoffs activés
               <input type="hidden" name="playoffsEnabled" value={playoffsEnabled ? "true" : "false"} />
               <button
@@ -593,15 +592,15 @@ export function TournamentsTab({
                 onClick={() => setPlayoffsEnabled((value) => !value)}
                 className={`flex h-10 items-center justify-between rounded-full border px-4 text-[11px] font-semibold uppercase tracking-[0.08em] transition whitespace-nowrap ${
                   playoffsEnabled
-                    ? "border-brand-violet bg-brand-violet text-white"
-                    : "border-border bg-white text-brand-charcoal"
+                    ? "border-orange-400/40 bg-orange-500/20 text-white"
+                    : "border-white/10 bg-white/5 text-white/60"
                 }`}
               >
                 <span>{playoffsEnabled ? "Activés" : "Désactivés"}</span>
-                <span className={`h-5 w-5 rounded-full ${playoffsEnabled ? "bg-white" : "bg-brand-gray"}`} />
+                <span className={`h-5 w-5 rounded-full ${playoffsEnabled ? "bg-white" : "bg-white/20"}`} />
               </button>
             </div>
-            <div className="flex flex-col gap-2 text-sm font-semibold text-brand-charcoal">
+            <div className="flex flex-col gap-2 text-sm font-semibold text-white">
               Petite finale
               <input type="hidden" name="hasThirdPlace" value={hasThirdPlace ? "true" : "false"} />
               <button
@@ -610,15 +609,15 @@ export function TournamentsTab({
                 onClick={() => setHasThirdPlace((value) => !value)}
                 className={`flex h-10 items-center justify-between rounded-full border px-4 text-[11px] font-semibold uppercase tracking-[0.08em] transition whitespace-nowrap ${
                   hasThirdPlace
-                    ? "border-brand-violet bg-brand-violet text-white"
-                    : "border-border bg-white text-brand-charcoal"
+                    ? "border-orange-400/40 bg-orange-500/20 text-white"
+                    : "border-white/10 bg-white/5 text-white/60"
                 }`}
               >
                 <span>{hasThirdPlace ? "Activée" : "Désactivée"}</span>
-                <span className={`h-5 w-5 rounded-full ${hasThirdPlace ? "bg-white" : "bg-brand-gray"}`} />
+                <span className={`h-5 w-5 rounded-full ${hasThirdPlace ? "bg-white" : "bg-white/20"}`} />
               </button>
             </div>
-            <div className="flex flex-col gap-2 text-sm font-semibold text-brand-charcoal">
+            <div className="flex flex-col gap-2 text-sm font-semibold text-white">
               Statut
               <input type="hidden" name="status" value={status} />
               <div className="grid grid-cols-3 gap-2">
@@ -637,10 +636,8 @@ export function TournamentsTab({
                       key={value}
                       type="button"
                       onClick={() => setStatus(value)}
-                      className={`rounded-full border px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.08em] transition whitespace-nowrap ${
-                        status === value
-                          ? "border-brand-violet bg-brand-violet text-white"
-                          : "border-border bg-white text-brand-charcoal"
+                      className={`radio-button rounded-lg px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.08em] whitespace-nowrap ${
+                        status === value ? "active" : ""
                       }`}
                     >
                       {statusLabel[value]}
@@ -655,7 +652,7 @@ export function TournamentsTab({
             <button
               type="submit"
               form="tournament-form"
-              className="gradient-primary text-white hover:text-white shadow-glow rounded-[10px] px-4 py-2"
+              className="rounded-xl bg-gradient-to-br from-orange-400 to-orange-500 px-4 py-2 text-sm font-semibold text-white shadow-md transition hover:translate-y-[-1px] hover:shadow-lg"
             >
               {selected ? "Mettre à jour" : "Créer"}
             </button>
@@ -663,7 +660,7 @@ export function TournamentsTab({
               <Button
                 type="button"
                 variant="outline"
-                className="bg-brand-violet text-white hover:bg-brand-violet/90 hover:text-white"
+                className="border-white/10 bg-white/5 text-white hover:border-orange-400/40 hover:bg-orange-500/10"
                 onClick={async () => {
                   const confirmed = window.confirm("Supprimer ce tournoi ?");
                   if (!confirmed) return;
