@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Inscriptions - Le Tournoi des Frérots</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      background: #1E1E2E;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    .gradient-text {
+      background: linear-gradient(135deg, #fb923c 0%, #fbbf24 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .shadow-card {
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .input-field {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 12px 16px;
+      color: white;
+      width: 100%;
+      transition: all 0.2s ease;
+    }
+
+    .input-field:focus {
+      outline: none;
+      border-color: rgba(251, 146, 60, 0.5);
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .input-field::placeholder {
+      color: rgba(255, 255, 255, 0.3);
+    }
+
+    .tab-active {
+      color: #fb923c;
+      border-bottom: 2px solid #fb923c;
+    }
+
+    .radio-button {
+      transition: all 0.2s ease;
+    }
+
+    .radio-button.active {
+      background: linear-gradient(135deg, #fb923c, #fbbf24);
+      color: white;
+    }
+
+    .radio-button:not(.active) {
+      background: rgba(255, 255, 255, 0.05);
+      color: rgba(255, 255, 255, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .radio-button:not(.active):hover {
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .upload-zone {
+      border: 2px dashed rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.03);
+      transition: all 0.3s ease;
+    }
+
+    .upload-zone:hover {
+      border-color: rgba(251, 146, 60, 0.4);
+      background: rgba(251, 146, 60, 0.05);
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="border-b border-white/10 bg-white/5 backdrop-blur-sm">
+    <div class="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+      <h1 class="gradient-text text-2xl font-bold">Le Tournoi des Frérots</h1>
+      <nav class="flex gap-6">
+        <a href="#" class="text-sm font-medium text-white/60 transition hover:text-white">Tournoi</a>
+        <a href="#" class="text-sm font-medium text-orange-400">Admin</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="mx-auto max-w-7xl px-6 py-8">
+    <!-- Titre et sous-titre -->
+    <div class="mb-8">
+      <h2 class="gradient-text mb-2 text-4xl font-bold">Admin inscriptions</h2>
+      <p class="text-white/60">Gère les tournois, photos et contenus de la home.</p>
+    </div>
+
+    <!-- Onglets -->
+    <div class="mb-8 flex gap-8 border-b border-white/10">
+      <button class="tab-active pb-4 text-sm font-semibold uppercase tracking-wide">
+        Tournois
+      </button>
+      <button class="pb-4 text-sm font-semibold uppercase tracking-wide text-white/50 transition hover:text-white">
+        Paiements
+      </button>
+      <button class="pb-4 text-sm font-semibold uppercase tracking-wide text-white/50 transition hover:text-white">
+        Home Photos
+      </button>
+      <button class="pb-4 text-sm font-semibold uppercase tracking-wide text-white/50 transition hover:text-white">
+        Photos (Storage)
+      </button>
+    </div>
+
+    <!-- Contenu principal -->
+    <div class="grid gap-6 lg:grid-cols-[1fr_1.5fr]">
+
+      <!-- Colonne gauche : Liste des tournois -->
+      <div class="space-y-6">
+        <!-- Header avec bouton créer et recherche -->
+        <div class="rounded-2xl border border-white/10 bg-white/5 p-5 shadow-card">
+          <div class="mb-4 flex items-center justify-between">
+            <div>
+              <h3 class="text-lg font-bold text-white">Tournois créés</h3>
+              <p class="text-xs text-white/50">1 entrées</p>
+            </div>
+            <button class="rounded-xl bg-gradient-to-br from-orange-400 to-orange-500 px-4 py-2 text-sm font-semibold text-white shadow-md transition hover:translate-y-[-2px] hover:shadow-lg">
+              Créer
+            </button>
+          </div>
+
+          <!-- Barre de recherche -->
+          <div class="relative">
+            <input
+              type="text"
+              placeholder="Rechercher un tournoi"
+              class="input-field pl-10"
+            />
+            <svg class="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-white/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
+        </div>
+
+        <!-- Liste des tournois -->
+        <div class="space-y-3">
+          <!-- Card tournoi -->
+          <div class="rounded-2xl border border-white/10 bg-white/5 p-4 shadow-card transition hover:border-orange-400/30">
+            <div class="flex items-center gap-4">
+              <div class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-orange-400 to-orange-500 text-sm font-bold text-white">
+                N/A
+              </div>
+              <div class="flex-1">
+                <h4 class="mb-1 font-bold text-white">Tournoi de mars</h4>
+                <p class="text-xs text-white/50">1991-01-01 · paris</p>
+              </div>
+              <div class="flex flex-col items-end gap-2">
+                <span class="inline-flex items-center gap-1 rounded-full border border-emerald-400/40 bg-gradient-to-r from-emerald-500/20 to-emerald-400/10 px-3 py-1 text-xs font-semibold uppercase text-emerald-300">
+                  Inscriptions ouvertes
+                </span>
+                <button class="rounded-lg bg-gradient-to-br from-orange-400 to-orange-500 px-4 py-2 text-sm font-semibold text-white shadow-md transition hover:translate-y-[-1px] hover:shadow-lg">
+                  Configurer
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Colonne droite : Formulaire de création -->
+      <div class="rounded-2xl border border-white/10 bg-white/5 p-6 shadow-card">
+        <div class="mb-6">
+          <h3 class="gradient-text mb-1 text-2xl font-bold">Créer un tournoi</h3>
+          <p class="text-sm text-white/60">Configurer le format et publier</p>
+        </div>
+
+        <form class="space-y-6">
+          <!-- Nom du tournoi -->
+          <div>
+            <label class="mb-2 block text-sm font-semibold text-white">Nom du tournoi</label>
+            <input
+              type="text"
+              placeholder="Nom"
+              class="input-field"
+            />
+          </div>
+
+          <!-- Slug -->
+          <div>
+            <label class="mb-2 block text-sm font-semibold text-white">Slug</label>
+            <input
+              type="text"
+              placeholder="Slug"
+              class="input-field"
+            />
+          </div>
+
+          <!-- Date -->
+          <div>
+            <label class="mb-2 block text-sm font-semibold text-white">Date</label>
+            <input
+              type="date"
+              class="input-field"
+            />
+          </div>
+
+          <!-- Lieu -->
+          <div>
+            <label class="mb-2 block text-sm font-semibold text-white">Lieu</label>
+            <input
+              type="text"
+              placeholder="Lieu"
+              class="input-field"
+            />
+          </div>
+
+          <!-- Prix d'inscription -->
+          <div>
+            <label class="mb-2 block text-sm font-semibold text-white">Prix d'inscription (€)</label>
+            <input
+              type="number"
+              placeholder="Ex: 25.00"
+              class="input-field"
+            />
+            <p class="mt-1 text-xs text-white/50">Laissez vide pour un tournoi gratuit ou sans prix défini</p>
+          </div>
+
+          <!-- Lien WhatsApp -->
+          <div>
+            <label class="mb-2 block text-sm font-semibold text-white">Lien du groupe WhatsApp</label>
+            <div class="relative">
+              <span class="absolute left-3 top-1/2 -translate-y-1/2 text-white/40">💬</span>
+              <input
+                type="url"
+                placeholder="https://chat.whatsapp.com/XXXXX"
+                class="input-field pl-10"
+              />
+            </div>
+            <p class="mt-1 text-xs text-white/50">
+              Laissez vide si vous ne souhaitez pas partager de groupe WhatsApp. Le lien doit être au format : https://chat.whatsapp.com/XXXXX
+            </p>
+          </div>
+
+          <!-- Nombre d'équipes -->
+          <div>
+            <label class="mb-2 block text-sm font-semibold text-white">Nombre d'équipes</label>
+            <input
+              type="number"
+              placeholder="Max joueurs"
+              class="input-field"
+            />
+          </div>
+
+          <!-- Photo du tournoi -->
+          <div>
+            <label class="mb-2 block text-sm font-semibold text-white">Photo du tournoi</label>
+            <div class="upload-zone flex cursor-pointer flex-col items-center justify-center rounded-2xl py-12">
+              <svg class="mb-3 h-12 w-12 text-white/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+              </svg>
+              <p class="mb-1 text-sm font-semibold text-white/70">Glissez-déposez une image ici ou cliquez pour importer</p>
+              <p class="text-xs text-white/40">(JPG/PNG/WEBP, 5 Mo max)</p>
+            </div>
+          </div>
+
+          <!-- Description -->
+          <div>
+            <label class="mb-2 block text-sm font-semibold text-white">Description</label>
+            <textarea
+              placeholder="Description"
+              rows="4"
+              class="input-field resize-none"
+            ></textarea>
+          </div>
+
+          <!-- Mode d'appariement -->
+          <div>
+            <label class="mb-3 block text-sm font-semibold text-white">Mode d'appariement des joueurs</label>
+            <div class="grid grid-cols-3 gap-2">
+              <button type="button" class="radio-button rounded-lg px-4 py-2 text-xs font-semibold uppercase">
+                Manuel
+              </button>
+              <button type="button" class="radio-button rounded-lg px-4 py-2 text-xs font-semibold uppercase">
+                Automatique
+              </button>
+              <button type="button" class="radio-button active rounded-lg px-4 py-2 text-xs font-semibold uppercase">
+                Auto Équitable
+              </button>
+            </div>
+          </div>
+
+          <!-- Nombre de poules -->
+          <div>
+            <label class="mb-2 block text-sm font-semibold text-white">Nombre de poules</label>
+            <input
+              type="number"
+              value="4"
+              class="input-field"
+            />
+            <p class="mt-2 text-xs text-emerald-400">Renseignez le nombre d'équipes et de poules pour calculer.</p>
+          </div>
+
+          <!-- Équipes qualifiées -->
+          <div>
+            <label class="mb-2 block text-sm font-semibold text-white">Équipes qualifiées</label>
+            <input
+              type="number"
+              value="8"
+              class="input-field"
+            />
+          </div>
+
+          <!-- Format playoffs -->
+          <div>
+            <label class="mb-3 block text-sm font-semibold text-white">Format playoffs</label>
+            <div class="grid grid-cols-2 gap-2">
+              <button type="button" class="radio-button active rounded-lg px-4 py-2 text-xs font-semibold uppercase">
+                Single_Elim
+              </button>
+              <button type="button" class="radio-button rounded-lg px-4 py-2 text-xs font-semibold uppercase">
+                Double_Elim
+              </button>
+            </div>
+          </div>
+
+          <!-- Playoffs activés -->
+          <div>
+            <label class="mb-3 block text-sm font-semibold text-white">Playoffs activés</label>
+            <button type="button" class="radio-button rounded-lg px-4 py-2 text-sm font-semibold uppercase">
+              Désactivés
+            </button>
+          </div>
+
+          <!-- Petite finale -->
+          <div>
+            <label class="mb-3 block text-sm font-semibold text-white">Petite finale</label>
+            <button type="button" class="radio-button rounded-lg px-4 py-2 text-sm font-semibold uppercase">
+              Désactivée
+            </button>
+          </div>
+
+          <!-- Statut -->
+          <div>
+            <label class="mb-3 block text-sm font-semibold text-white">Statut</label>
+            <div class="grid grid-cols-3 gap-2">
+              <button type="button" class="radio-button active rounded-lg px-4 py-2 text-xs font-semibold uppercase">
+                Brouillon
+              </button>
+              <button type="button" class="radio-button rounded-lg px-4 py-2 text-xs font-semibold uppercase">
+                À venir
+              </button>
+              <button type="button" class="radio-button rounded-lg px-4 py-2 text-xs font-semibold uppercase">
+                Inscriptions ouvertes
+              </button>
+              <button type="button" class="radio-button rounded-lg px-4 py-2 text-xs font-semibold uppercase">
+                En cours
+              </button>
+              <button type="button" class="radio-button rounded-lg px-4 py-2 text-xs font-semibold uppercase">
+                Publié
+              </button>
+              <button type="button" class="radio-button rounded-lg px-4 py-2 text-xs font-semibold uppercase">
+                Archivé
+              </button>
+            </div>
+          </div>
+
+          <!-- Bouton soumettre -->
+          <button
+            type="submit"
+            class="w-full rounded-xl bg-gradient-to-br from-orange-400 to-orange-500 px-6 py-3 font-semibold text-white shadow-lg transition hover:translate-y-[-2px] hover:shadow-xl"
+          >
+            Créer
+          </button>
+        </form>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="mt-12 border-t border-white/10 py-6">
+    <div class="mx-auto flex max-w-7xl items-center justify-between px-6 text-sm text-white/40">
+      <p>© 2026 Le Tournoi des Frérots</p>
+      <p>Padel crew · Urban Sport vibe</p>
+    </div>
+  </footer>
+</body>
+</html>
