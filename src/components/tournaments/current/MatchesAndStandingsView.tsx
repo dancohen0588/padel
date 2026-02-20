@@ -179,7 +179,7 @@ export function MatchesAndStandingsView({
   if (pools.length === 0) {
     return (
       <Card className="rounded-2xl border border-white/10 bg-white/5 p-6 text-white">
-        <div className="text-lg font-semibold">Les poules n'ont pas encore été générées.</div>
+        <div className="text-lg font-semibold">Les poules n&apos;ont pas encore été générées.</div>
       </Card>
     );
   }

@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  Suspense,
   createContext,
   useCallback,
   useContext,
@@ -46,22 +47,44 @@ const isInternalNavigation = (anchor: HTMLAnchorElement) => {
   return true;
 };
 
+function RouteChangeWatcher({
+  activeRef,
+  startTimeRef,
+  endNavigation,
+}: {
+  activeRef: React.RefObject<boolean>;
+  startTimeRef: React.RefObject<number | null>;
+  endNavigation: () => void;
+}) {
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const routeKey = useMemo(
+    () => `${pathname ?? ""}?${searchParams?.toString() ?? ""}`,
+    [pathname, searchParams]
+  );
+
+  useEffect(() => {
+    if (!activeRef.current) return;
+    const elapsed = Date.now() - (startTimeRef.current ?? 0);
+    const remaining = Math.max(MIN_DURATION_MS - elapsed, 0);
+    const timeout = window.setTimeout(() => {
+      endNavigation();
+    }, remaining);
+    return () => window.clearTimeout(timeout);
+  }, [endNavigation, routeKey, activeRef, startTimeRef]);
+
+  return null;
+}
+
 export function NavigationOverlayProvider({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
   const [visible, setVisible] = useState(false);
   const startTimeRef = useRef<number | null>(null);
   const activeRef = useRef(false);
   const failSafeTimeoutRef = useRef<number | null>(null);
-
-  const routeKey = useMemo(
-    () => `${pathname ?? ""}?${searchParams?.toString() ?? ""}`,
-    [pathname, searchParams]
-  );
 
   const clearFailSafe = useCallback(() => {
     if (failSafeTimeoutRef.current !== null) {
@@ -86,16 +109,6 @@ export function NavigationOverlayProvider({
       endNavigation();
     }, FAILSAFE_DURATION_MS);
   }, [clearFailSafe, endNavigation]);
-
-  useEffect(() => {
-    if (!activeRef.current) return;
-    const elapsed = Date.now() - (startTimeRef.current ?? 0);
-    const remaining = Math.max(MIN_DURATION_MS - elapsed, 0);
-    const timeout = window.setTimeout(() => {
-      endNavigation();
-    }, remaining);
-    return () => window.clearTimeout(timeout);
-  }, [endNavigation, routeKey]);
 
   useEffect(() => {
     const handleClick = (event: MouseEvent) => {
@@ -126,6 +139,13 @@ export function NavigationOverlayProvider({
 
   return (
     <NavigationOverlayContext.Provider value={{ startNavigation }}>
+      <Suspense fallback={null}>
+        <RouteChangeWatcher
+          activeRef={activeRef}
+          startTimeRef={startTimeRef}
+          endNavigation={endNavigation}
+        />
+      </Suspense>
       {children}
       {visible ? (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm">

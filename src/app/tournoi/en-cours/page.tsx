@@ -18,7 +18,7 @@ export default async function CurrentTournamentPage() {
         />
         {tournaments.length === 0 ? (
           <div className="mt-8 rounded-2xl border border-dashed border-white/20 bg-white/5 p-10 text-center text-sm text-white/70">
-            Aucun tournoi publié ou en cours n'est disponible pour le moment.
+            Aucun tournoi publié ou en cours n&apos;est disponible pour le moment.
           </div>
         ) : (
           <CurrentTournamentClient tournaments={tournaments} />

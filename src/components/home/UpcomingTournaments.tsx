@@ -47,7 +47,7 @@ export function UpcomingTournaments({ tournaments }: UpcomingTournamentsProps) {
         <span className="text-lg">📅</span>
         <div>
           <h2 className="text-lg font-semibold">Prochains tournois</h2>
-          <p className="text-xs text-white/80">Réserve ta place ou suis l'action</p>
+          <p className="text-xs text-white/80">Réserve ta place ou suis l&apos;action</p>
         </div>
       </div>
       <div className="flex flex-col gap-3">
@@ -117,7 +117,7 @@ export function UpcomingTournaments({ tournaments }: UpcomingTournamentsProps) {
                       href={`/tournaments/${tournament.slug ?? tournament.id}/register`}
                       className="flex-1 inline-flex items-center justify-center rounded-xl bg-white px-3 py-2 text-xs font-semibold text-[#ff6b35] transition hover:scale-[1.01] hover:bg-white/90"
                     >
-                      S'inscrire
+                      S&apos;inscrire
                     </Link>
                   )}
 

@@ -567,7 +567,6 @@ export function RegistrationForm({
 
       {!isPairMode ? (
         <div className="mb-8 rounded-xl border border-white/10 bg-white/5 p-5">
-        {console.debug("RegistrationForm:solo-switch", { isPairMode, mode })}
         <label className="block text-sm font-semibold text-white/90">
           Avez-vous déjà participé à un tournoi ?
         </label>
@@ -635,10 +634,6 @@ export function RegistrationForm({
 
             {isPairMode ? (
               <div className="mb-8 rounded-xl border border-white/10 bg-white/5 p-5">
-                {console.debug("RegistrationForm:pair-switch", {
-                  isPairMode,
-                  player1Mode,
-                })}
                 <label className="block text-sm font-semibold text-white/90">
                   Avez-vous déjà participé à un tournoi ?
                 </label>
@@ -1029,10 +1024,6 @@ export function RegistrationForm({
 
             {isPairMode ? (
               <>
-                {console.debug("RegistrationForm:player1-cta-location", {
-                  isPairMode,
-                  player1Mode,
-                })}
                 {player1Mode === "existing" && !player1VerifiedPlayer && player1PhoneStatus !== "error" ? (
                   <div className="flex gap-3">
                     <VerifyButton

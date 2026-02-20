@@ -217,7 +217,7 @@ export function UsersApprovalTab({
                       <input type="hidden" name="status" value="waitlist" />
                       <input type="hidden" name="adminToken" value={adminToken} />
                     <AdminButton type="submit" variant="primary">
-                      ⏳ Liste d'attente
+                      ⏳ Liste d&apos;attente
                     </AdminButton>
                     </form>
                     <form

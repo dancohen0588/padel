@@ -8,7 +8,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
-import { Button } from "@/components/ui/button";
 import { GradientButton } from "@/components/ui/gradient-button";
 
 type PaymentsTabProps = {
@@ -181,7 +180,7 @@ export function PaymentsTab({
             <div>
               <p className="text-sm font-semibold text-white">Paiements activés</p>
               <p className="text-xs text-white/60">
-                Active la section paiement dans le formulaire d'inscription
+                Active la section paiement dans le formulaire d&apos;inscription
               </p>
             </div>
             <Switch

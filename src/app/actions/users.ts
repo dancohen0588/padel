@@ -15,6 +15,7 @@ type PlayerUpdateInput = Partial<
 export async function getAllPlayersAction(
   adminToken: string,
   search?: string,
+  status?: string,
   page = 1,
   limit = 10
 ): Promise<{
@@ -45,6 +46,11 @@ export async function getAllPlayersAction(
         OR phone LIKE $${searchIndex}
       )`
     );
+  }
+
+  if (status && status !== "all") {
+    values.push(status);
+    filters.push(`status = $${values.length}`);
   }
 
   const whereClause = filters.length ? `WHERE ${filters.join(" AND ")}` : "";

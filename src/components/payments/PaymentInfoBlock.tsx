@@ -2,7 +2,6 @@
 
 import { useMemo, useState } from "react";
 import type { PaymentConfig } from "@/lib/types";
-import { Separator } from "@/components/ui/separator";
 
 type PaymentInfoBlockProps = {
   price: number | null;
@@ -156,7 +155,7 @@ export function PaymentInfoBlock({
         <div className="flex-1">
           <h3 className="mb-2 text-sm font-semibold text-orange-400">Informations de paiement</h3>
           <p className="mb-3 text-xs text-white/70">
-            Le prix d'inscription à ce tournoi est de{" "}
+            Le prix d&apos;inscription à ce tournoi est de{" "}
             <span className="font-bold text-white">{formattedPrice}</span>
             {isPairMode && formattedPairPrice ? (
               <span>
@@ -175,7 +174,7 @@ export function PaymentInfoBlock({
           <div className="mt-3 flex items-start gap-2 rounded-lg border border-amber-500/30 bg-amber-500/10 p-3">
             <span className="text-base">⚠️</span>
             <p className="text-xs text-amber-200">
-              <strong>Important :</strong> Votre inscription ne sera validée qu'après réception du paiement.
+              <strong>Important :</strong> Votre inscription ne sera validée qu&apos;après réception du paiement.
               {safeConfig.paymentDeadlineHours
                 ? ` Merci d'effectuer le règlement dans les ${safeConfig.paymentDeadlineHours}h suivant votre inscription.`
                 : ""}
@@ -239,7 +238,7 @@ export function PaymentInfoBlock({
                 ))
               ) : (
                 <div className="rounded-xl border border-white/10 bg-white/5 p-4 text-xs text-white/70">
-                  Aucun moyen de paiement n'est configuré pour ce tournoi.
+                  Aucun moyen de paiement n&apos;est configuré pour ce tournoi.
                 </div>
               )}
             </div>
@@ -250,7 +249,7 @@ export function PaymentInfoBlock({
                 <div className="flex-1">
                   <p className="text-xs font-semibold text-emerald-300">Confirmation de paiement</p>
                   <p className="mt-1 text-xs text-emerald-200/80">
-                    Après votre paiement, envoyez une capture d'écran ou une confirmation par email à{" "}
+                    Après votre paiement, envoyez une capture d&apos;écran ou une confirmation par email à{" "}
                     {safeConfig.confirmationEmail ? (
                       <a
                         href={`mailto:${safeConfig.confirmationEmail}`}
@@ -259,7 +258,7 @@ export function PaymentInfoBlock({
                         {safeConfig.confirmationEmail}
                       </a>
                     ) : (
-                      <span className="font-semibold text-emerald-300">l'organisateur</span>
+                      <span className="font-semibold text-emerald-300">l&apos;organisateur</span>
                     )}{" "}
                     pour validation rapide.
                   </p>

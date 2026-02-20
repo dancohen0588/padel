@@ -406,7 +406,8 @@ export async function registerPairAction(
     const player1Mode = String(formData.get("player1Mode") ?? "new") as RegistrationMode;
     const player2Mode = String(formData.get("player2Mode") ?? "new") as RegistrationMode;
 
-    const pairResult = await database.begin(async (transaction) => {
+    const pairResult = await database.begin(async (txn) => {
+      const transaction = txn as unknown as Sql;
       const resolvePlayer = async (prefix: "player1" | "player2") => {
         const mode = prefix === "player1" ? player1Mode : player2Mode;
         const rawPhone = String(formData.get(`${prefix}Phone`) ?? "").trim();
@@ -428,14 +429,13 @@ export async function registerPairAction(
             );
           }
 
-          const [player] = await transaction<
-            Array<{ id: string; phone: string | null; first_name: string; last_name: string }>
-          >`
+          const players: Array<{ id: string; phone: string | null; first_name: string; last_name: string }> = await (transaction as unknown as Sql)`
             select id, phone, first_name, last_name
             from players
             where id = ${playerId}
             limit 1
           `;
+          const [player] = players;
 
           if (!player?.id || normalizePhone(player.phone ?? "") !== phone) {
             throw new Error(
@@ -470,7 +470,7 @@ export async function registerPairAction(
           );
         }
 
-        const existingPlayers = await transaction<Array<{ id: string }>>`
+        const existingPlayers: Array<{ id: string }> = await (transaction as unknown as Sql)`
           select id
           from players
           where CASE
@@ -488,7 +488,7 @@ export async function registerPairAction(
           );
         }
 
-        const playerId = await createPlayer(transaction, {
+        const playerId = await createPlayer(transaction as unknown as Sql, {
           firstName,
           lastName,
           email,
@@ -529,14 +529,14 @@ export async function registerPairAction(
         where id = ${player2.id}
       `;
 
-      await ensureRegistration(transaction, tournamentId, player1.id);
-      await ensureRegistration(transaction, tournamentId, player2.id);
+      await ensureRegistration(transaction as unknown as Sql, tournamentId, player1.id);
+      await ensureRegistration(transaction as unknown as Sql, tournamentId, player2.id);
 
-      const whatsappGroupLink = await getTournamentWhatsappLink(transaction, tournamentId);
-      const hasAlreadyJoined = await getHasAlreadyJoined(transaction, player1.id, tournamentId);
+      const whatsappGroupLink = await getTournamentWhatsappLink(transaction as unknown as Sql, tournamentId);
+      const hasAlreadyJoined = await getHasAlreadyJoined(transaction as unknown as Sql, player1.id, tournamentId);
 
       return {
-        status: "ok",
+        status: "ok" as const,
         message: `Inscription validée pour ${player1FullName} et ${player2FullName} !`,
         player1Id: player1.id,
         player2Id: player2.id,

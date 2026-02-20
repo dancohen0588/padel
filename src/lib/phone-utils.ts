@@ -10,7 +10,7 @@
  * - +33X XX XX XX XX
  */
 export function normalizePhoneNumber(phone: string): string | null {
-  let cleaned = phone.trim().replace(/[^\d+]/g, "");
+  const cleaned = phone.trim().replace(/[^\d+]/g, "");
 
   if (cleaned.startsWith("+33")) {
     const digits = cleaned.substring(3);

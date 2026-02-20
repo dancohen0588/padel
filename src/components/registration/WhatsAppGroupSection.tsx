@@ -34,7 +34,7 @@ export function WhatsAppGroupSection({
         },
         errorCorrectionLevel: "H",
       },
-      (error: Error | null) => {
+      (error: Error | null | undefined) => {
         if (error) console.error("QR Code generation error:", error);
       }
     );

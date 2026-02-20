@@ -1,6 +1,5 @@
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
-import { SectionHeader } from "@/components/ui/section-header";
 import { AdminTabs } from "@/components/admin/AdminTabs";
 import { getAllPlayersAction } from "@/app/actions/users";
 import {
@@ -60,7 +59,7 @@ export default async function AdminInscriptionsPage({
     getHomeConfig(),
     getHomeGallery(),
     getGlobalPaymentConfig(),
-    getAllPlayersAction(adminToken, search, page, 10),
+    getAllPlayersAction(adminToken, search, undefined, page, 10),
   ]);
 
   return (

@@ -268,7 +268,7 @@ export function PhotosTab({ adminToken, config, photos }: PhotosTabProps) {
             className="mt-4 w-full border border-white/10 bg-white/5 text-white hover:border-orange-400/40 hover:bg-white/10"
             variant="outline"
           >
-            Enregistrer l'ordre
+            Enregistrer l&apos;ordre
           </Button>
         ) : null}
       </Card>
