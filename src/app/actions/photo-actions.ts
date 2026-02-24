@@ -21,14 +21,14 @@ export async function updateHomeCoverPhoto(formData: FormData) {
 
   const database = getDatabaseClient();
   const [config] = await database<{
-    cover_photo_path: string | null;
-  }[]>`select cover_photo_path from home_config where id = ${
+    cover_photo_url: string | null;
+  }[]>`select cover_photo_url from home_config where id = ${
     "00000000-0000-0000-0000-000000000001"
   }`;
 
   try {
-    if (config?.cover_photo_path) {
-      await deleteImage(config.cover_photo_path, "home-photos");
+    if (config?.cover_photo_url) {
+      await deleteImage(config.cover_photo_url);
     }
 
     const { url, path } = await uploadImage(file, "home-photos", "cover");
@@ -109,8 +109,8 @@ export async function deleteGalleryPhoto(formData: FormData) {
 
   try {
     const database = getDatabaseClient();
-    const [photo] = await database<{ photo_path: string }[]>`
-      select photo_path
+    const [photo] = await database<{ photo_url: string }[]>`
+      select photo_url
       from home_gallery
       where id = ${photoId}
     `;
@@ -119,7 +119,7 @@ export async function deleteGalleryPhoto(formData: FormData) {
       return { success: false, error: "Photo non trouvée" };
     }
 
-    await deleteImage(photo.photo_path, "home-photos");
+    await deleteImage(photo.photo_url);
 
     await database`
       delete from home_gallery
@@ -186,14 +186,14 @@ export async function updatePlayerPhoto(userId: string, formData: FormData) {
 
   try {
     const database = getDatabaseClient();
-    const [player] = await database<{ photo_path: string | null }[]>`
-      select photo_path
+    const [player] = await database<{ photo_url: string | null }[]>`
+      select photo_url
       from players
       where id = ${userId}
     `;
 
-    if (player?.photo_path) {
-      await deleteImage(player.photo_path, "player-photos");
+    if (player?.photo_url) {
+      await deleteImage(player.photo_url);
     }
 
     const { url, path } = await uploadImage(file, "player-photos", userId);
