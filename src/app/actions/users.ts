@@ -108,36 +108,25 @@ export async function updatePlayerAction(
       }
     }
 
-    const updates: string[] = [];
-    const values: Array<string | null> = [];
+    const patch: Record<string, string | null> = {};
+    if (data.first_name !== undefined) patch.first_name = data.first_name ?? null;
+    if (data.last_name !== undefined) patch.last_name = data.last_name ?? null;
+    if (data.email !== undefined) patch.email = data.email ?? null;
+    if (data.phone !== undefined) patch.phone = data.phone ?? null;
+    if (data.photo_url !== undefined) patch.photo_url = data.photo_url ?? null;
+    if (data.status !== undefined) patch.status = data.status ?? null;
+    if (data.admin_notes !== undefined) patch.admin_notes = data.admin_notes ?? null;
 
-    const pushUpdate = (column: string, value: string | null | undefined) => {
-      if (value === undefined) return;
-      values.push(value ?? null);
-      updates.push(`${column} = $${values.length}`);
-    };
-
-    pushUpdate("first_name", data.first_name);
-    pushUpdate("last_name", data.last_name);
-    pushUpdate("email", data.email ?? null);
-    pushUpdate("phone", data.phone ?? null);
-    pushUpdate("photo_url", data.photo_url ?? null);
-    pushUpdate("status", data.status);
-    pushUpdate("admin_notes", data.admin_notes ?? null);
-
-    if (updates.length === 0) {
+    if (Object.keys(patch).length === 0) {
       return { success: false, error: "Aucune modification" };
     }
 
-    values.push(playerId);
-
-    const query = `
+    const result = await database<Player[]>`
       UPDATE players
-      SET ${updates.join(", ")}, updated_at = NOW()
-      WHERE id = $${values.length}
+      SET ${database(patch)}, updated_at = NOW()
+      WHERE id = ${playerId}
       RETURNING *
     `;
-    const result = await database.unsafe<Player[]>(query, values);
 
     revalidatePath("/admin/users");
     return { success: true, player: result[0] };
