@@ -3,6 +3,7 @@ export const dynamic = "force-dynamic";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { HomeHero } from "@/components/home/HomeHero";
+import { HomeGallery } from "@/components/home/HomeGallery";
 import { UpcomingTournaments } from "@/components/home/UpcomingTournaments";
 import { RecentWinners } from "@/components/home/RecentWinners";
 import { ClosestMatch } from "@/components/home/ClosestMatch";
@@ -125,6 +126,7 @@ export default async function Home() {
         }
         stats={heroStats}
       />
+      <HomeGallery />
       <main className="mx-auto w-full max-w-7xl px-6 py-12">
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-5">
           <div className="space-y-6 lg:col-span-3">

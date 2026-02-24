@@ -59,6 +59,7 @@ export async function addGalleryPhoto(formData: FormData) {
 
   const file = formData.get("gallery_photo") as File | null;
   const caption = String(formData.get("caption") ?? "").trim();
+  const tournamentId = String(formData.get("tournament_id") ?? "").trim() || null;
 
   if (!file || file.size === 0) {
     return { success: false, error: "Aucun fichier fourni" };
@@ -82,8 +83,8 @@ export async function addGalleryPhoto(formData: FormData) {
     const { url, path } = await uploadImage(file, "home-photos", "gallery");
 
     await database`
-      insert into home_gallery (photo_url, photo_path, caption, display_order, is_active)
-      values (${url}, ${path}, ${caption || null}, ${nextOrder}, true)
+      insert into home_gallery (photo_url, photo_path, caption, display_order, is_active, tournament_id)
+      values (${url}, ${path}, ${caption || null}, ${nextOrder}, true, ${tournamentId})
     `;
 
     revalidatePath("/");

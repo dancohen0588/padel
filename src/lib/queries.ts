@@ -385,17 +385,31 @@ export const getGlobalPaymentConfig = async (): Promise<PaymentConfig> => {
   return getPaymentConfigOrDefault(normalized);
 };
 
-export const getHomeGallery = async (): Promise<
-  { id: string; photo_url: string; caption: string | null; display_order: number }[]
-> => {
+export type GalleryPhotoWithTournament = {
+  id: string;
+  photo_url: string;
+  caption: string | null;
+  display_order: number;
+  tournament_id: string | null;
+  tournament_name: string | null;
+  tournament_date: string | null;
+};
+
+export const getHomeGallery = async (): Promise<GalleryPhotoWithTournament[]> => {
   const database = getDatabaseClient();
-  return database<
-    { id: string; photo_url: string; caption: string | null; display_order: number }[]
-  >`
-    select id, photo_url, caption, display_order
-    from home_gallery
-    where is_active = true
-    order by display_order asc
+  return database<GalleryPhotoWithTournament[]>`
+    select
+      g.id,
+      g.photo_url,
+      g.caption,
+      g.display_order,
+      g.tournament_id,
+      t.name as tournament_name,
+      t.date::text as tournament_date
+    from home_gallery g
+    left join tournaments t on t.id = g.tournament_id
+    where g.is_active = true
+    order by g.display_order asc
   `;
 };
 

@@ -3,11 +3,9 @@ import { Footer } from "@/components/layout/footer";
 import { AdminTabs } from "@/components/admin/AdminTabs";
 import { getAllPlayersAction } from "@/app/actions/users";
 import {
-  getFeaturedTournamentPhotos,
   getGlobalPaymentConfig,
   getHomeConfig,
   getHomeGallery,
-  getTournamentPhotos,
   getTournaments,
 } from "@/lib/queries";
 import { assertAdminToken } from "@/lib/admin";
@@ -29,7 +27,7 @@ export default async function AdminInscriptionsPage({
           <div className="mb-8">
             <h2 className="gradient-text mb-2 text-4xl font-bold">Admin inscriptions</h2>
             <p className="text-white/60">
-              Token admin invalide. Ajoute ?token=ADMIN_TOKEN à l’URL.
+              Token admin invalide. Ajoute ?token=ADMIN_TOKEN à l'URL.
             </p>
           </div>
           <div className="mt-6 rounded-2xl border border-dashed border-white/10 bg-white/5 p-6 text-sm text-white/50 shadow-card">
@@ -44,18 +42,8 @@ export default async function AdminInscriptionsPage({
   const search = searchParams.search ?? "";
   const page = Number(searchParams.page ?? "1");
 
-  const [
-    tournaments,
-    photos,
-    featuredPhotos,
-    homeConfig,
-    homeGallery,
-    globalPaymentConfig,
-    usersData,
-  ] = await Promise.all([
+  const [tournaments, homeConfig, homeGallery, globalPaymentConfig, usersData] = await Promise.all([
     getTournaments(),
-    getTournamentPhotos(),
-    getFeaturedTournamentPhotos(),
     getHomeConfig(),
     getHomeGallery(),
     getGlobalPaymentConfig(),
@@ -76,8 +64,6 @@ export default async function AdminInscriptionsPage({
           <AdminTabs
             adminToken={adminToken}
             tournaments={tournaments}
-            photos={photos}
-            featuredPhotos={featuredPhotos}
             homeConfig={homeConfig}
             homeGallery={homeGallery}
             paymentConfig={globalPaymentConfig}

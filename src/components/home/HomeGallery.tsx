@@ -1,6 +1,10 @@
 import Image from "next/image";
 import { getHomeGallery } from "@/lib/queries";
 
+function formatTournamentDate(dateStr: string) {
+  return new Date(dateStr).toLocaleDateString("fr-FR", { month: "long", year: "numeric" });
+}
+
 export async function HomeGallery() {
   const photos = await getHomeGallery();
 
@@ -9,12 +13,8 @@ export async function HomeGallery() {
   }
 
   return (
-    <section className="rounded-xl border border-white/10 bg-white/5 p-6">
-      <div className="mb-4 flex items-center gap-2 border-b border-white/10 pb-3">
-        <span className="text-lg">🖼️</span>
-        <h2 className="text-lg font-semibold">Galerie</h2>
-      </div>
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
+    <section className="mx-auto w-full max-w-7xl px-6 pb-4 pt-2">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
         {photos.map((photo) => (
           <div
             key={photo.id}
@@ -26,11 +26,19 @@ export async function HomeGallery() {
               fill
               className="object-cover transition-transform duration-300 group-hover:scale-105"
             />
-            {photo.caption ? (
-              <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-3">
-                <p className="text-xs font-medium text-white">{photo.caption}</p>
-              </div>
-            ) : null}
+            <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-3">
+              {photo.caption ? (
+                <p className="text-xs font-medium leading-tight text-white">{photo.caption}</p>
+              ) : null}
+              {photo.tournament_name ? (
+                <p className="mt-0.5 text-[10px] leading-tight text-white/50">
+                  {photo.tournament_name}
+                  {photo.tournament_date
+                    ? ` · ${formatTournamentDate(photo.tournament_date)}`
+                    : ""}
+                </p>
+              ) : null}
+            </div>
           </div>
         ))}
       </div>

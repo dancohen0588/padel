@@ -2,18 +2,16 @@
 
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import type { PaymentConfig, Player, Tournament, TournamentPhoto } from "@/lib/types";
+import type { PaymentConfig, Player, Tournament } from "@/lib/types";
+import type { GalleryPhotoWithTournament } from "@/lib/queries";
 import { TournamentsTab } from "@/components/admin/tabs/TournamentsTab";
-import { HomePhotosTab } from "@/components/admin/tabs/HomePhotosTab";
-import { PhotosTab } from "@/components/admin/tabs/PhotosTab";
+import { GalerieTab } from "@/components/admin/tabs/GalerieTab";
 import { PaymentsTab } from "@/components/admin/tabs/PaymentsTab";
 import { UsersManagement } from "@/components/admin/UsersManagement";
 
 type AdminTabsProps = {
   adminToken: string;
   tournaments: Tournament[];
-  photos: TournamentPhoto[];
-  featuredPhotos: TournamentPhoto[];
   paymentConfig: PaymentConfig;
   usersData: {
     players: Player[];
@@ -25,19 +23,12 @@ type AdminTabsProps = {
     id: string;
     cover_photo_url: string | null;
   } | null;
-  homeGallery?: {
-    id: string;
-    photo_url: string;
-    caption: string | null;
-    display_order: number;
-  }[];
+  homeGallery?: GalleryPhotoWithTournament[];
 };
 
 export function AdminTabs({
   adminToken,
   tournaments,
-  photos,
-  featuredPhotos,
   paymentConfig,
   usersData,
   homeConfig,
@@ -57,11 +48,8 @@ export function AdminTabs({
         <TabsTrigger value="users" className="rounded-none px-0 pb-4">
           Utilisateurs
         </TabsTrigger>
-        <TabsTrigger value="photos" className="rounded-none px-0 pb-4">
-          Home Photos
-        </TabsTrigger>
-        <TabsTrigger value="home-gallery" className="rounded-none px-0 pb-4">
-          Photos (Storage)
+        <TabsTrigger value="galerie" className="rounded-none px-0 pb-4">
+          Galerie photo
         </TabsTrigger>
       </TabsList>
 
@@ -82,19 +70,12 @@ export function AdminTabs({
       <TabsContent value="users" className="mt-6">
         <UsersManagement initialData={usersData} adminToken={adminToken} />
       </TabsContent>
-      <TabsContent value="photos" className="mt-6">
-        <HomePhotosTab
+      <TabsContent value="galerie" className="mt-6">
+        <GalerieTab
           adminToken={adminToken}
-          photos={photos}
-          featuredPhotos={featuredPhotos}
-          tournaments={tournaments}
-        />
-      </TabsContent>
-      <TabsContent value="home-gallery" className="mt-6">
-        <PhotosTab
-          adminToken={adminToken}
-          config={homeConfig ?? null}
           photos={homeGallery}
+          tournaments={tournaments}
+          config={homeConfig ?? null}
         />
       </TabsContent>
     </Tabs>
