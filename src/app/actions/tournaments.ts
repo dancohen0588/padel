@@ -53,6 +53,11 @@ export async function upsertTournamentAction(
     whatsappGroupLink && String(whatsappGroupLink).trim() !== ""
       ? String(whatsappGroupLink).trim()
       : null;
+  const reglementUrl = getValue(formData, "reglementUrl");
+  const reglementUrlValue =
+    reglementUrl && String(reglementUrl).trim() !== ""
+      ? String(reglementUrl).trim()
+      : null;
   const pairingMode = String(
     getValue(formData, "pairingMode") ?? "balanced"
   ) as TournamentConfig["pairing_mode"];
@@ -112,6 +117,7 @@ export async function upsertTournamentAction(
         image_path = ${imagePath || null},
         price = ${priceValue},
         whatsapp_group_link = ${whatsappLinkValue},
+        reglement_url = ${reglementUrlValue},
         config = ${database.json(config)}
       where id = ${tournamentId}
     `;
@@ -121,7 +127,7 @@ export async function upsertTournamentAction(
     }
   } else {
     const created = await database<Array<{ id: string }>>`
-      insert into tournaments (slug, name, date, location, description, status, max_players, image_path, price, whatsapp_group_link, config)
+      insert into tournaments (slug, name, date, location, description, status, max_players, image_path, price, whatsapp_group_link, reglement_url, config)
       values (
         ${slug || null},
         ${name},
@@ -133,6 +139,7 @@ export async function upsertTournamentAction(
         ${imagePath || null},
         ${priceValue},
         ${whatsappLinkValue},
+        ${reglementUrlValue},
         ${database.json(config || DEFAULT_CONFIG)}
       )
       returning id

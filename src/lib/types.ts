@@ -94,6 +94,7 @@ export type Tournament = {
   price: number | null;
   paymentConfig: PaymentConfig;
   whatsappGroupLink: string | null;
+  reglementUrl: string | null;
 };
 
 export type Player = {

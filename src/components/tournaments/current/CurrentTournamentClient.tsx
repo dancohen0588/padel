@@ -114,6 +114,24 @@ export function CurrentTournamentClient({ tournaments }: CurrentTournamentClient
         onChange={handleLoad}
       />
 
+      {selectedTournament?.reglementUrl ? (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
+          <div>
+            <div className="text-sm font-semibold text-white">Règlement du tournoi</div>
+            <div className="text-xs text-white/60">Consultez les règles et conditions de participation.</div>
+          </div>
+          <a
+            href={selectedTournament.reglementUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-orange-500 to-orange-400 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-white"
+          >
+            Consulter le règlement
+            <span aria-hidden>↗</span>
+          </a>
+        </div>
+      ) : null}
+
       {loading ? (
         <div className="rounded-2xl border border-white/10 bg-white/5 p-6 text-sm text-white/70">
           Chargement des données du tournoi…

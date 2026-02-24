@@ -51,6 +51,10 @@ export function TournamentsTab({
   const [uploadError, setUploadError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const tempPreviewRef = useRef<string | null>(null);
+  const [reglementUrl, setReglementUrl] = useState<string | null>(null);
+  const [isPdfUploading, setIsPdfUploading] = useState(false);
+  const [pdfUploadError, setPdfUploadError] = useState<string | null>(null);
+  const pdfInputRef = useRef<HTMLInputElement | null>(null);
   const router = useRouter();
   const { startNavigation } = useNavigationOverlay();
   const adminQuery = `?token=${adminToken}`;
@@ -90,7 +94,9 @@ export function TournamentsTab({
       selected?.price !== null && selected?.price !== undefined ? String(selected.price) : ""
     );
     setWhatsappLink(selected?.whatsappGroupLink ?? "");
+    setReglementUrl(selected?.reglementUrl ?? null);
     setUploadError(null);
+    setPdfUploadError(null);
   }, [selected]);
 
   useEffect(() => {
@@ -185,6 +191,60 @@ export function TournamentsTab({
       setUploadError(error instanceof Error ? error.message : "Suppression impossible.");
     } finally {
       setIsUploading(false);
+    }
+  };
+
+  const handlePdfUpload = async (file: File) => {
+    setPdfUploadError(null);
+    if (file.type !== "application/pdf") {
+      setPdfUploadError("Seuls les fichiers PDF sont acceptés.");
+      return;
+    }
+    if (file.size > 20 * 1024 * 1024) {
+      setPdfUploadError("Taille maximale : 20 Mo.");
+      return;
+    }
+    setIsPdfUploading(true);
+    try {
+      const formData = new FormData();
+      formData.set("file", file);
+      formData.set("slug", slugValue || "tournoi");
+      if (reglementUrl) {
+        formData.set("previousUrl", reglementUrl);
+      }
+      const response = await fetch("/api/tournaments/pdf", {
+        method: "POST",
+        body: formData,
+      });
+      if (!response.ok) {
+        const payload = await response.json().catch(() => null);
+        throw new Error(payload?.error || "Upload impossible.");
+      }
+      const payload = (await response.json()) as { url: string };
+      setReglementUrl(payload.url);
+      setPdfUploadError(null);
+    } catch (error) {
+      setPdfUploadError(error instanceof Error ? error.message : "Upload impossible.");
+    } finally {
+      setIsPdfUploading(false);
+    }
+  };
+
+  const handleRemovePdf = async () => {
+    if (!reglementUrl) return;
+    setIsPdfUploading(true);
+    setPdfUploadError(null);
+    try {
+      await fetch("/api/tournaments/upload/delete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ path: reglementUrl }),
+      });
+      setReglementUrl(null);
+    } catch (error) {
+      setPdfUploadError(error instanceof Error ? error.message : "Suppression impossible.");
+    } finally {
+      setIsPdfUploading(false);
     }
   };
 
@@ -434,6 +494,64 @@ export function TournamentsTab({
               Le lien doit être au format : https://chat.whatsapp.com/XXXXX
             </span>
           </label>
+          <div className="flex flex-col gap-2 text-sm font-semibold text-white">
+            Règlement du tournoi (PDF)
+            <input type="hidden" name="reglementUrl" value={reglementUrl ?? ""} />
+            <input
+              ref={pdfInputRef}
+              type="file"
+              accept="application/pdf"
+              className="hidden"
+              onChange={(event) => {
+                const file = event.target.files?.[0];
+                if (file) void handlePdfUpload(file);
+              }}
+            />
+            {reglementUrl ? (
+              <div className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/5 px-4 py-3">
+                <span className="text-lg">📄</span>
+                <a
+                  href={reglementUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex-1 truncate text-xs text-orange-300 hover:underline"
+                >
+                  Règlement uploadé ↗
+                </a>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="border-white/10 bg-white/5 text-xs text-white hover:border-orange-400/40 hover:bg-orange-500/10"
+                  onClick={() => void handleRemovePdf()}
+                  disabled={isPdfUploading}
+                >
+                  Supprimer
+                </Button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => pdfInputRef.current?.click()}
+                onDragOver={(event) => event.preventDefault()}
+                onDrop={(event) => {
+                  event.preventDefault();
+                  const file = event.dataTransfer.files?.[0];
+                  if (file) void handlePdfUpload(file);
+                }}
+                className="upload-zone flex min-h-[80px] flex-col items-center justify-center gap-2 rounded-2xl px-4 py-4 text-center text-xs font-semibold text-white/70"
+              >
+                {isPdfUploading ? (
+                  <span className="text-white/60">Upload en cours...</span>
+                ) : (
+                  <span>Glissez-déposez un PDF ou cliquez pour importer (20 Mo max).</span>
+                )}
+              </button>
+            )}
+            {pdfUploadError ? (
+              <span className="text-xs font-semibold text-red-300">{pdfUploadError}</span>
+            ) : null}
+          </div>
+
           <label className="flex flex-col gap-2 text-sm font-semibold text-white">
             Nombre d&apos;équipes
             <Input

@@ -83,6 +83,7 @@ export const getActiveTournament = async (): Promise<Tournament | null> => {
       price,
       payment_config,
       config,
+      reglement_url as "reglementUrl",
       created_at::text as created_at
     from tournaments
     where status in ('published', 'ongoing')
@@ -119,6 +120,7 @@ export const getActiveDisplayTournaments = async (): Promise<Tournament[]> => {
       price,
       payment_config,
       config,
+      reglement_url as "reglementUrl",
       created_at::text as created_at
     from tournaments
     where status in ('published', 'ongoing')
@@ -214,6 +216,7 @@ export const getTournaments = async (
       price,
       payment_config,
       config,
+      reglement_url as "reglementUrl",
       created_at::text as created_at
     from tournaments
     ${statusClause}
@@ -277,6 +280,7 @@ export const getTournamentById = async (
       price,
       payment_config,
       config,
+      reglement_url as "reglementUrl",
       created_at::text as created_at
     from tournaments
     where id = ${tournamentId}
