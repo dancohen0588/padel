@@ -27,7 +27,7 @@ export default async function AdminInscriptionsPage({
           <div className="mb-8">
             <h2 className="gradient-text mb-2 text-4xl font-bold">Admin inscriptions</h2>
             <p className="text-white/60">
-              Token admin invalide. Ajoute ?token=ADMIN_TOKEN à l'URL.
+              Token admin invalide. Ajoute ?token=ADMIN_TOKEN à l&apos;URL.
             </p>
           </div>
           <div className="mt-6 rounded-2xl border border-dashed border-white/10 bg-white/5 p-6 text-sm text-white/50 shadow-card">
