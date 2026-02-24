@@ -196,8 +196,9 @@ export function TournamentsTab({
 
   const handlePdfUpload = async (file: File) => {
     setPdfUploadError(null);
-    if (file.type !== "application/pdf") {
-      setPdfUploadError("Seuls les fichiers PDF sont acceptés.");
+    const allowed = ["application/pdf", "image/jpeg", "image/jpg", "image/png", "image/webp"];
+    if (!allowed.includes(file.type)) {
+      setPdfUploadError("Format non supporté. Utilisez PDF, JPG, PNG ou WebP.");
       return;
     }
     if (file.size > 20 * 1024 * 1024) {
@@ -495,12 +496,12 @@ export function TournamentsTab({
             </span>
           </label>
           <div className="flex flex-col gap-2 text-sm font-semibold text-white">
-            Règlement du tournoi (PDF)
+            Règlement du tournoi
             <input type="hidden" name="reglementUrl" value={reglementUrl ?? ""} />
             <input
               ref={pdfInputRef}
               type="file"
-              accept="application/pdf"
+              accept="application/pdf,image/jpeg,image/png,image/webp"
               className="hidden"
               onChange={(event) => {
                 const file = event.target.files?.[0];
@@ -543,7 +544,7 @@ export function TournamentsTab({
                 {isPdfUploading ? (
                   <span className="text-white/60">Upload en cours...</span>
                 ) : (
-                  <span>Glissez-déposez un PDF ou cliquez pour importer (20 Mo max).</span>
+                  <span>Glissez-déposez un PDF ou une image (JPG/PNG/WebP) ou cliquez pour importer (20 Mo max).</span>
                 )}
               </button>
             )}
