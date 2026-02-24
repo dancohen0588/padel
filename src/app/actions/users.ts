@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { assertAdminToken } from "@/lib/admin";
 import { getDatabaseClient } from "@/lib/database";
+import { uploadImage, deleteImage, validateImageFile } from "@/lib/storage-helpers";
 import type { Player } from "@/lib/types";
 
 type PlayerUpdateInput = Partial<
@@ -159,31 +160,23 @@ export async function uploadPlayerPhotoAction(
       return { success: false, error: "Aucun fichier fourni" };
     }
 
-    if (!file.type.startsWith("image/")) {
-      return { success: false, error: "Le fichier doit être une image" };
+    const validation = validateImageFile(file);
+    if (!validation.valid) {
+      return { success: false, error: validation.error };
     }
-
-    if (file.size > 5 * 1024 * 1024) {
-      return { success: false, error: "L'image ne doit pas dépasser 5 Mo" };
-    }
-
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
-    const { promises: fs } = await import("fs");
-    const path = await import("path");
-
-    const uploadDir = path.join(process.cwd(), "public", "uploads", "players");
-    await fs.mkdir(uploadDir, { recursive: true });
-
-    const extension = file.name.split(".").pop() || "png";
-    const filename = `${playerId}-${Date.now()}.${extension}`;
-    const filepath = path.join(uploadDir, filename);
-
-    await fs.writeFile(filepath, buffer);
-
-    const photoUrl = `/uploads/players/${filename}`;
 
     const database = getDatabaseClient();
+    const rows = await database<Array<{ photo_url: string | null }>>`
+      SELECT photo_url FROM players WHERE id = ${playerId}
+    `;
+    const oldPhotoUrl = rows[0]?.photo_url ?? null;
+
+    if (oldPhotoUrl) {
+      await deleteImage(oldPhotoUrl);
+    }
+
+    const { url: photoUrl } = await uploadImage(file, "player-photos", playerId);
+
     await database`
       UPDATE players SET photo_url = ${photoUrl}, updated_at = NOW() WHERE id = ${playerId}
     `;
