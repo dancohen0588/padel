@@ -36,6 +36,13 @@ const getRoundLabel = (matches: PlayoffMatch[], roundNumber: number): RoundLabel
 const sortedByMatchNumber = (matches: PlayoffMatch[]) =>
   [...matches].sort((a, b) => a.match_number - b.match_number);
 
+const gridTemplateByColumnCount: Record<number, string> = {
+  1: "1fr",
+  2: "1.5fr 1fr",
+  3: "1.8fr 1.3fr 1fr",
+  4: "2fr 1.5fr 1.2fr 1fr",
+};
+
 export function DisplayBracket({
   tournamentName,
   tournamentDate,
@@ -56,6 +63,10 @@ export function DisplayBracket({
       return acc;
     }, { "8èmes": [], Quarts: [], Demi: [], Finale: [] });
   }, [bracketData.rounds]);
+
+  const visibleNonFinaleLabels = useMemo(() => {
+    return roundOrder.slice(0, 3).filter((label) => roundsByLabel[label].length > 0);
+  }, [roundsByLabel]);
 
   useEffect(() => {
     const entries = Object.entries(bracketData.rounds)
@@ -125,8 +136,15 @@ export function DisplayBracket({
       </div>
 
       <div className="flex-1">
-        <div className="bracket-container h-full">
-          {roundOrder.slice(0, 3).map((label) => (
+        <div
+          className="bracket-container h-full"
+          style={{
+            gridTemplateColumns:
+              gridTemplateByColumnCount[visibleNonFinaleLabels.length + 1] ??
+              gridTemplateByColumnCount[4],
+          }}
+        >
+          {visibleNonFinaleLabels.map((label) => (
             <RoundColumn key={label} label={label} matches={roundsByLabel[label]} />
           ))}
 
