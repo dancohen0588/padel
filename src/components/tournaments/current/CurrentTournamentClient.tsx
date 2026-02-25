@@ -32,11 +32,15 @@ type TournamentPayload = {
   hasStarted: boolean;
   playoffMatches: PlayoffMatch[];
   playoffBracketData: PlayoffBracketData;
+  consolationMatches: PlayoffMatch[];
+  consolationBracketData: PlayoffBracketData;
 };
 
 type CurrentTournamentClientProps = {
   tournaments: Tournament[];
 };
+
+type ActiveTab = "matches" | "playoffs" | "consolation";
 
 export function CurrentTournamentClient({ tournaments }: CurrentTournamentClientProps) {
   const sortedTournaments = useMemo(
@@ -54,8 +58,9 @@ export function CurrentTournamentClient({ tournaments }: CurrentTournamentClient
   const [error, setError] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
   const [toastTone, setToastTone] = useState<"success" | "error">("success");
-  const [activeTab, setActiveTab] = useState<"matches" | "playoffs">("matches");
+  const [activeTab, setActiveTab] = useState<ActiveTab>("matches");
   const [activePlayoffMatchId, setActivePlayoffMatchId] = useState<string | null>(null);
+  const [activeConsolationMatchId, setActiveConsolationMatchId] = useState<string | null>(null);
 
   const handleLoad = async (tournamentId: string) => {
     if (!tournamentId) return;
@@ -84,13 +89,18 @@ export function CurrentTournamentClient({ tournaments }: CurrentTournamentClient
 
   const selectedTournament = sortedTournaments.find((item) => item.id === selectedId);
   const tournamentData = payload?.tournament?.id === selectedId ? payload : null;
+
   const activePlayoffMatch = useMemo(() => {
     if (!activePlayoffMatchId || !tournamentData) return null;
-    return (
-      tournamentData.playoffMatches.find((match) => match.id === activePlayoffMatchId) ??
-      null
-    );
+    return tournamentData.playoffMatches.find((m) => m.id === activePlayoffMatchId) ?? null;
   }, [activePlayoffMatchId, tournamentData]);
+
+  const activeConsolationMatch = useMemo(() => {
+    if (!activeConsolationMatchId || !tournamentData) return null;
+    return tournamentData.consolationMatches?.find((m) => m.id === activeConsolationMatchId) ?? null;
+  }, [activeConsolationMatchId, tournamentData]);
+
+  const hasConsolation = (tournamentData?.consolationMatches?.length ?? 0) > 0;
 
   useEffect(() => {
     if (!selectedId) return;
@@ -99,14 +109,18 @@ export function CurrentTournamentClient({ tournaments }: CurrentTournamentClient
     void handleLoad(selectedId);
   }, [loading, payload?.tournament?.id, selectedId]);
 
+  const tabClass = (tab: ActiveTab) =>
+    cn(
+      "rounded-t-lg px-6 py-3 text-sm font-semibold transition",
+      activeTab === tab
+        ? "bg-gradient-to-r from-orange-500 to-orange-400 text-white"
+        : "text-white/60 hover:text-white"
+    );
+
   return (
     <div className="mt-8 space-y-8">
       {toast ? (
-        <Toast
-          message={toast}
-          tone={toastTone}
-          onDismiss={() => setToast(null)}
-        />
+        <Toast message={toast} tone={toastTone} onDismiss={() => setToast(null)} />
       ) : null}
       <TournamentSelector
         tournaments={sortedTournaments}
@@ -118,7 +132,9 @@ export function CurrentTournamentClient({ tournaments }: CurrentTournamentClient
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
           <div>
             <div className="text-sm font-semibold text-white">Règlement du tournoi</div>
-            <div className="text-xs text-white/60">Consultez les règles et conditions de participation.</div>
+            <div className="text-xs text-white/60">
+              Consultez les règles et conditions de participation.
+            </div>
           </div>
           <a
             href={selectedTournament.reglementUrl}
@@ -148,33 +164,24 @@ export function CurrentTournamentClient({ tournaments }: CurrentTournamentClient
         tournamentData.hasStarted ? (
           <div className="space-y-6">
             <div className="flex gap-2 border-b border-white/10">
-              <button
-                type="button"
-                onClick={() => setActiveTab("matches")}
-                className={cn(
-                  "rounded-t-lg px-6 py-3 text-sm font-semibold transition",
-                  activeTab === "matches"
-                    ? "bg-gradient-to-r from-orange-500 to-orange-400 text-white"
-                    : "text-white/60 hover:text-white"
-                )}
-              >
+              <button type="button" onClick={() => setActiveTab("matches")} className={tabClass("matches")}>
                 Matchs & Classement
               </button>
-              <button
-                type="button"
-                onClick={() => setActiveTab("playoffs")}
-                className={cn(
-                  "rounded-t-lg px-6 py-3 text-sm font-semibold transition",
-                  activeTab === "playoffs"
-                    ? "bg-gradient-to-r from-orange-500 to-orange-400 text-white"
-                    : "text-white/60 hover:text-white"
-                )}
-              >
+              <button type="button" onClick={() => setActiveTab("playoffs")} className={tabClass("playoffs")}>
                 Phases finales
               </button>
+              {hasConsolation && (
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("consolation")}
+                  className={tabClass("consolation")}
+                >
+                  Phases consolantes
+                </button>
+              )}
             </div>
 
-            {activeTab === "matches" ? (
+            {activeTab === "matches" && (
               <MatchesAndStandingsView
                 tournament={selectedTournament}
                 pools={tournamentData.pools}
@@ -189,13 +196,15 @@ export function CurrentTournamentClient({ tournaments }: CurrentTournamentClient
                 }}
                 onError={(message) => handleToast(message, "error")}
               />
-            ) : (
+            )}
+
+            {activeTab === "playoffs" && (
               <div className="space-y-4">
                 <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
                   <div>
                     <div className="text-sm font-semibold text-white">Mode display</div>
                     <div className="text-xs text-white/60">
-                      Ouvre l’affichage plein écran pour diffusion.
+                      Ouvre l'affichage plein écran pour diffusion.
                     </div>
                   </div>
                   {selectedTournament?.slug ? (
@@ -222,6 +231,33 @@ export function CurrentTournamentClient({ tournaments }: CurrentTournamentClient
                       handleToast("Score playoffs enregistré", "success");
                       void handleLoad(selectedId);
                       setActivePlayoffMatchId(null);
+                    }}
+                    onError={(message) => handleToast(message, "error")}
+                  />
+                ) : null}
+              </div>
+            )}
+
+            {activeTab === "consolation" && hasConsolation && (
+              <div className="space-y-4">
+                <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
+                  <div className="text-sm font-semibold text-white">Tableau consolante</div>
+                  <div className="text-xs text-white/60">
+                    Phases finales pour les équipes éliminées du tableau principal.
+                  </div>
+                </div>
+                <PlayoffBracket
+                  bracketData={tournamentData.consolationBracketData}
+                  onMatchClick={(matchId) => setActiveConsolationMatchId(matchId)}
+                />
+                {activeConsolationMatch ? (
+                  <PlayoffScoreModal
+                    match={activeConsolationMatch}
+                    onClose={() => setActiveConsolationMatchId(null)}
+                    onSaved={() => {
+                      handleToast("Score consolante enregistré", "success");
+                      void handleLoad(selectedId);
+                      setActiveConsolationMatchId(null);
                     }}
                     onError={(message) => handleToast(message, "error")}
                   />

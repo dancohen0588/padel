@@ -4,6 +4,8 @@ import {
   getTournamentWithAllData,
   getPlayoffBracketData,
   getPlayoffMatchesWithTeams,
+  getConsolationMatchesWithTeams,
+  getConsolationBracketData,
 } from "@/lib/queries";
 
 type RouteParams = {
@@ -21,16 +23,21 @@ export async function GET(request: Request, { params }: RouteParams) {
     return NextResponse.json({ error: "Tournoi introuvable" }, { status: 404 });
   }
 
-  const [hasStarted, playoffMatches, playoffBracketData] = await Promise.all([
-    checkIfTournamentStarted(tournamentId),
-    getPlayoffMatchesWithTeams(tournamentId),
-    getPlayoffBracketData(tournamentId),
-  ]);
+  const [hasStarted, playoffMatches, playoffBracketData, consolationMatches, consolationBracketData] =
+    await Promise.all([
+      checkIfTournamentStarted(tournamentId),
+      getPlayoffMatchesWithTeams(tournamentId),
+      getPlayoffBracketData(tournamentId),
+      getConsolationMatchesWithTeams(tournamentId),
+      getConsolationBracketData(tournamentId),
+    ]);
 
   return NextResponse.json({
     ...data,
     hasStarted,
     playoffMatches,
     playoffBracketData,
+    consolationMatches,
+    consolationBracketData,
   });
 }
