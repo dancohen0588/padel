@@ -204,7 +204,7 @@ export function CurrentTournamentClient({ tournaments }: CurrentTournamentClient
                   <div>
                     <div className="text-sm font-semibold text-white">Mode display</div>
                     <div className="text-xs text-white/60">
-                      Ouvre l'affichage plein écran pour diffusion.
+                      Ouvre l&apos;affichage plein écran pour diffusion.
                     </div>
                   </div>
                   {selectedTournament?.slug ? (
