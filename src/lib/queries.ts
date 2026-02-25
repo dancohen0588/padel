@@ -1211,7 +1211,8 @@ export const getPlayoffSetsByTournament = async (
 };
 
 export const getPlayoffMatchesWithTeams = async (
-  tournamentId: string
+  tournamentId: string,
+  bracketType: "main" | "consolation" = "main"
 ): Promise<PlayoffMatch[]> => {
   const database = getDatabaseClient();
   type PlayoffMatchRow = PlayoffMatch & {
@@ -1261,6 +1262,7 @@ export const getPlayoffMatchesWithTeams = async (
     left join teams t2 on t2.id = pm.team2_id
     left join teams tw on tw.id = pm.winner_id
     where pm.tournament_id = ${tournamentId}
+      and pr.bracket_type = ${bracketType}
     order by pr.round_number asc, pm.match_number asc
   `;
 
@@ -1340,10 +1342,20 @@ export const getPlayoffMatchesWithTeams = async (
   }));
 };
 
-export const getPlayoffBracketData = async (
+export const getConsolationMatchesWithTeams = (tournamentId: string) =>
+  getPlayoffMatchesWithTeams(tournamentId, "consolation");
+
+export const getConsolationBracketData = async (
   tournamentId: string
 ): Promise<PlayoffBracketData> => {
-  const matches = await getPlayoffMatchesWithTeams(tournamentId);
+  return getPlayoffBracketData(tournamentId, "consolation");
+};
+
+export const getPlayoffBracketData = async (
+  tournamentId: string,
+  bracketType: "main" | "consolation" = "main"
+): Promise<PlayoffBracketData> => {
+  const matches = await getPlayoffMatchesWithTeams(tournamentId, bracketType);
   const rounds = matches.reduce<Record<number, PlayoffMatch[]>>((acc, match) => {
     const roundNumber = match.round?.round_number ?? 0;
     if (!acc[roundNumber]) {

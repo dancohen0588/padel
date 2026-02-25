@@ -8,6 +8,8 @@ import {
   getMatchesWithTeamsByPool,
   getPlayoffMatchesWithTeams,
   getPlayoffBracketData,
+  getConsolationMatchesWithTeams,
+  getConsolationBracketData,
   getPoolStandings,
   getRegistrationsByStatus,
   getGlobalPaymentConfig,
@@ -67,10 +69,13 @@ export default async function TournamentAdminPage({
     }))
   );
 
-  const [playoffMatches, playoffBracketData] = await Promise.all([
-    getPlayoffMatchesWithTeams(tournament.id),
-    getPlayoffBracketData(tournament.id),
-  ]);
+  const [playoffMatches, playoffBracketData, consolationMatches, consolationBracketData] =
+    await Promise.all([
+      getPlayoffMatchesWithTeams(tournament.id),
+      getPlayoffBracketData(tournament.id),
+      getConsolationMatchesWithTeams(tournament.id),
+      getConsolationBracketData(tournament.id),
+    ]);
 
   const pendingCount = counts.pending ?? 0;
   const approvedCount = counts.approved ?? 0;
@@ -224,6 +229,8 @@ export default async function TournamentAdminPage({
               adminToken={adminToken}
               playoffMatches={playoffMatches}
               playoffBracketData={playoffBracketData}
+              consolationMatches={consolationMatches}
+              consolationBracketData={consolationBracketData}
               allTeams={teams}
             />
           </TabsContent>

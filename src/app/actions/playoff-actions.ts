@@ -326,7 +326,7 @@ export async function generateEmptyPlayoffBracket(
     }
 
     const existingRounds = await database<Array<{ id: string }>>`
-      select id from playoff_rounds where tournament_id = ${tournamentId} limit 1
+      select id from playoff_rounds where tournament_id = ${tournamentId} and bracket_type = 'main' limit 1
     `;
     console.log("[playoffs] generateEmptyPlayoffBracket:existingRounds", {
       tournamentId,
@@ -350,8 +350,8 @@ export async function generateEmptyPlayoffBracket(
         matchCount,
       });
       const roundRows = await database<Array<{ id: string }>>`
-        insert into playoff_rounds (tournament_id, round_number, round_name)
-        values (${tournamentId}, ${roundNumber}, ${roundNameByTeams(teamsRemaining)})
+        insert into playoff_rounds (tournament_id, round_number, round_name, bracket_type)
+        values (${tournamentId}, ${roundNumber}, ${roundNameByTeams(teamsRemaining)}, 'main')
         returning id
       `;
 
@@ -633,14 +633,19 @@ export async function regeneratePlayoffBracketAction(
     await database`
       delete from playoff_sets
       where match_id in (
-        select id from playoff_matches where tournament_id = ${tournamentId}
+        select pm.id from playoff_matches pm
+        join playoff_rounds pr on pr.id = pm.round_id
+        where pm.tournament_id = ${tournamentId} and pr.bracket_type = 'main'
       )
     `;
     await database`
-      delete from playoff_matches where tournament_id = ${tournamentId}
+      delete from playoff_matches
+      where round_id in (
+        select id from playoff_rounds where tournament_id = ${tournamentId} and bracket_type = 'main'
+      )
     `;
     await database`
-      delete from playoff_rounds where tournament_id = ${tournamentId}
+      delete from playoff_rounds where tournament_id = ${tournamentId} and bracket_type = 'main'
     `;
 
     const generated = await generateEmptyPlayoffBracket(tournamentId);
@@ -806,6 +811,169 @@ export async function updatePlayoffMatchScoreAction(
     revalidatePath("/tournoi/en-cours");
 
     return { success: true };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Erreur inconnue";
+    return { success: false, error: message };
+  }
+}
+
+// ─── Tableau consolante ───────────────────────────────────────────────────────
+
+const consolationBracketSize = (nonQualifiedCount: number): number | null => {
+  if (nonQualifiedCount >= 16) return 16;
+  if (nonQualifiedCount >= 8) return 8;
+  if (nonQualifiedCount >= 4) return 4;
+  return null;
+};
+
+async function deleteConsolationBracket(tournamentId: string): Promise<void> {
+  const database = getDatabaseClient();
+  await database`
+    delete from playoff_sets
+    where match_id in (
+      select pm.id from playoff_matches pm
+      join playoff_rounds pr on pr.id = pm.round_id
+      where pm.tournament_id = ${tournamentId} and pr.bracket_type = 'consolation'
+    )
+  `;
+  await database`
+    delete from playoff_matches
+    where round_id in (
+      select id from playoff_rounds where tournament_id = ${tournamentId} and bracket_type = 'consolation'
+    )
+  `;
+  await database`
+    delete from playoff_rounds where tournament_id = ${tournamentId} and bracket_type = 'consolation'
+  `;
+}
+
+export async function generateConsolationBracketAction(
+  tournamentId: string,
+  adminToken: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    assertAdminToken(adminToken);
+    const database = getDatabaseClient();
+
+    const existingRounds = await database<Array<{ id: string }>>`
+      select id from playoff_rounds
+      where tournament_id = ${tournamentId} and bracket_type = 'consolation'
+      limit 1
+    `;
+    if (existingRounds.length > 0) {
+      return { success: false, error: "Le tableau consolante existe déjà. Supprimez-le d'abord." };
+    }
+
+    const mainFirstRound = await database<Array<{ team1_id: string | null; team2_id: string | null }>>`
+      select pm.team1_id, pm.team2_id
+      from playoff_matches pm
+      join playoff_rounds pr on pr.id = pm.round_id
+      where pm.tournament_id = ${tournamentId}
+        and pr.bracket_type = 'main'
+        and pm.team1_seed is not null
+    `;
+    const qualifiedIds = new Set<string>();
+    mainFirstRound.forEach((m) => {
+      if (m.team1_id) qualifiedIds.add(m.team1_id);
+      if (m.team2_id) qualifiedIds.add(m.team2_id);
+    });
+
+    const allTeams = await database<Array<{ id: string; name: string | null }>>`
+      select id, name from teams where tournament_id = ${tournamentId} order by name asc
+    `;
+    const nonQualified = allTeams.filter((t) => !qualifiedIds.has(t.id));
+
+    const bracketSize = consolationBracketSize(nonQualified.length);
+    if (!bracketSize) {
+      return { success: false, error: "Pas assez d'équipes éliminées (minimum 4 requises)." };
+    }
+
+    const teamsForConsolation = nonQualified.slice(0, bracketSize);
+
+    const tournaments = await database<Array<{ slug: string | null }>>`
+      select slug from tournaments where id = ${tournamentId} limit 1
+    `;
+
+    let teamsRemaining = bracketSize;
+    let roundNumber = 1;
+    const rounds: Array<{ id: string; round_number: number; matchCount: number }> = [];
+
+    while (teamsRemaining >= 2) {
+      const matchCount = teamsRemaining / 2;
+      const roundRows = await database<Array<{ id: string }>>`
+        insert into playoff_rounds (tournament_id, round_number, round_name, bracket_type)
+        values (${tournamentId}, ${roundNumber}, ${roundNameByTeams(teamsRemaining)}, 'consolation')
+        returning id
+      `;
+      const roundId = roundRows[0]?.id;
+      if (!roundId) return { success: false, error: "Impossible de créer les rounds consolante." };
+
+      rounds.push({ id: roundId, round_number: roundNumber, matchCount });
+      teamsRemaining = teamsRemaining / 2;
+      roundNumber += 1;
+    }
+
+    const matchesByRound: Array<Array<{ id: string }>> = [];
+    for (let i = 0; i < rounds.length; i += 1) {
+      const round = rounds[i];
+      const roundMatches: Array<{ id: string }> = [];
+
+      for (let matchIndex = 0; matchIndex < round.matchCount; matchIndex += 1) {
+        const team1Id = i === 0 ? (teamsForConsolation[matchIndex * 2]?.id ?? null) : null;
+        const team2Id = i === 0 ? (teamsForConsolation[matchIndex * 2 + 1]?.id ?? null) : null;
+
+        const matchRows = await database<Array<{ id: string }>>`
+          insert into playoff_matches (tournament_id, round_id, match_number, team1_id, team2_id, winner_id, team1_seed, team2_seed, status)
+          values (${tournamentId}, ${round.id}, ${matchIndex + 1}, ${team1Id}, ${team2Id}, ${null}, ${null}, ${null}, 'upcoming')
+          returning id
+        `;
+        const matchId = matchRows[0]?.id;
+        if (!matchId) return { success: false, error: "Impossible de créer les matchs consolante." };
+        roundMatches.push({ id: matchId });
+      }
+      matchesByRound.push(roundMatches);
+    }
+
+    for (let roundIndex = 0; roundIndex < matchesByRound.length - 1; roundIndex += 1) {
+      const currentRoundMatches = matchesByRound[roundIndex];
+      const nextRoundMatches = matchesByRound[roundIndex + 1];
+
+      for (let matchIndex = 0; matchIndex < currentRoundMatches.length; matchIndex += 2) {
+        const nextMatch = nextRoundMatches[Math.floor(matchIndex / 2)];
+        const firstMatch = currentRoundMatches[matchIndex];
+        const secondMatch = currentRoundMatches[matchIndex + 1];
+        if (!nextMatch || !firstMatch || !secondMatch) continue;
+
+        await database`
+          update playoff_matches set next_match_id = ${nextMatch.id}, next_match_position = 1
+          where id = ${firstMatch.id}
+        `;
+        await database`
+          update playoff_matches set next_match_id = ${nextMatch.id}, next_match_position = 2
+          where id = ${secondMatch.id}
+        `;
+      }
+    }
+
+    const slug = tournaments[0]?.slug;
+    if (slug) revalidatePath(`/tournaments/${slug}/admin`);
+    revalidatePath("/tournoi/en-cours");
+
+    return { success: true };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Erreur inconnue";
+    return { success: false, error: message };
+  }
+}
+
+export async function regenerateConsolationBracketAction(
+  tournamentId: string,
+  adminToken: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    assertAdminToken(adminToken);
+    await deleteConsolationBracket(tournamentId);
+    return generateConsolationBracketAction(tournamentId, adminToken);
   } catch (error) {
     const message = error instanceof Error ? error.message : "Erreur inconnue";
     return { success: false, error: message };
