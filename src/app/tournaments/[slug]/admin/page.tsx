@@ -224,6 +224,7 @@ export default async function TournamentAdminPage({
               adminToken={adminToken}
               playoffMatches={playoffMatches}
               playoffBracketData={playoffBracketData}
+              allTeams={teams}
             />
           </TabsContent>
         </Tabs>

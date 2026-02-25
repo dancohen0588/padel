@@ -660,6 +660,47 @@ export async function regeneratePlayoffBracketAction(
   }
 }
 
+export async function overridePlayoffTeamAction(
+  matchId: string,
+  position: "team1" | "team2",
+  newTeamId: string,
+  adminToken: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    assertAdminToken(adminToken);
+    const database = getDatabaseClient();
+
+    const matches = await database<Array<{ tournament_id: string }>>`
+      SELECT tournament_id FROM playoff_matches WHERE id = ${matchId} LIMIT 1
+    `;
+    if (!matches[0]) {
+      return { success: false, error: "Match introuvable" };
+    }
+
+    const tournamentId = matches[0].tournament_id;
+
+    if (position === "team1") {
+      await database`UPDATE playoff_matches SET team1_id = ${newTeamId} WHERE id = ${matchId}`;
+    } else {
+      await database`UPDATE playoff_matches SET team2_id = ${newTeamId} WHERE id = ${matchId}`;
+    }
+
+    const tournaments = await database<Array<{ slug: string | null }>>`
+      SELECT slug FROM tournaments WHERE id = ${tournamentId} LIMIT 1
+    `;
+    const slug = tournaments[0]?.slug;
+    if (slug) {
+      revalidatePath(`/tournaments/${slug}/admin`);
+    }
+    revalidatePath("/tournoi/en-cours");
+
+    return { success: true };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Erreur inconnue";
+    return { success: false, error: message };
+  }
+}
+
 export async function updatePlayoffMatchScoreAction(
   matchId: string,
   sets: PlayoffSetInput[],
