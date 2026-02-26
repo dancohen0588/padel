@@ -74,7 +74,9 @@ export default async function Home() {
         t.status,
         t.max_players as max_participants,
         t.price,
-        count(r.id)::text as current_participants
+        (
+          count(r.id) filter (where r.status = 'approved') / 2
+        )::text as current_participants
       from tournaments t
       left join registrations r on r.tournament_id = t.id
       where t.status in ('upcoming', 'registration', 'ongoing')
