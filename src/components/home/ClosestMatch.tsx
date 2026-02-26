@@ -63,51 +63,51 @@ export function ClosestMatch({ match }: ClosestMatchProps) {
       {!match ? (
         <p className="text-sm text-white/60">Aucun match disponible.</p>
       ) : (
-        <div className="rounded-2xl border border-white/5 bg-gradient-to-r from-[#9D7AFA]/5 via-transparent to-[#ff6b35]/5 p-6">
-          <div className="flex items-center justify-between">
-            <div className="flex-1 text-center">
-              <div className="mb-2 flex justify-center gap-1">
-                <Avatar name={match.player1a_name} photo={match.player1a_photo} size={48} />
-                <Avatar name={match.player2a_name} photo={match.player2a_photo} size={48} />
+        <div className="rounded-2xl border border-white/5 bg-gradient-to-r from-[#9D7AFA]/5 via-transparent to-[#ff6b35]/5 p-3 sm:p-6">
+          <div className="flex items-center justify-between gap-1">
+            <div className="min-w-0 flex-1 text-center">
+              <div className="mb-1 flex justify-center gap-1 sm:mb-2">
+                <Avatar name={match.player1a_name} photo={match.player1a_photo} size={36} />
+                <Avatar name={match.player2a_name} photo={match.player2a_photo} size={36} />
               </div>
-              <p className="text-sm font-semibold text-white">
+              <p className="truncate px-1 text-xs font-semibold text-white sm:text-sm">
                 {match.player1a_name ?? "Joueur 1"}
               </p>
-              <p className="text-sm font-semibold text-white">
+              <p className="truncate px-1 text-xs font-semibold text-white sm:text-sm">
                 {match.player2a_name ?? "Joueur 2"}
               </p>
             </div>
 
-            <div className="px-6">
-              <div className="flex items-center gap-3">
+            <div className="shrink-0 px-2 sm:px-6">
+              <div className="flex items-center gap-2 sm:gap-3">
                 <div className="text-center">
-                  <div className="bg-gradient-to-r from-[#ff6b35] to-[#ff8c42] bg-clip-text text-4xl font-black text-transparent">
+                  <div className="bg-gradient-to-r from-[#ff6b35] to-[#ff8c42] bg-clip-text text-2xl font-black text-transparent sm:text-4xl">
                     {match.team_a_score}
                   </div>
                 </div>
-                <div className="text-2xl text-gray-600">-</div>
+                <div className="text-xl text-gray-600 sm:text-2xl">-</div>
                 <div className="text-center">
-                  <div className="bg-gradient-to-r from-[#9D7AFA] to-[#B39DFF] bg-clip-text text-4xl font-black text-transparent">
+                  <div className="bg-gradient-to-r from-[#9D7AFA] to-[#B39DFF] bg-clip-text text-2xl font-black text-transparent sm:text-4xl">
                     {match.team_b_score}
                   </div>
                 </div>
               </div>
-              <div className="mt-2 text-center">
-                <span className="inline-flex items-center rounded-full border border-red-500/40 bg-red-500/20 px-3 py-1 text-xs font-bold text-red-400">
+              <div className="mt-1 text-center sm:mt-2">
+                <span className="inline-flex items-center rounded-full border border-red-500/40 bg-red-500/20 px-2 py-0.5 text-[10px] font-bold text-red-400 sm:px-3 sm:py-1 sm:text-xs">
                   🔥 {match.nb_sets} sets
                 </span>
               </div>
             </div>
 
-            <div className="flex-1 text-center">
-              <div className="mb-2 flex justify-center gap-1">
-                <Avatar name={match.player1b_name} photo={match.player1b_photo} size={48} />
-                <Avatar name={match.player2b_name} photo={match.player2b_photo} size={48} />
+            <div className="min-w-0 flex-1 text-center">
+              <div className="mb-1 flex justify-center gap-1 sm:mb-2">
+                <Avatar name={match.player1b_name} photo={match.player1b_photo} size={36} />
+                <Avatar name={match.player2b_name} photo={match.player2b_photo} size={36} />
               </div>
-              <p className="text-sm font-semibold text-white">
+              <p className="truncate px-1 text-xs font-semibold text-white sm:text-sm">
                 {match.player1b_name ?? "Joueur 1"}
               </p>
-              <p className="text-sm font-semibold text-white">
+              <p className="truncate px-1 text-xs font-semibold text-white sm:text-sm">
                 {match.player2b_name ?? "Joueur 2"}
               </p>
             </div>
