@@ -90,3 +90,60 @@ export async function removeTeamFromPoolAction(
   `;
   revalidatePath("/tournaments");
 }
+
+export async function fillPoolsAction(
+  tournamentId: string,
+  adminToken: string
+): Promise<{ poolTeams: Array<{ pool_id: string; team_id: string }> }> {
+  assertAdminToken(adminToken);
+  const database = getDatabaseClient();
+
+  const pools = await database<Array<{ id: string }>>`
+    select id from pools
+    where tournament_id = ${tournamentId}
+    order by pool_order asc
+  `;
+
+  if (pools.length === 0) return { poolTeams: [] };
+
+  const teams = await database<Array<{ id: string }>>`
+    select t.id
+    from teams t
+    where t.tournament_id = ${tournamentId}
+      and (select count(*) from team_players tp where tp.team_id = t.id) >= 2
+    order by t.is_seeded desc, t.created_at asc
+  `;
+
+  if (teams.length === 0) return { poolTeams: [] };
+
+  await database`
+    delete from pool_teams
+    where pool_id in (select id from pools where tournament_id = ${tournamentId})
+  `;
+
+  const newPoolTeams: Array<{ pool_id: string; team_id: string }> = [];
+  for (let i = 0; i < teams.length; i++) {
+    const pool = pools[i % pools.length];
+    await database`
+      insert into pool_teams (pool_id, team_id)
+      values (${pool.id}, ${teams[i].id})
+    `;
+    newPoolTeams.push({ pool_id: pool.id, team_id: teams[i].id });
+  }
+
+  revalidatePath("/tournaments");
+  return { poolTeams: newPoolTeams };
+}
+
+export async function clearPoolsAction(
+  tournamentId: string,
+  adminToken: string
+): Promise<void> {
+  assertAdminToken(adminToken);
+  const database = getDatabaseClient();
+  await database`
+    delete from pool_teams
+    where pool_id in (select id from pools where tournament_id = ${tournamentId})
+  `;
+  revalidatePath("/tournaments");
+}

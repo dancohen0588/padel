@@ -32,7 +32,9 @@ import {
 } from "@/app/actions/teams";
 import {
   assignTeamToPoolAction,
+  clearPoolsAction,
   ensurePoolsAction,
+  fillPoolsAction,
   removeTeamFromPoolAction,
   updatePoolNameAction,
 } from "@/app/actions/pools";
@@ -119,6 +121,8 @@ export function TournamentConfigContent({
   const [localPools, setLocalPools] = useState<Pool[]>(pools);
   const [localPoolTeams, setLocalPoolTeams] = useState<PoolTeam[]>(poolTeams);
   const [isEnsuringPools, setIsEnsuringPools] = useState(false);
+  const [isFillingPools, setIsFillingPools] = useState(false);
+  const [isClearingPools, setIsClearingPools] = useState(false);
   const router = useRouter();
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }));
@@ -299,6 +303,24 @@ export function TournamentConfigContent({
     }
     await ensurePoolsAction(tournament.id, poolsCount, adminToken);
     console.info("[tournament-admin] ensurePools done");
+  };
+
+  const handleFillPools = async () => {
+    if (isFillingPools || localPools.length === 0) return;
+    setIsFillingPools(true);
+    const result = await fillPoolsAction(tournament.id, adminToken);
+    setLocalPoolTeams(result.poolTeams.map((pt) => ({ ...pt, created_at: "" })));
+    setToast("Poules remplies automatiquement");
+    setIsFillingPools(false);
+  };
+
+  const handleClearPools = async () => {
+    if (isClearingPools) return;
+    setIsClearingPools(true);
+    await clearPoolsAction(tournament.id, adminToken);
+    setLocalPoolTeams([]);
+    setToast("Poules vidées");
+    setIsClearingPools(false);
   };
 
   const handleAssignTeamToPool = async (teamId: string, poolId: string) => {
@@ -570,15 +592,35 @@ export function TournamentConfigContent({
                 Glissez-déposez les équipes complètes dans les poules
               </p>
             </div>
-            <Button
-              type="button"
-              variant="outline"
-              className="rounded-xl border-none bg-gradient-to-br from-violet-400 to-violet-600 px-4 py-2 text-xs font-semibold text-white shadow-md transition hover:translate-y-[-1px] hover:shadow-lg"
-              onClick={ensurePools}
-              disabled={isEnsuringPools}
-            >
-              Générer les poules
-            </Button>
+            <div className="flex flex-wrap gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                className="rounded-xl border-none bg-gradient-to-br from-violet-400 to-violet-600 px-4 py-2 text-xs font-semibold text-white shadow-md transition hover:translate-y-[-1px] hover:shadow-lg"
+                onClick={ensurePools}
+                disabled={isEnsuringPools}
+              >
+                Générer les poules
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                className="rounded-xl border-none bg-gradient-to-br from-emerald-400 to-emerald-600 px-4 py-2 text-xs font-semibold text-white shadow-md transition hover:translate-y-[-1px] hover:shadow-lg disabled:opacity-50"
+                onClick={handleFillPools}
+                disabled={isFillingPools || localPools.length === 0}
+              >
+                {isFillingPools ? "Remplissage…" : "Remplir les poules"}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                className="rounded-xl border-none bg-gradient-to-br from-rose-400 to-rose-600 px-4 py-2 text-xs font-semibold text-white shadow-md transition hover:translate-y-[-1px] hover:shadow-lg disabled:opacity-50"
+                onClick={handleClearPools}
+                disabled={isClearingPools || localPoolTeams.length === 0}
+              >
+                {isClearingPools ? "Vidage…" : "Vider les poules"}
+              </Button>
+            </div>
           </div>
           <div className="mt-6 grid gap-6 lg:grid-cols-[320px_1fr]">
             <Card className="sticky top-6 h-fit rounded-2xl border border-orange-400/30 bg-orange-500/10 p-5 text-white shadow-card">
