@@ -47,7 +47,10 @@ export default async function Home() {
           from registrations
           where status = 'approved'
         ) as players,
-        (select count(*)::int from match_sets) as sets
+        (
+          select (select count(*)::int from match_sets)
+               + (select count(*)::int from playoff_sets)
+        ) as sets
     `,
     database<
       Array<{
