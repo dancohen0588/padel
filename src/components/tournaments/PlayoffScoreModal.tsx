@@ -25,10 +25,7 @@ const buildInitialSets = (match: PlayoffMatch): SetInput[] => {
       team2_score: set.team2_score,
     }));
   }
-  return [
-    { team1_score: 0, team2_score: 0 },
-    { team1_score: 0, team2_score: 0 },
-  ];
+  return [{ team1_score: 0, team2_score: 0 }];
 };
 
 export function PlayoffScoreModal({

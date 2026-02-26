@@ -44,10 +44,7 @@ const formatDateTime = (value: string | null) => {
 
 const buildInitialSets = (match?: MatchWithTeams | null): SetInput[] => {
   if (!match || match.sets.length === 0) {
-    return [
-      { teamA: "", teamB: "" },
-      { teamA: "", teamB: "" },
-    ];
+    return [{ teamA: "", teamB: "" }];
   }
   return match.sets.map((set) => ({
     teamA: String(set.team_a_games),

@@ -24,10 +24,7 @@ type SetInput = {
 
 const buildInitialSets = (match: MatchScoreModalProps["match"]): SetInput[] => {
   if (!match.sets.length) {
-    return [
-      { teamA: "", teamB: "" },
-      { teamA: "", teamB: "" },
-    ];
+    return [{ teamA: "", teamB: "" }];
   }
   return match.sets.map((set) => ({
     teamA: String(set.team_a_games),
