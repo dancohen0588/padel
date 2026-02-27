@@ -25,7 +25,7 @@ export default async function AdminInscriptionsPage({
         <Header />
         <main className="mx-auto w-full max-w-7xl px-6 py-10">
           <div className="mb-8">
-            <h2 className="gradient-text mb-2 text-4xl font-bold">Admin inscriptions</h2>
+            <h2 className="gradient-text mb-2 text-2xl font-bold sm:text-4xl">Admin inscriptions</h2>
             <p className="text-white/60">
               Token admin invalide. Ajoute ?token=ADMIN_TOKEN à l&apos;URL.
             </p>
@@ -55,7 +55,7 @@ export default async function AdminInscriptionsPage({
       <Header />
       <main className="mx-auto w-full max-w-7xl px-6 py-10">
         <div className="mb-8">
-          <h2 className="gradient-text mb-2 text-4xl font-bold">Admin inscriptions</h2>
+          <h2 className="gradient-text mb-2 text-2xl font-bold sm:text-4xl">Admin inscriptions</h2>
           <p className="text-white/60">
             Gère les tournois, photos et contenus de la home.
           </p>

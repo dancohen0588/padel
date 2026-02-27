@@ -108,7 +108,7 @@ export function UsersManagement({ initialData, adminToken }: UsersManagementProp
                 type="text"
                 defaultValue={currentSearch}
                 placeholder="Rechercher un utilisateur..."
-                className="input-field w-72 pl-10 text-sm"
+                className="input-field w-full pl-10 text-sm sm:w-72"
                 onChange={(event) => handleSearch(event.target.value)}
               />
               <svg

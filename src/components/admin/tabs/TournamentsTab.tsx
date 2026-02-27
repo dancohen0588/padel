@@ -353,7 +353,7 @@ export function TournamentsTab({
                     : "border-white/10 bg-white/5 hover:border-orange-400/30"
                 }`}
               >
-                <div className="flex items-center justify-between gap-3">
+                <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
                   <div className="flex items-center gap-3">
                     {tournament.image_path ? (
                       <img
@@ -639,7 +639,7 @@ export function TournamentsTab({
                     key={value}
                     type="button"
                     onClick={() => setPairingMode(value)}
-                    className={`radio-button rounded-lg px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.08em] whitespace-nowrap ${
+                    className={`radio-button rounded-lg px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.08em] ${
                       pairingMode === value ? "active" : ""
                     }`}
                   >
@@ -691,7 +691,7 @@ export function TournamentsTab({
                     key={value}
                     type="button"
                     onClick={() => setPlayoffsFormat(value)}
-                    className={`radio-button rounded-lg px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.08em] whitespace-nowrap ${
+                    className={`radio-button rounded-lg px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.08em] ${
                       playoffsFormat === value ? "active" : ""
                     }`}
                   >
@@ -739,7 +739,7 @@ export function TournamentsTab({
             <div className="flex flex-col gap-2 text-sm font-semibold text-white">
               Statut
               <input type="hidden" name="status" value={status} />
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
                 {(
                   [
                     "draft",
@@ -755,7 +755,7 @@ export function TournamentsTab({
                       key={value}
                       type="button"
                       onClick={() => setStatus(value)}
-                      className={`radio-button rounded-lg px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.08em] whitespace-nowrap ${
+                      className={`radio-button rounded-lg px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.08em] ${
                         status === value ? "active" : ""
                       }`}
                     >
