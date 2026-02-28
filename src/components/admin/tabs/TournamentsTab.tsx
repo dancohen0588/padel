@@ -10,6 +10,7 @@ import { GradientButton } from "@/components/ui/gradient-button";
 import { Badge } from "@/components/ui/badge";
 import { upsertTournamentAction, deleteTournamentAction } from "@/app/actions/tournaments";
 import { useNavigationOverlay } from "@/components/ui/navigation-overlay";
+import { PadelLoader } from "@/components/ui/padel-loader";
 
 type TournamentsTabProps = {
   tournaments: Tournament[];
@@ -37,8 +38,8 @@ export function TournamentsTab({
   const [playoffsEnabled, setPlayoffsEnabled] = useState(false);
   const [hasThirdPlace, setHasThirdPlace] = useState(false);
   const [status, setStatus] = useState<TournamentStatus>("draft");
-  const [pairingMode, setPairingMode] = useState("balanced");
-  const [playoffsFormat, setPlayoffsFormat] = useState("single_elim");
+  const [pairingMode, setPairingMode] = useState("manual");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [maxPlayers, setMaxPlayers] = useState(0);
   const [poolsCount, setPoolsCount] = useState(0);
   const [teamsQualified, setTeamsQualified] = useState(0);
@@ -82,8 +83,7 @@ export function TournamentsTab({
     setPlayoffsEnabled(selected?.config?.playoffs?.enabled ?? false);
     setHasThirdPlace(selected?.config?.playoffs?.has_third_place ?? false);
     setStatus(selected?.status ?? "draft");
-    setPairingMode(selected?.config?.pairing_mode ?? "balanced");
-    setPlayoffsFormat(selected?.config?.playoffs?.format ?? "single_elim");
+    setPairingMode(selected?.config?.pairing_mode ?? "manual");
     setMaxPlayers(Number(selected?.max_players ?? 0));
     setPoolsCount(Number(selected?.config?.pools_count ?? 4));
     setTeamsQualified(Number(selected?.config?.playoffs?.teams_qualified ?? 0));
@@ -311,6 +311,13 @@ export function TournamentsTab({
   }, [teamsQualified, poolsCount]);
 
   return (
+    <>
+    {isSubmitting ? (
+      <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm">
+        <PadelLoader size="xl" className="drop-shadow" />
+        <span className="sr-only">Chargement en cours...</span>
+      </div>
+    ) : null}
     <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
       <Card className="rounded-2xl border border-white/10 bg-white/5 p-5 text-white shadow-card">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -418,16 +425,21 @@ export function TournamentsTab({
           id="tournament-form"
           className="mt-4 space-y-4"
           action={async (formData) => {
-            console.info("[admin] tournament submit payload", {
-              poolsCount: formData.get("poolsCount"),
-              maxPlayers: formData.get("maxPlayers"),
-              name: formData.get("name"),
-              date: formData.get("date"),
-              keys: Array.from(formData.keys()),
-            });
-            const result = await upsertTournamentAction(formData);
-            console.info("[admin] tournament submit result", result);
-            router.refresh();
+            setIsSubmitting(true);
+            try {
+              console.info("[admin] tournament submit payload", {
+                poolsCount: formData.get("poolsCount"),
+                maxPlayers: formData.get("maxPlayers"),
+                name: formData.get("name"),
+                date: formData.get("date"),
+                keys: Array.from(formData.keys()),
+              });
+              const result = await upsertTournamentAction(formData);
+              console.info("[admin] tournament submit result", result);
+              router.refresh();
+            } finally {
+              setIsSubmitting(false);
+            }
           }}
         >
           <input type="hidden" name="adminToken" value={adminToken} />
@@ -634,22 +646,27 @@ export function TournamentsTab({
               Mode d&apos;appariement des joueurs
               <input type="hidden" name="pairingMode" value={pairingMode} />
               <div className="grid grid-cols-3 gap-2">
-                {(["manual", "random", "balanced"] as const).map((value) => (
-                  <button
-                    key={value}
-                    type="button"
-                    onClick={() => setPairingMode(value)}
-                    className={`radio-button rounded-lg px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.08em] ${
-                      pairingMode === value ? "active" : ""
-                    }`}
-                  >
-                    {value === "manual"
-                      ? "Manuel"
-                      : value === "random"
-                        ? "Automatique"
-                        : "Auto equitable"}
-                  </button>
-                ))}
+                {(["manual", "random", "balanced"] as const).map((value) => {
+                  const isDisabled = value === "balanced";
+                  return (
+                    <button
+                      key={value}
+                      type="button"
+                      onClick={() => !isDisabled && setPairingMode(value)}
+                      disabled={isDisabled}
+                      title={isDisabled ? "Non disponible" : undefined}
+                      className={`radio-button rounded-lg px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.08em] ${
+                        pairingMode === value ? "active" : ""
+                      } ${isDisabled ? "cursor-not-allowed opacity-35" : ""}`}
+                    >
+                      {value === "manual"
+                        ? "Manuel"
+                        : value === "random"
+                          ? "Automatique"
+                          : "Auto équitable"}
+                    </button>
+                  );
+                })}
               </div>
             </label>
             <label className="flex flex-col gap-2 text-sm font-semibold text-white">
@@ -681,24 +698,6 @@ export function TournamentsTab({
                   {qualifiedInfo}
                 </span>
               ) : null}
-            </label>
-            <label className="flex flex-col gap-2 text-sm font-semibold text-white">
-              Format playoffs
-              <input type="hidden" name="playoffsFormat" value={playoffsFormat} />
-              <div className="grid grid-cols-2 gap-2">
-                {(["single_elim", "double_elim"] as const).map((value) => (
-                  <button
-                    key={value}
-                    type="button"
-                    onClick={() => setPlayoffsFormat(value)}
-                    className={`radio-button rounded-lg px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.08em] ${
-                      playoffsFormat === value ? "active" : ""
-                    }`}
-                  >
-                    {value}
-                  </button>
-                ))}
-              </div>
             </label>
           </div>
           <div className="flex flex-col gap-4">
@@ -771,7 +770,8 @@ export function TournamentsTab({
             <button
               type="submit"
               form="tournament-form"
-              className="rounded-xl bg-gradient-to-br from-orange-400 to-orange-500 px-4 py-2 text-sm font-semibold text-white shadow-md transition hover:translate-y-[-1px] hover:shadow-lg"
+              disabled={isSubmitting}
+              className="rounded-xl bg-gradient-to-br from-orange-400 to-orange-500 px-4 py-2 text-sm font-semibold text-white shadow-md transition hover:translate-y-[-1px] hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-60"
             >
               {selected ? "Mettre à jour" : "Créer"}
             </button>
@@ -798,5 +798,6 @@ export function TournamentsTab({
         </form>
       </Card>
     </div>
+    </>
   );
 }
