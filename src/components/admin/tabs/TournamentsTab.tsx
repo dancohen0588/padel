@@ -424,8 +424,10 @@ export function TournamentsTab({
         <form
           id="tournament-form"
           className="mt-4 space-y-4"
-          action={async (formData) => {
+          onSubmit={async (event) => {
+            event.preventDefault();
             setIsSubmitting(true);
+            const formData = new FormData(event.currentTarget);
             try {
               console.info("[admin] tournament submit payload", {
                 poolsCount: formData.get("poolsCount"),
