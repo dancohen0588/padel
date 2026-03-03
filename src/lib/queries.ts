@@ -1212,7 +1212,7 @@ export const getPlayoffSetsByTournament = async (
 
 export const getPlayoffMatchesWithTeams = async (
   tournamentId: string,
-  bracketType: "main" | "consolation" = "main"
+  bracketType: "main" | "consolation" | "main_3rd_place" | "consolation_3rd_place" = "main"
 ): Promise<PlayoffMatch[]> => {
   const database = getDatabaseClient();
   type PlayoffMatchRow = PlayoffMatch & {
@@ -1355,7 +1355,12 @@ export const getPlayoffBracketData = async (
   tournamentId: string,
   bracketType: "main" | "consolation" = "main"
 ): Promise<PlayoffBracketData> => {
-  const matches = await getPlayoffMatchesWithTeams(tournamentId, bracketType);
+  const thirdPlaceBracketType = bracketType === "main" ? "main_3rd_place" : "consolation_3rd_place";
+  const [matches, thirdPlaceMatches] = await Promise.all([
+    getPlayoffMatchesWithTeams(tournamentId, bracketType),
+    getPlayoffMatchesWithTeams(tournamentId, thirdPlaceBracketType),
+  ]);
+
   const rounds = matches.reduce<Record<number, PlayoffMatch[]>>((acc, match) => {
     const roundNumber = match.round?.round_number ?? 0;
     if (!acc[roundNumber]) {
@@ -1371,6 +1376,7 @@ export const getPlayoffBracketData = async (
   const finalRound = roundNumbers.length ? Math.max(...roundNumbers) : 0;
   const finalMatch = finalRound ? rounds[finalRound]?.[0] : undefined;
   const champion = finalMatch?.winner ?? null;
+  const thirdPlaceMatch = thirdPlaceMatches[0] ?? null;
 
-  return { rounds, champion };
+  return { rounds, champion, thirdPlaceMatch };
 };

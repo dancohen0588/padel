@@ -206,7 +206,8 @@ export function TournamentConfigContent({
       if (localPools.length >= poolsCount) return;
       if (isEnsuringPools) return;
       setIsEnsuringPools(true);
-      await ensurePoolsAction(tournament.id, poolsCount, adminToken);
+      const createdPools = await ensurePoolsAction(tournament.id, poolsCount, adminToken);
+      setLocalPools(createdPools);
       router.refresh();
       setIsEnsuringPools(false);
     };

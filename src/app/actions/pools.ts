@@ -8,7 +8,7 @@ export async function ensurePoolsAction(
   tournamentId: string,
   poolCount: number,
   adminToken: string
-): Promise<void> {
+): Promise<Array<{ id: string; name: string; pool_order: number; tournament_id: string; created_at: string }>> {
   console.info("[pools] ensurePoolsAction", { tournamentId, poolCount });
   assertAdminToken(adminToken);
   const database = getDatabaseClient();
@@ -19,27 +19,34 @@ export async function ensurePoolsAction(
     where tournament_id = ${tournamentId}
   `;
 
-  if (existing.length >= poolCount) {
+  if (existing.length < poolCount) {
+    const missing = Math.max(poolCount - existing.length, 0);
+    const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    for (let index = 0; index < missing; index += 1) {
+      const order = existing.length + index + 1;
+      const name = `Poule ${alphabet[index] ?? order}`;
+      await database`
+        insert into pools (tournament_id, name, pool_order)
+        values (${tournamentId}, ${name}, ${order})
+      `;
+    }
+    revalidatePath("/tournaments");
+    console.info("[pools] ensurePoolsAction done", { created: missing });
+  } else {
     console.info("[pools] ensurePoolsAction skip", {
       existing: existing.length,
       poolCount,
     });
-    return;
   }
 
-  const missing = Math.max(poolCount - existing.length, 0);
-  const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-  for (let index = 0; index < missing; index += 1) {
-    const order = existing.length + index + 1;
-    const name = `Poule ${alphabet[index] ?? order}`;
-    await database`
-      insert into pools (tournament_id, name, pool_order)
-      values (${tournamentId}, ${name}, ${order})
-    `;
-  }
+  const allPools = await database<Array<{ id: string; name: string; pool_order: number; tournament_id: string; created_at: string }>>`
+    select id, name, pool_order, tournament_id, created_at::text as created_at
+    from pools
+    where tournament_id = ${tournamentId}
+    order by pool_order asc
+  `;
 
-  revalidatePath("/tournaments");
-  console.info("[pools] ensurePoolsAction done", { created: missing });
+  return allPools;
 }
 
 export async function updatePoolNameAction(

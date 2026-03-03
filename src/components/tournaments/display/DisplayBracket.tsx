@@ -123,6 +123,7 @@ export function DisplayBracket({
   }, []);
 
   const finalMatch = roundsByLabel.Finale[0];
+  const thirdPlaceMatch = bracketData.thirdPlaceMatch ?? null;
 
   return (
     <div className="flex h-screen flex-col px-6 py-4 text-white">
@@ -149,21 +150,51 @@ export function DisplayBracket({
           ))}
 
           <div className="bracket-round flex items-center">
-            <div className="w-full">
-              <div className="mb-4 text-center">
-                <div className="phase-label inline-block rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wider text-orange-300">
-                  Finale
+            <div className="w-full space-y-6">
+              <div>
+                <div className="mb-4 text-center">
+                  <div className="phase-label inline-block rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wider text-orange-300">
+                    Finale
+                  </div>
+                </div>
+                <div className="finale-badge relative rounded-2xl p-4">
+                  {finalMatch ? (
+                    <FinaleCard match={finalMatch} />
+                  ) : (
+                    <div className="rounded-xl border border-dashed border-white/10 bg-black/20 p-6 text-center text-sm text-white/40">
+                      Finale à venir
+                    </div>
+                  )}
                 </div>
               </div>
-              <div className="finale-badge relative rounded-2xl p-4">
-                {finalMatch ? (
-                  <FinaleCard match={finalMatch} />
-                ) : (
-                  <div className="rounded-xl border border-dashed border-white/10 bg-black/20 p-6 text-center text-sm text-white/40">
-                    Finale à venir
+
+              {thirdPlaceMatch ? (
+                <div>
+                  <div className="mb-3 text-center">
+                    <div className="inline-block rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-bold uppercase tracking-wider text-white/50">
+                      Petite finale · 3ème place
+                    </div>
                   </div>
-                )}
-              </div>
+                  <div className="match-card rounded-xl p-2">
+                    <div className="space-y-1">
+                      <TeamRow
+                        name={thirdPlaceMatch.team1?.name ?? "En attente"}
+                        score={thirdPlaceMatch.sets?.filter((s) => s.team1_score > s.team2_score).length ?? 0}
+                        isWinner={Boolean(thirdPlaceMatch.winner_id && thirdPlaceMatch.winner_id === thirdPlaceMatch.team1_id)}
+                        isLoser={Boolean(thirdPlaceMatch.winner_id && thirdPlaceMatch.winner_id !== thirdPlaceMatch.team1_id)}
+                        isSeeded={Boolean(thirdPlaceMatch.team1?.is_seeded)}
+                      />
+                      <TeamRow
+                        name={thirdPlaceMatch.team2?.name ?? "En attente"}
+                        score={thirdPlaceMatch.sets?.filter((s) => s.team2_score > s.team1_score).length ?? 0}
+                        isWinner={Boolean(thirdPlaceMatch.winner_id && thirdPlaceMatch.winner_id === thirdPlaceMatch.team2_id)}
+                        isLoser={Boolean(thirdPlaceMatch.winner_id && thirdPlaceMatch.winner_id !== thirdPlaceMatch.team2_id)}
+                        isSeeded={Boolean(thirdPlaceMatch.team2?.is_seeded)}
+                      />
+                    </div>
+                  </div>
+                </div>
+              ) : null}
             </div>
           </div>
         </div>

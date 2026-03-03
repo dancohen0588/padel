@@ -136,6 +136,20 @@ export function PlayoffBracket({ bracketData, onMatchClick }: PlayoffBracketProp
           ))}
         </div>
       </div>
+
+      {bracketData.thirdPlaceMatch ? (
+        <div className="mt-2 border-t border-white/10 pt-5">
+          <div className="mb-3 text-center text-xs font-semibold uppercase tracking-widest text-white/40">
+            Petite finale · 3ème place
+          </div>
+          <div className="mx-auto max-w-xs">
+            <MatchCard
+              match={bracketData.thirdPlaceMatch}
+              onClick={() => onMatchClick(bracketData.thirdPlaceMatch!.id)}
+            />
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

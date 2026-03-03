@@ -44,4 +44,5 @@ export type PlayoffSet = {
 export type PlayoffBracketData = {
   rounds: Record<number, PlayoffMatch[]>;
   champion: Team | null;
+  thirdPlaceMatch: PlayoffMatch | null;
 };

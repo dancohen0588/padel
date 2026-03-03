@@ -460,6 +460,23 @@ export async function generateEmptyPlayoffBracket(
       }
     }
 
+    // Petite finale (3ème place) : losers des demi-finales
+    const hasThirdPlace = tournament.config.playoffs.has_third_place;
+    if (hasThirdPlace && totalQualified >= 4) {
+      const thirdPlaceRoundRows = await database<Array<{ id: string }>>`
+        insert into playoff_rounds (tournament_id, round_number, round_name, bracket_type)
+        values (${tournamentId}, 999, 'Petite finale', 'main_3rd_place')
+        returning id
+      `;
+      const thirdPlaceRoundId = thirdPlaceRoundRows[0]?.id;
+      if (thirdPlaceRoundId) {
+        await database`
+          insert into playoff_matches (tournament_id, round_id, match_number, team1_id, team2_id, winner_id, team1_seed, team2_seed, status)
+          values (${tournamentId}, ${thirdPlaceRoundId}, 1, ${null}, ${null}, ${null}, ${null}, ${null}, 'upcoming')
+        `;
+      }
+    }
+
     if (tournament.slug) {
       revalidatePath(`/tournaments/${tournament.slug}/admin`);
     }
@@ -630,23 +647,25 @@ export async function regeneratePlayoffBracketAction(
     assertAdminToken(adminToken);
     const database = getDatabaseClient();
 
-    await database`
-      delete from playoff_sets
-      where match_id in (
-        select pm.id from playoff_matches pm
-        join playoff_rounds pr on pr.id = pm.round_id
-        where pm.tournament_id = ${tournamentId} and pr.bracket_type = 'main'
-      )
-    `;
-    await database`
-      delete from playoff_matches
-      where round_id in (
-        select id from playoff_rounds where tournament_id = ${tournamentId} and bracket_type = 'main'
-      )
-    `;
-    await database`
-      delete from playoff_rounds where tournament_id = ${tournamentId} and bracket_type = 'main'
-    `;
+    for (const bracketType of ["main", "main_3rd_place"] as const) {
+      await database`
+        delete from playoff_sets
+        where match_id in (
+          select pm.id from playoff_matches pm
+          join playoff_rounds pr on pr.id = pm.round_id
+          where pm.tournament_id = ${tournamentId} and pr.bracket_type = ${bracketType}
+        )
+      `;
+      await database`
+        delete from playoff_matches
+        where round_id in (
+          select id from playoff_rounds where tournament_id = ${tournamentId} and bracket_type = ${bracketType}
+        )
+      `;
+      await database`
+        delete from playoff_rounds where tournament_id = ${tournamentId} and bracket_type = ${bracketType}
+      `;
+    }
 
     const generated = await generateEmptyPlayoffBracket(tournamentId);
     if (!generated.success) {
@@ -727,17 +746,24 @@ export async function updatePlayoffMatchScoreAction(
         team2_id: string | null;
         next_match_id: string | null;
         next_match_position: number | null;
+        match_number: number;
+        round_number: number;
+        bracket_type: string;
       }>
     >`
       select
-        id,
-        tournament_id,
-        team1_id,
-        team2_id,
-        next_match_id,
-        next_match_position
-      from playoff_matches
-      where id = ${matchId}
+        pm.id,
+        pm.tournament_id,
+        pm.team1_id,
+        pm.team2_id,
+        pm.next_match_id,
+        pm.next_match_position,
+        pm.match_number,
+        pr.round_number,
+        pr.bracket_type
+      from playoff_matches pm
+      join playoff_rounds pr on pr.id = pm.round_id
+      where pm.id = ${matchId}
       limit 1
     `;
 
@@ -749,8 +775,8 @@ export async function updatePlayoffMatchScoreAction(
       return { success: false, error: "Les équipes du match ne sont pas définies." };
     }
 
-    const tournaments = await database<Array<{ status: string; slug: string | null }>>`
-      select status, slug
+    const tournaments = await database<Array<{ status: string; slug: string | null; config: TournamentConfig }>>`
+      select status, slug, config
       from tournaments
       where id = ${match.tournament_id}
       limit 1
@@ -804,6 +830,38 @@ export async function updatePlayoffMatchScoreAction(
       }
     }
 
+    // Petite finale : propager le perdant des demi-finales
+    const hasThirdPlace = tournaments[0]?.config?.playoffs?.has_third_place;
+    if (hasThirdPlace && (match.bracket_type === "main" || match.bracket_type === "consolation")) {
+      const maxRoundRows = await database<Array<{ max_round: number }>>`
+        select max(round_number) as max_round
+        from playoff_rounds
+        where tournament_id = ${match.tournament_id}
+          and bracket_type = ${match.bracket_type}
+      `;
+      const maxRound = maxRoundRows[0]?.max_round ?? 0;
+      if (maxRound >= 2 && match.round_number === maxRound - 1) {
+        const loserId = winnerId === match.team1_id ? match.team2_id : match.team1_id;
+        const thirdPlaceBracketType =
+          match.bracket_type === "main" ? "main_3rd_place" : "consolation_3rd_place";
+        const thirdPlaceRows = await database<Array<{ id: string }>>`
+          select pm.id from playoff_matches pm
+          join playoff_rounds pr on pr.id = pm.round_id
+          where pm.tournament_id = ${match.tournament_id}
+            and pr.bracket_type = ${thirdPlaceBracketType}
+          limit 1
+        `;
+        const thirdPlaceId = thirdPlaceRows[0]?.id;
+        if (thirdPlaceId) {
+          if (match.match_number === 1) {
+            await database`update playoff_matches set team1_id = ${loserId} where id = ${thirdPlaceId}`;
+          } else {
+            await database`update playoff_matches set team2_id = ${loserId} where id = ${thirdPlaceId}`;
+          }
+        }
+      }
+    }
+
     const slug = tournaments[0]?.slug;
     if (slug) {
       revalidatePath(`/tournaments/${slug}/admin`);
@@ -828,23 +886,25 @@ const consolationBracketSize = (nonQualifiedCount: number): number | null => {
 
 async function deleteConsolationBracket(tournamentId: string): Promise<void> {
   const database = getDatabaseClient();
-  await database`
-    delete from playoff_sets
-    where match_id in (
-      select pm.id from playoff_matches pm
-      join playoff_rounds pr on pr.id = pm.round_id
-      where pm.tournament_id = ${tournamentId} and pr.bracket_type = 'consolation'
-    )
-  `;
-  await database`
-    delete from playoff_matches
-    where round_id in (
-      select id from playoff_rounds where tournament_id = ${tournamentId} and bracket_type = 'consolation'
-    )
-  `;
-  await database`
-    delete from playoff_rounds where tournament_id = ${tournamentId} and bracket_type = 'consolation'
-  `;
+  for (const bracketType of ["consolation", "consolation_3rd_place"] as const) {
+    await database`
+      delete from playoff_sets
+      where match_id in (
+        select pm.id from playoff_matches pm
+        join playoff_rounds pr on pr.id = pm.round_id
+        where pm.tournament_id = ${tournamentId} and pr.bracket_type = ${bracketType}
+      )
+    `;
+    await database`
+      delete from playoff_matches
+      where round_id in (
+        select id from playoff_rounds where tournament_id = ${tournamentId} and bracket_type = ${bracketType}
+      )
+    `;
+    await database`
+      delete from playoff_rounds where tournament_id = ${tournamentId} and bracket_type = ${bracketType}
+    `;
+  }
 }
 
 export async function generateConsolationBracketAction(
@@ -890,8 +950,8 @@ export async function generateConsolationBracketAction(
 
     const teamsForConsolation = nonQualified.slice(0, bracketSize);
 
-    const tournaments = await database<Array<{ slug: string | null }>>`
-      select slug from tournaments where id = ${tournamentId} limit 1
+    const tournaments = await database<Array<{ slug: string | null; config: TournamentConfig }>>`
+      select slug, config from tournaments where id = ${tournamentId} limit 1
     `;
 
     let teamsRemaining = bracketSize;
@@ -951,6 +1011,23 @@ export async function generateConsolationBracketAction(
         await database`
           update playoff_matches set next_match_id = ${nextMatch.id}, next_match_position = 2
           where id = ${secondMatch.id}
+        `;
+      }
+    }
+
+    // Petite finale consolante
+    const hasThirdPlace = tournaments[0]?.config?.playoffs?.has_third_place;
+    if (hasThirdPlace && bracketSize >= 4) {
+      const thirdPlaceRoundRows = await database<Array<{ id: string }>>`
+        insert into playoff_rounds (tournament_id, round_number, round_name, bracket_type)
+        values (${tournamentId}, 999, 'Petite finale', 'consolation_3rd_place')
+        returning id
+      `;
+      const thirdPlaceRoundId = thirdPlaceRoundRows[0]?.id;
+      if (thirdPlaceRoundId) {
+        await database`
+          insert into playoff_matches (tournament_id, round_id, match_number, team1_id, team2_id, winner_id, team1_seed, team2_seed, status)
+          values (${tournamentId}, ${thirdPlaceRoundId}, 1, ${null}, ${null}, ${null}, ${null}, ${null}, 'upcoming')
         `;
       }
     }

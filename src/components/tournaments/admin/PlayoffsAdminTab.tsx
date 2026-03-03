@@ -152,15 +152,22 @@ export function PlayoffsAdminTab({
 
   const [refreshTick, setRefreshTick] = useState(0);
 
-  // Maps matchId → match
-  const mainMatchMap = useMemo(
-    () => new Map(playoffMatches.map((m) => [m.id, m])),
-    [playoffMatches]
-  );
-  const consolationMatchMap = useMemo(
-    () => new Map(consolationMatches.map((m) => [m.id, m])),
-    [consolationMatches]
-  );
+  // Maps matchId → match (inclut la petite finale si elle existe)
+  const mainMatchMap = useMemo(() => {
+    const map = new Map(playoffMatches.map((m) => [m.id, m]));
+    if (playoffBracketData.thirdPlaceMatch) {
+      map.set(playoffBracketData.thirdPlaceMatch.id, playoffBracketData.thirdPlaceMatch);
+    }
+    return map;
+  }, [playoffMatches, playoffBracketData.thirdPlaceMatch]);
+
+  const consolationMatchMap = useMemo(() => {
+    const map = new Map(consolationMatches.map((m) => [m.id, m]));
+    if (consolationBracketData.thirdPlaceMatch) {
+      map.set(consolationBracketData.thirdPlaceMatch.id, consolationBracketData.thirdPlaceMatch);
+    }
+    return map;
+  }, [consolationMatches, consolationBracketData.thirdPlaceMatch]);
 
   // Premier tour de chaque tableau
   const mainFirstRound = useFirstRoundMatches(playoffBracketData);
