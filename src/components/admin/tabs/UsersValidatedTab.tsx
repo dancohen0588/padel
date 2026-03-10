@@ -506,6 +506,9 @@ export function UsersValidatedTab({
                       <WhatsAppBadge
                         hasJoined={Boolean(registration.hasJoinedWhatsApp)}
                         joinedAt={registration.whatsappJoinDate}
+                        playerId={registration.player.id}
+                        tournamentId={tournamentId}
+                        adminToken={adminToken}
                       />
                     </div>
                     {registration.player.phone ? (
@@ -663,6 +666,9 @@ export function UsersValidatedTab({
                           <WhatsAppBadge
                             hasJoined={Boolean(registration.hasJoinedWhatsApp)}
                             joinedAt={registration.whatsappJoinDate}
+                            playerId={registration.player.id}
+                            tournamentId={tournamentId}
+                            adminToken={adminToken}
                           />
                         </div>
                         {registration.player.phone ? (

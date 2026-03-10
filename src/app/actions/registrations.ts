@@ -791,6 +791,58 @@ export async function updateRegistrationStatusAction(
   await updateRegistrationStatus(registrationId, status, adminToken);
 }
 
+export async function toggleWhatsAppStatusAction(
+  playerId: string,
+  tournamentId: string,
+  adminToken: string
+): Promise<{ status: "ok" | "error"; hasJoined: boolean }> {
+  try {
+    assertAdminToken(adminToken);
+    const database = getDatabaseClient();
+
+    const [player] = await database<Array<{ whatsapp_joined_tournaments: unknown }>>`
+      select whatsapp_joined_tournaments
+      from players
+      where id = ${playerId}
+    `;
+
+    if (!player) {
+      return { status: "error", hasJoined: false };
+    }
+
+    const joins = (player.whatsapp_joined_tournaments as Array<{
+      tournamentId: string;
+      joinedAt: string;
+    }>) || [];
+
+    const hasJoined = joins.some((j) => j.tournamentId === tournamentId);
+
+    const updatedJoins = hasJoined
+      ? joins.filter((j) => j.tournamentId !== tournamentId)
+      : [...joins, { tournamentId, joinedAt: new Date().toISOString() }];
+
+    await database`
+      update players
+      set whatsapp_joined_tournaments = ${database.json(updatedJoins)}
+      where id = ${playerId}
+    `;
+
+    const [tournament] = await database<Array<{ slug: string }>>`
+      select slug from tournaments where id = ${tournamentId} limit 1
+    `;
+    if (tournament?.slug) {
+      revalidatePath(`/tournaments/${tournament.slug}/admin`);
+    }
+
+    return { status: "ok", hasJoined: !hasJoined };
+  } catch (error) {
+    return {
+      status: "error",
+      hasJoined: false,
+    };
+  }
+}
+
 export async function deletePlayerAction(formData: FormData): Promise<void> {
   const playerId = String(formData.get("playerId") ?? "");
   const adminToken = String(formData.get("adminToken") ?? "");
