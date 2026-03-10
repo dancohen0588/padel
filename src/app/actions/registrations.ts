@@ -835,7 +835,7 @@ export async function toggleWhatsAppStatusAction(
     }
 
     return { status: "ok", hasJoined: !hasJoined };
-  } catch (error) {
+  } catch {
     return {
       status: "error",
       hasJoined: false,
