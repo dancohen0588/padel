@@ -291,11 +291,11 @@ export function MatchesAndStandingsView({
                               </div>
                               <div className="flex items-center gap-2">
                                 <span className={`text-2xl font-bold ${aIsWinner ? "text-emerald-400" : "text-orange-300"}`}>
-                                  {match.sets_won_a}
+                                  {match.sets.length === 1 ? match.sets[0].team_a_games : match.sets_won_a}
                                 </span>
                                 <span className="rounded-lg bg-white/10 px-3 py-1 text-xs font-semibold text-white/50">-</span>
                                 <span className={`text-2xl font-bold ${bIsWinner ? "text-emerald-400" : "text-orange-300"}`}>
-                                  {match.sets_won_b}
+                                  {match.sets.length === 1 ? match.sets[0].team_b_games : match.sets_won_b}
                                 </span>
                               </div>
                               <div className="flex items-center justify-end gap-3">

@@ -203,6 +203,9 @@ type MatchCardProps = {
 function MatchCard({ match, onClick, isFinal = false }: MatchCardProps) {
   const team1SetsWon = match.sets?.filter((set) => set.team1_score > set.team2_score).length ?? 0;
   const team2SetsWon = match.sets?.filter((set) => set.team2_score > set.team1_score).length ?? 0;
+  const singleSet = match.sets?.length === 1 ? match.sets[0] : null;
+  const team1DisplayScore = singleSet ? singleSet.team1_score : team1SetsWon;
+  const team2DisplayScore = singleSet ? singleSet.team2_score : team2SetsWon;
   const isTeam1Winner = match.winner_id && match.winner_id === match.team1_id;
   const isTeam2Winner = match.winner_id && match.winner_id === match.team2_id;
   const isTeam1Empty = !match.team1_id;
@@ -261,7 +264,7 @@ function MatchCard({ match, onClick, isFinal = false }: MatchCardProps) {
               isTeam1Winner ? "text-emerald-400" : "text-white/70"
             )}
           >
-            {team1SetsWon}
+            {team1DisplayScore}
           </span>
         ) : null}
       </div>
@@ -303,7 +306,7 @@ function MatchCard({ match, onClick, isFinal = false }: MatchCardProps) {
               isTeam2Winner ? "text-emerald-400" : "text-white/70"
             )}
           >
-            {team2SetsWon}
+            {team2DisplayScore}
           </span>
         ) : null}
       </div>

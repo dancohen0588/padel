@@ -240,6 +240,9 @@ type MatchCardProps = {
 function MatchCard({ match }: MatchCardProps) {
   const team1SetsWon = match.sets?.filter((set) => set.team1_score > set.team2_score).length ?? 0;
   const team2SetsWon = match.sets?.filter((set) => set.team2_score > set.team1_score).length ?? 0;
+  const singleSet = match.sets?.length === 1 ? match.sets[0] : null;
+  const team1DisplayScore = singleSet ? singleSet.team1_score : team1SetsWon;
+  const team2DisplayScore = singleSet ? singleSet.team2_score : team2SetsWon;
   const isTeam1Winner = match.winner_id && match.winner_id === match.team1_id;
   const isTeam2Winner = match.winner_id && match.winner_id === match.team2_id;
 
@@ -251,14 +254,14 @@ function MatchCard({ match }: MatchCardProps) {
       <div className="space-y-1">
         <TeamRow
           name={match.team1?.name ?? "En attente"}
-          score={team1SetsWon}
+          score={team1DisplayScore}
           isWinner={Boolean(isTeam1Winner)}
           isLoser={Boolean(match.winner_id && !isTeam1Winner)}
           isSeeded={Boolean(match.team1?.is_seeded)}
         />
         <TeamRow
           name={match.team2?.name ?? "En attente"}
-          score={team2SetsWon}
+          score={team2DisplayScore}
           isWinner={Boolean(isTeam2Winner)}
           isLoser={Boolean(match.winner_id && !isTeam2Winner)}
           isSeeded={Boolean(match.team2?.is_seeded)}
@@ -271,6 +274,9 @@ function MatchCard({ match }: MatchCardProps) {
 function FinaleCard({ match }: { match: PlayoffMatch }) {
   const team1SetsWon = match.sets?.filter((set) => set.team1_score > set.team2_score).length ?? 0;
   const team2SetsWon = match.sets?.filter((set) => set.team2_score > set.team1_score).length ?? 0;
+  const singleSet = match.sets?.length === 1 ? match.sets[0] : null;
+  const team1DisplayScore = singleSet ? singleSet.team1_score : team1SetsWon;
+  const team2DisplayScore = singleSet ? singleSet.team2_score : team2SetsWon;
   const isTeam1Winner = match.winner_id && match.winner_id === match.team1_id;
   const isTeam2Winner = match.winner_id && match.winner_id === match.team2_id;
 
@@ -278,7 +284,7 @@ function FinaleCard({ match }: { match: PlayoffMatch }) {
     <div className="space-y-2.5">
       <TeamRow
         name={match.team1?.name ?? "En attente"}
-        score={team1SetsWon}
+        score={team1DisplayScore}
         isWinner={Boolean(isTeam1Winner)}
         isLoser={Boolean(match.winner_id && !isTeam1Winner)}
         isSeeded={Boolean(match.team1?.is_seeded)}
@@ -286,7 +292,7 @@ function FinaleCard({ match }: { match: PlayoffMatch }) {
       />
       <TeamRow
         name={match.team2?.name ?? "En attente"}
-        score={team2SetsWon}
+        score={team2DisplayScore}
         isWinner={Boolean(isTeam2Winner)}
         isLoser={Boolean(match.winner_id && !isTeam2Winner)}
         isSeeded={Boolean(match.team2?.is_seeded)}
