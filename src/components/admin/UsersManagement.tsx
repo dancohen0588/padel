@@ -26,6 +26,7 @@ export function UsersManagement({ initialData, adminToken }: UsersManagementProp
   const [isEditOpen, setIsEditOpen] = useState(false);
 
   const currentSearch = searchParams.get("search") ?? "";
+  const [searchValue, setSearchValue] = useState(currentSearch);
 
   const openEditModal = (player: Player) => {
     setSelectedPlayer(player);
@@ -106,10 +107,13 @@ export function UsersManagement({ initialData, adminToken }: UsersManagementProp
             <div className="relative">
               <input
                 type="text"
-                defaultValue={currentSearch}
+                value={searchValue}
                 placeholder="Rechercher un utilisateur..."
-                className="input-field w-full pl-10 text-sm sm:w-72"
-                onChange={(event) => handleSearch(event.target.value)}
+                className="input-field w-full !pl-10 text-sm sm:w-72"
+                onChange={(event) => setSearchValue(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") handleSearch(searchValue);
+                }}
               />
               <svg
                 className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-white/40"
@@ -125,6 +129,14 @@ export function UsersManagement({ initialData, adminToken }: UsersManagementProp
                 />
               </svg>
             </div>
+            <button
+              type="button"
+              onClick={() => handleSearch(searchValue)}
+              disabled={isPending}
+              className="rounded-lg bg-orange-500/20 px-4 py-2 text-sm font-semibold text-orange-200 transition hover:bg-orange-500/30 disabled:opacity-50"
+            >
+              Rechercher
+            </button>
 
           </div>
 
