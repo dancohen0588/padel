@@ -108,21 +108,18 @@ export async function generatePoolMatchesAction(
       continue;
     }
 
+    // Supprimer les matchs non joués de cette poule avant de régénérer
+    // pour éviter les matchs obsolètes suite à des réassignations d'équipes
+    await database`
+      delete from matches
+      where pool_id = ${pool.id}
+        and status = 'upcoming'
+    `;
+
     for (let i = 0; i < teamIds.length; i += 1) {
       for (let j = i + 1; j < teamIds.length; j += 1) {
         const teamA = teamIds[i];
         const teamB = teamIds[j];
-        const existing = await database<Array<{ id: string }>>`
-          select id
-          from matches
-          where tournament_id = ${tournamentId}
-            and pool_id = ${pool.id}
-            and ((team_a_id = ${teamA} and team_b_id = ${teamB}) or (team_a_id = ${teamB} and team_b_id = ${teamA}))
-          limit 1
-        `;
-        if (existing.length > 0) {
-          continue;
-        }
 
         await database`
           insert into matches (tournament_id, pool_id, team_a_id, team_b_id)
