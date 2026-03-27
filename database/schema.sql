@@ -148,6 +148,7 @@ CREATE TABLE IF NOT EXISTS public.matches (
   sets_won_b     int NOT NULL DEFAULT 0,
   games_won_a    int NOT NULL DEFAULT 0,
   games_won_b    int NOT NULL DEFAULT 0,
+  match_order    int,
   created_at     timestamptz NOT NULL DEFAULT now(),
   CHECK (team_a_id <> team_b_id)
 );

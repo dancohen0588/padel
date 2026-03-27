@@ -990,7 +990,7 @@ export const getMatchesWithTeamsByPool = async (
     join teams tb on tb.id = m.team_b_id
     where m.tournament_id = ${tournamentId}
     ${poolClause}
-    order by m.created_at asc
+    order by m.match_order asc nulls last, m.created_at asc
   `;
 
   const matchIds = rows.map((row) => row.id);

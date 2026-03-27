@@ -84,6 +84,106 @@ const ensureValidPadelSets = (sets: PublicSetInput[]) => {
   });
 };
 
+/**
+ * Calcule l'ordre optimal des matchs d'une poule pour minimiser les temps d'attente.
+ *
+ * Utilise l'algorithme "round-robin rotation" :
+ * - On fixe la première équipe et on fait tourner les autres
+ * - Pour N équipes impaires, on ajoute un "bye" fictif (une équipe ne joue pas à chaque round)
+ * - Chaque round produit au plus `numCourts` matchs sans qu'une équipe joue deux fois
+ *
+ * Exemple 5 équipes, 2 terrains → 5 rounds de 2 matchs (1 équipe attend par round)
+ * au lieu de A vs B, A vs C, A vs D... qui fait jouer A trois fois de suite.
+ */
+function scheduleMatchOrder(
+  teamIds: string[],
+  numCourts: number
+): Array<[string, string]> {
+  const n = teamIds.length;
+  if (n < 2) return [];
+
+  // Pour n impair, on ajoute un "bye" null pour équilibrer les rounds
+  const teams: Array<string | null> =
+    n % 2 === 0 ? [...teamIds] : [...teamIds, null];
+  const size = teams.length;
+
+  // La première équipe est fixe, les autres tournent
+  const rotation: Array<string | null> = teams.slice(1);
+
+  // Génère les rounds round-robin
+  const rounds: Array<Array<[string, string]>> = [];
+  for (let round = 0; round < size - 1; round++) {
+    const current = [teams[0], ...rotation];
+    const roundMatches: Array<[string, string]> = [];
+
+    for (let i = 0; i < size / 2; i++) {
+      const a = current[i];
+      const b = current[size - 1 - i];
+      // On ignore les matchs impliquant le "bye" fictif
+      if (a !== null && b !== null) {
+        roundMatches.push([a, b]);
+      }
+    }
+    rounds.push(roundMatches);
+
+    // Rotation : le dernier élément passe en tête
+    rotation.unshift(rotation.pop()!);
+  }
+
+  // Aplatit les rounds en créneaux de numCourts matchs
+  // Si un round a plus de matchs que de terrains, l'excédent passe au créneau suivant
+  const result: Array<[string, string]> = [];
+  const pending: Array<[string, string]> = [];
+
+  for (const round of rounds) {
+    const available = [...pending.splice(0), ...round];
+    const usedTeams = new Set<string>();
+    let count = 0;
+
+    for (const match of available) {
+      if (
+        count < numCourts &&
+        !usedTeams.has(match[0]) &&
+        !usedTeams.has(match[1])
+      ) {
+        result.push(match);
+        usedTeams.add(match[0]);
+        usedTeams.add(match[1]);
+        count++;
+      } else {
+        pending.push(match);
+      }
+    }
+  }
+
+  // Vide les matchs en attente restants
+  while (pending.length > 0) {
+    const usedTeams = new Set<string>();
+    const nextPending: Array<[string, string]> = [];
+    let count = 0;
+
+    for (const match of pending) {
+      if (
+        count < numCourts &&
+        !usedTeams.has(match[0]) &&
+        !usedTeams.has(match[1])
+      ) {
+        result.push(match);
+        usedTeams.add(match[0]);
+        usedTeams.add(match[1]);
+        count++;
+      } else {
+        nextPending.push(match);
+      }
+    }
+    pending.splice(0, pending.length, ...nextPending);
+  }
+
+  return result;
+}
+
+const COURTS_PER_POOL = 2;
+
 export async function generatePoolMatchesAction(
   tournamentId: string,
   adminToken: string
@@ -116,16 +216,15 @@ export async function generatePoolMatchesAction(
         and status = 'upcoming'
     `;
 
-    for (let i = 0; i < teamIds.length; i += 1) {
-      for (let j = i + 1; j < teamIds.length; j += 1) {
-        const teamA = teamIds[i];
-        const teamB = teamIds[j];
+    // Calcul de l'ordre optimal : round-robin rotation avec numCourts terrains
+    const orderedMatches = scheduleMatchOrder(teamIds, COURTS_PER_POOL);
 
-        await database`
-          insert into matches (tournament_id, pool_id, team_a_id, team_b_id)
-          values (${tournamentId}, ${pool.id}, ${teamA}, ${teamB})
-        `;
-      }
+    for (let index = 0; index < orderedMatches.length; index += 1) {
+      const [teamA, teamB] = orderedMatches[index];
+      await database`
+        insert into matches (tournament_id, pool_id, team_a_id, team_b_id, match_order)
+        values (${tournamentId}, ${pool.id}, ${teamA}, ${teamB}, ${index + 1})
+      `;
     }
   }
 
