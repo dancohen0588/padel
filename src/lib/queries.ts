@@ -436,16 +436,30 @@ export const getHomeRecentWinners = async (): Promise<RecentWinner[]> => {
     finals as (
       select
         r.id as tournament_id,
-        pm.winner_id
+        coalesce(
+          -- Priorité : finale du tableau principal avec un gagnant
+          (
+            select pm.winner_id
+            from playoff_matches pm
+            join playoff_rounds pr on pr.id = pm.round_id
+            where pr.tournament_id = r.id
+              and pr.bracket_type = 'main'
+              and pm.winner_id is not null
+            order by pr.round_number desc, pm.match_number asc
+            limit 1
+          ),
+          -- Fallback : n'importe quel match principal terminé (bracket_type absent ou autre)
+          (
+            select pm.winner_id
+            from playoff_matches pm
+            join playoff_rounds pr on pr.id = pm.round_id
+            where pr.tournament_id = r.id
+              and pm.winner_id is not null
+            order by pr.round_number desc, pm.match_number asc
+            limit 1
+          )
+        ) as winner_id
       from recent r
-      left join lateral (
-        select pm.winner_id
-        from playoff_matches pm
-        join playoff_rounds pr on pr.id = pm.round_id
-        where pr.tournament_id = r.id
-        order by pr.round_number desc, pm.match_number desc
-        limit 1
-      ) pm on true
     ),
     team_players_ranked as (
       select
