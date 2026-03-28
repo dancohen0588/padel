@@ -235,7 +235,7 @@ export function MatchesAdminTab({
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h3 className="text-lg font-semibold text-white">Matchs & Classements</h3>
-          <p className="text-sm text-white/60">Round‑robin par poule • V=2, N=1, D=0</p>
+          <p className="text-sm text-white/60">Round‑robin par poule • V=3, N=1, D=0</p>
         </div>
         <Button type="button" onClick={handleGenerateMatches} disabled={isPending}>
           Générer les matchs
@@ -288,7 +288,8 @@ export function MatchesAdminTab({
                               <span>G: <strong className="text-emerald-300">{standing.wins}</strong></span>
                               <span>N: <strong className="text-amber-200">{standing.draws}</strong></span>
                               <span>P: <strong className="text-rose-300">{standing.losses}</strong></span>
-                              <span>+/-: <strong className="text-emerald-300">{standing.set_diff}</strong></span>
+                              <span>J: <strong className="text-sky-300">{standing.games_for}</strong></span>
+                              <span>+/-: <strong className={standing.game_diff >= 0 ? "text-emerald-300" : "text-rose-300"}>{standing.game_diff > 0 ? "+" : ""}{standing.game_diff}</strong></span>
                             </div>
                           </div>
                           <div className="rounded-xl bg-violet-500/20 px-3 py-2 text-sm font-bold text-violet-300">

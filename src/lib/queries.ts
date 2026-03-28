@@ -1119,11 +1119,11 @@ export const getPoolStandings = async (
     if (match.sets_won_a > match.sets_won_b) {
       teamA.wins += 1;
       teamB.losses += 1;
-      teamA.points += 2;
+      teamA.points += 3;
     } else if (match.sets_won_b > match.sets_won_a) {
       teamB.wins += 1;
       teamA.losses += 1;
-      teamB.points += 2;
+      teamB.points += 3;
     } else {
       teamA.draws += 1;
       teamB.draws += 1;

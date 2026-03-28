@@ -108,11 +108,11 @@ const computeStandings = (
     if (match.sets_won_a > match.sets_won_b) {
       teamA.wins += 1;
       teamB.losses += 1;
-      teamA.points += 2;
+      teamA.points += 3;
     } else if (match.sets_won_b > match.sets_won_a) {
       teamB.wins += 1;
       teamA.losses += 1;
-      teamB.points += 2;
+      teamB.points += 3;
     } else {
       teamA.draws += 1;
       teamB.draws += 1;
@@ -239,7 +239,8 @@ export function MatchesAndStandingsView({
                               <span>G: <strong className="text-emerald-300">{standing.wins}</strong></span>
                               <span>N: <strong className="text-amber-200">{standing.draws}</strong></span>
                               <span>P: <strong className="text-rose-300">{standing.losses}</strong></span>
-                              <span>+/-: <strong className="text-emerald-300">{standing.set_diff}</strong></span>
+                              <span>J: <strong className="text-sky-300">{standing.games_for}</strong></span>
+                              <span>+/-: <strong className={standing.game_diff >= 0 ? "text-emerald-300" : "text-rose-300"}>{standing.game_diff > 0 ? "+" : ""}{standing.game_diff}</strong></span>
                             </div>
                           </div>
                           <div className="rounded-xl bg-violet-500/20 px-3 py-2 text-sm font-bold text-violet-300">
