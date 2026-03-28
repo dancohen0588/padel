@@ -392,6 +392,7 @@ export function PlayoffsAdminTab({
               <PlayoffBracket
                 bracketData={consolationBracketData}
                 onMatchClick={(id) => { if (!isConsolationEditMode) setActiveConsolationMatchId(id); }}
+                championLabel="Champion du tournoi consolante"
               />
 
               {isConsolationEditMode && consolationFirstRound.length > 0 && (

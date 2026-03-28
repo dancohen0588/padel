@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 type PlayoffBracketProps = {
   bracketData: PlayoffBracketData;
   onMatchClick: (matchId: string) => void;
+  championLabel?: string;
 };
 
 const roundSpacing: Record<number, string> = {
@@ -16,7 +17,7 @@ const roundSpacing: Record<number, string> = {
   4: "mb-[230px]",
 };
 
-export function PlayoffBracket({ bracketData, onMatchClick }: PlayoffBracketProps) {
+export function PlayoffBracket({ bracketData, onMatchClick, championLabel = "Champion du tournoi" }: PlayoffBracketProps) {
   const totalSlots = useMemo(
     () =>
       Object.values(bracketData.rounds)
@@ -117,7 +118,7 @@ export function PlayoffBracket({ bracketData, onMatchClick }: PlayoffBracketProp
             {bracketData.champion ? (
               <div className="mt-4 rounded-lg bg-gradient-to-r from-orange-500 to-orange-400 p-3 text-center">
                 <div className="mb-1 text-xs uppercase tracking-wide text-white/80">
-                  Champion du tournoi
+                  {championLabel}
                 </div>
                 <div className="text-lg font-bold text-white">
                   {bracketData.champion.name ?? "Champion"}
