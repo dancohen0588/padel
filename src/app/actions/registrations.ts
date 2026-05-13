@@ -53,6 +53,7 @@ const createPlayer = async (
   {
     firstName,
     lastName,
+    surnom,
     email,
     phone,
     level,
@@ -62,6 +63,7 @@ const createPlayer = async (
   }: {
     firstName: string;
     lastName: string;
+    surnom: string | null;
     email: string | null;
     phone: string;
     level: string;
@@ -75,6 +77,7 @@ const createPlayer = async (
       email,
       first_name,
       last_name,
+      surnom,
       phone,
       level,
       is_ranked,
@@ -85,6 +88,7 @@ const createPlayer = async (
       ${email || null},
       ${firstName},
       ${lastName},
+      ${surnom || null},
       ${phone},
       ${level},
       ${isRanked},
@@ -229,6 +233,7 @@ const registerForTournament = async (
 
   const firstName = String(formData.get("firstName") ?? "").trim();
   const lastName = String(formData.get("lastName") ?? "").trim();
+  const surnom = String(formData.get("surnom") ?? "").trim() || null;
   const email = String(formData.get("email") ?? "").trim() || null;
   const level = String(formData.get("level") ?? "").trim();
   const isRankedValue = String(formData.get("isRanked") ?? "non");
@@ -261,6 +266,7 @@ const registerForTournament = async (
   const playerId = await createPlayer(database, {
     firstName,
     lastName,
+    surnom,
     email,
     phone,
     level,
@@ -453,6 +459,7 @@ export async function registerPairAction(
 
         const firstName = String(formData.get(`${prefix}FirstName`) ?? "").trim();
         const lastName = String(formData.get(`${prefix}LastName`) ?? "").trim();
+        const surnom = String(formData.get(`${prefix}Surnom`) ?? "").trim() || null;
         const email = String(formData.get(`${prefix}Email`) ?? "").trim() || null;
         const level = String(formData.get(`${prefix}Level`) ?? "").trim();
         const isRankedValue = String(formData.get(`${prefix}IsRanked`) ?? "non");
@@ -491,6 +498,7 @@ export async function registerPairAction(
         const playerId = await createPlayer(transaction as unknown as Sql, {
           firstName,
           lastName,
+          surnom,
           email,
           phone,
           level,
@@ -688,6 +696,7 @@ export async function createPlayerByAdminAction(
 
     const firstName = String(formData.get("firstName") ?? "").trim();
     const lastName = String(formData.get("lastName") ?? "").trim();
+    const surnom = String(formData.get("surnom") ?? "").trim() || null;
     const email = String(formData.get("email") ?? "").trim() || null;
     const level = String(formData.get("level") ?? "").trim();
     const isRankedValue = String(formData.get("isRanked") ?? "non");
@@ -706,6 +715,7 @@ export async function createPlayerByAdminAction(
     const playerId = await createPlayer(database, {
       firstName,
       lastName,
+      surnom,
       email,
       phone,
       level,

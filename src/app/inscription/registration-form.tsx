@@ -807,6 +807,16 @@ export function RegistrationForm({
                 </div>
                 <div>
                   <label className="mb-2 block text-sm font-medium text-white/80">
+                    Surnom <span className="text-xs text-white/50">(optionnel)</span>
+                  </label>
+                  <input
+                    name={isPairMode ? "player1Surnom" : "surnom"}
+                    placeholder="Ex: Jojo"
+                    className="w-full rounded-lg border border-white/20 bg-white/5 px-4 py-3 text-base text-white placeholder:text-white/40"
+                  />
+                </div>
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-white/80">
                     Email <span className="text-xs text-white/50">(optionnel)</span>
                   </label>
                   <input
@@ -1223,6 +1233,16 @@ export function RegistrationForm({
                         className="w-full rounded-lg border border-white/20 bg-white/5 px-4 py-3 text-base text-white placeholder:text-white/40"
                       />
                     </div>
+                  </div>
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-white/80">
+                      Surnom <span className="text-xs text-white/50">(optionnel)</span>
+                    </label>
+                    <input
+                      name="player2Surnom"
+                      placeholder="Ex: Jojo"
+                      className="w-full rounded-lg border border-white/20 bg-white/5 px-4 py-3 text-base text-white placeholder:text-white/40"
+                    />
                   </div>
                   <div>
                     <label className="mb-2 block text-sm font-medium text-white/80">

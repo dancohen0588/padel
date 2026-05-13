@@ -1,0 +1,39 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git *)",
+      "Bash(npm *)",
+      "Bash(npx *)",
+      "Bash(node *)",
+      "Bash(python3 *)",
+      "Bash(find *)",
+      "Bash(ls *)",
+      "Bash(cat *)",
+      "Bash(mkdir *)",
+      "Bash(cp *)",
+      "Bash(mv *)",
+      "Bash(rm *)",
+      "Bash(grep *)",
+      "Bash(echo *)",
+      "Bash(curl *)",
+      "Bash(touch *)",
+      "Bash(chmod *)",
+      "Bash(head *)",
+      "Bash(tail *)",
+      "Bash(wc *)",
+      "Bash(sort *)",
+      "Bash(uniq *)",
+      "Bash(sed *)",
+      "Bash(awk *)",
+      "Bash(jq *)",
+      "Bash(pkill *)",
+      "Bash(ps *)",
+      "Bash(gh *)",
+      "WebFetch(domain:padel-two-theta.vercel.app)",
+      "WebFetch(domain:supabase.com)",
+      "WebFetch(domain:vercel.com)",
+      "WebFetch(domain:localhost)"
+    ],
+    "deny": []
+  }
+}

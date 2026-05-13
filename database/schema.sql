@@ -53,6 +53,7 @@ CREATE TABLE IF NOT EXISTS public.players (
   id                          uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
   first_name                  text NOT NULL,
   last_name                   text NOT NULL,
+  surnom                      text,
   email                       text,           -- nullable, phone est l'identifiant principal
   phone                       text NOT NULL,
   level                       text,

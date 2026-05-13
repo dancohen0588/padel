@@ -29,6 +29,7 @@ export function EditUserModal({
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
+  const [surnom, setSurnom] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [adminNotes, setAdminNotes] = useState("");
@@ -41,6 +42,7 @@ export function EditUserModal({
     if (!isOpen) return;
     setFirstName(player.first_name ?? "");
     setLastName(player.last_name ?? "");
+    setSurnom(player.surnom ?? "");
     setEmail(player.email ?? "");
     setPhone(player.phone ?? "");
     setAdminNotes(player.admin_notes ?? "");
@@ -83,6 +85,7 @@ export function EditUserModal({
     const nextData: {
       first_name?: string;
       last_name?: string;
+      surnom?: string | null;
       email?: string | null;
       phone?: string | null;
       admin_notes?: string | null;
@@ -93,6 +96,9 @@ export function EditUserModal({
     }
     if (lastName.trim() !== (player.last_name ?? "")) {
       nextData.last_name = lastName.trim();
+    }
+    if ((surnom || "") !== (player.surnom ?? "")) {
+      nextData.surnom = surnom.trim() ? surnom.trim() : null;
     }
     if ((email || "") !== (player.email ?? "")) {
       nextData.email = email.trim() ? email.trim() : null;
@@ -269,6 +275,15 @@ export function EditUserModal({
                 onChange={(event) => setLastName(event.target.value)}
                 className="input-field text-base"
                 placeholder="Nom"
+              />
+            </div>
+            <div className="md:col-span-2">
+              <label className="mb-2 block text-sm font-medium text-white/80">Surnom</label>
+              <input
+                value={surnom}
+                onChange={(event) => setSurnom(event.target.value)}
+                className="input-field text-base"
+                placeholder="Ex: Jojo"
               />
             </div>
             <div>

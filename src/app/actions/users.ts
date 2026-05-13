@@ -9,7 +9,7 @@ import type { Player } from "@/lib/types";
 type PlayerUpdateInput = Partial<
   Pick<
     Player,
-    "first_name" | "last_name" | "email" | "phone" | "photo_url" | "status" | "admin_notes"
+    "first_name" | "last_name" | "surnom" | "email" | "phone" | "photo_url" | "status" | "admin_notes"
   >
 >;
 
@@ -111,6 +111,7 @@ export async function updatePlayerAction(
     const patch: Record<string, string | null> = {};
     if (data.first_name !== undefined) patch.first_name = data.first_name ?? null;
     if (data.last_name !== undefined) patch.last_name = data.last_name ?? null;
+    if (data.surnom !== undefined) patch.surnom = data.surnom ?? null;
     if (data.email !== undefined) patch.email = data.email ?? null;
     if (data.phone !== undefined) patch.phone = data.phone ?? null;
     if (data.photo_url !== undefined) patch.photo_url = data.photo_url ?? null;

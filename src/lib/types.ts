@@ -101,6 +101,7 @@ export type Player = {
   id: string;
   first_name: string;
   last_name: string;
+  surnom?: string | null;
   email: string | null;
   photo_url?: string | null;
   status?: "verified" | "pending" | "suspended";
